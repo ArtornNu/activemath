@@ -90,81 +90,9 @@
   /* --- nav progress dots (item 9) --- */
   .m5-nav button .visited-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-left: 5px; opacity: 0; vertical-align: middle; }
   .m5-nav button.visited .visited-dot { opacity: 1; }
-
-  /* ===== Unit + sub-slide two-level nav (added on top of the slide-mode shell) ===== */
-  .subslide { display: none; }
-  .subslide.active { display: block; }
-  .unit-progress { text-align: center; font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; margin: 0 0 10px; }
-  .unit-bridge { text-align: center; margin-top: 20px; padding-top: 16px; border-top: 1px dashed var(--line); }
-  .mini-check { margin-top: 16px; background: #fafcff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
-  .mini-check-q { font-weight: 700; margin: 0 0 10px; font-size: 14.5px; }
-  .mini-check .btn.correct { background: var(--green); color: #fff; border-color: var(--green); }
-  .mini-check .btn.wrong { background: var(--red); color: #fff; border-color: var(--red); opacity: .8; }
-  .mini-check-fb { margin-top: 10px; font-size: 13.5px; }
-
-  /* ===== Slide-deck shell (converted from long-scroll layout, see design notes) ===== */
-  .app-shell { display: flex; align-items: flex-start; gap: 22px; margin-top: 10px; }
-  .sidebar {
-    width: 260px; flex-shrink: 0; background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
-    padding: 14px 12px; box-shadow: var(--shadow); position: sticky; top: 78px;
-    max-height: calc(100vh - 100px); overflow-y: auto;
-  }
-  .sidebar h1 { font-size: 12.5px; margin: 4px 8px 12px; line-height: 1.35; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
-  .sidebar button {
-    display: block; width: 100%; text-align: left; background: none; border: none;
-    padding: 9px 10px; border-radius: 10px; font-size: 13px; font-weight: 700;
-    color: var(--muted); cursor: pointer; margin-bottom: 2px; font-family: var(--font);
-  }
-  .sidebar button:hover { background: #f4f7fb; }
-  .sidebar button.active { background: var(--brand-soft); color: var(--brand-dark); }
-  .sidebar button .idx { display: inline-block; width: 26px; opacity: .6; font-size: 11.5px; }
-  .sidebar button.locked { opacity: .55; }
-  .sidebar button .lock-badge { display: none; margin-left: 4px; }
-  .sidebar button.locked .lock-badge { display: inline; }
-  .sidebar button .visited-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-left: 5px; opacity: 0; vertical-align: middle; }
-  .sidebar button.visited .visited-dot { opacity: 1; }
-
-  .mobile-menu-btn {
-    display: none; position: fixed; top: 70px; left: 14px; z-index: 200;
-    width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--line);
-    background: #fff; box-shadow: var(--shadow); font-size: 18px; cursor: pointer;
-  }
-  .slide-overlay { display: none; position: fixed; inset: 0; background: rgba(20,30,50,0.35); z-index: 150; }
-  .slide-overlay.open { display: block; }
-  @media (max-width: 900px) { .sidebar.open { z-index: 190; } }
-
-  .main-col { flex: 1; min-width: 0; }
-  .slide { display: none; }
-  .slide.active { display: block; }
-  .slide.locked .slide-body { display: none; }
-  .locked-msg { display: none; }
-  .slide.locked .locked-msg { display: block; }
-  .locked-msg .card { text-align: center; }
-  .locked-msg .lock-emoji { font-size: 26px; display: block; margin-bottom: 8px; }
-
-  .bottom-nav {
-    display: flex; align-items: center; justify-content: center; gap: 18px; padding: 12px 16px;
-    margin-top: 18px; border-top: 1px solid var(--line); background: #fff; border-radius: var(--radius);
-    position: sticky; bottom: 12px; box-shadow: var(--shadow);
-  }
-  .nav-round { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: #fff; font-size: 18px; cursor: pointer; }
-  .nav-round:disabled { opacity: .35; cursor: default; }
-  .dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 260px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); border: none; cursor: pointer; padding: 0; }
-  .dot.active { background: var(--brand); width: 20px; border-radius: 5px; }
-
-  @media (max-width: 900px) {
-    .sidebar { display: none; }
-    .sidebar.open { display: block; position: fixed; inset: 0; z-index: 35; width: 84vw; max-width: 320px; top: 0; border-radius: 0; max-height: 100vh; }
-    .mobile-menu-btn { display: block; }
-  }
 </style>
 </head>
 <body>
-
-<button class="mobile-menu-btn" id="menuBtn" type="button">☰</button>
-<div class="slide-overlay" id="overlay"></div>
-
 <script>window.PAGE_ID = "module-5";</script>
 
 <header class="site-nav">
@@ -200,35 +128,8 @@
   </div>
 </section>
 
-
 <main class="wrap">
-  <div class="app-shell">
-    <nav class="sidebar" id="sidebar">
-      <h1>Module 5<br>Session outline</h1>
-      <button data-unit="0" class="active"><span class="idx">✓</span>Before you start</button>
-      <button data-unit="1"><span class="idx">1</span>Objectives</button>
-      <button data-unit="2"><span class="idx">2</span>Session flow</button>
-      <button data-unit="3"><span class="idx">3</span>The big idea</button>
-      <button data-unit="4"><span class="idx">4</span>Readiness check</button>
-      <button data-unit="5"><span class="idx">4.1</span>Activity 1 — Familiar Moves<span class="visited-dot"></span><span class="lock-badge">🔒</span></button>
-      <button data-unit="6"><span class="idx">4.2</span>Activity 2 — Match the Shape<span class="visited-dot"></span><span class="lock-badge">🔒</span></button>
-      <button data-unit="7"><span class="idx">4.3</span>Activity 3 — Two Rulers<span class="visited-dot"></span><span class="lock-badge">🔒</span></button>
-      <button data-unit="8"><span class="idx">4.4</span>Activity 4 — The Formula<span class="visited-dot"></span><span class="lock-badge">🔒</span></button>
-      <button data-unit="9"><span class="idx">4.5</span>Activity 5 — Area Detective<span class="visited-dot"></span><span class="lock-badge">🔒</span></button>
-      <button data-unit="10"><span class="idx">4.6</span>Activity 6 — The Undo Button<span class="visited-dot"></span><span class="lock-badge">🔒</span></button>
-      <button data-unit="11"><span class="idx">4.7</span>Activity 7 — Many Points<span class="visited-dot"></span><span class="lock-badge">🔒</span></button>
-      <button data-unit="12"><span class="idx">4.8</span>Activity 8 — Equation → System<span class="visited-dot"></span><span class="lock-badge">🔒</span></button>
-      <button data-unit="13"><span class="idx">4.9</span>Activity 9 — Real Problems<span class="visited-dot"></span><span class="lock-badge">🔒</span></button>
-      <button data-unit="14"><span class="idx">5</span>Reconnecting<span class="lock-badge">🔒</span></button>
-      <button data-unit="15"><span class="idx">6</span>Extensions</button>
-      <button data-unit="16"><span class="idx">7</span>Facilitator guide</button>
-    </nav>
 
-    <div class="main-col">
-      <div class="slide-viewport">
-
-      <div class="slide active" id="slide0">
-      <div class="subslide active" data-sub="0">
   <!-- ===================== Prerequisites ===================== -->
   <section class="card">
     <div class="section-title"><span class="num">✓</span><h2>Before you start</h2></div>
@@ -246,27 +147,6 @@
     </div>
   </section>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
-          <div class="callout reflect">
-            <h4>🤔 Quick check-in</h4>
-            <p>Which of the four checks above are you least sure about right now?</p>
-          </div>
-          <button class="btn btn-ghost" id="rc0Btn" type="button">💭 See a sample thought</button>
-          <div id="rc0Box" style="display:none" class="callout idea">
-            <p>Most people who pause here get stuck on “vector as an arrow with direction and length” — if that's you, Activity 1 rebuilds it from motion you already teach, not from a definition.</p>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="1" type="button">Continue: Objectives →</button></div>
-        </div>
-
-      </div>
-
-      </div>
-
-      <div class="slide" id="slide1">
-      <div class="subslide active" data-sub="0">
   <!-- ===================== Objectives ===================== -->
   <section class="card">
     <div class="section-title"><span class="num">1</span><h2>By the end of this session, participants will be able to…</h2></div>
@@ -280,27 +160,6 @@
     </ul>
   </section>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
-          <div class="callout reflect">
-            <h4>🤔 Quick check-in</h4>
-            <p>Of the six objectives above, which one feels furthest from how you currently teach matrices?</p>
-          </div>
-          <button class="btn btn-ghost" id="rc1Btn" type="button">💭 See a sample thought</button>
-          <div id="rc1Box" style="display:none" class="callout idea">
-            <p>Facilitators most often pick “derive, not just state, the formulas” — most of us were taught the determinant and inverse as rules to apply, not things to discover. That's the exact gap Activities 4–6 close.</p>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="2" type="button">Continue: Session flow →</button></div>
-        </div>
-
-      </div>
-
-      </div>
-
-      <div class="slide" id="slide2">
-      <div class="subslide active" data-sub="0">
   <!-- ===================== Timeline ===================== -->
   <section class="card">
     <div class="section-title"><span class="num">2</span><h2>Session flow (3.5 hours)</h2></div>
@@ -320,27 +179,6 @@
     </div>
   </section>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
-          <div class="callout reflect">
-            <h4>🤔 Quick check-in</h4>
-            <p>Given your own students, which single activity would you most want extra time for?</p>
-          </div>
-          <button class="btn btn-ghost" id="rc2Btn" type="button">💭 See a sample thought</button>
-          <div id="rc2Box" style="display:none" class="callout idea">
-            <p>Facilitators most often flag Activity 8 (One Equation, Then a System) — it does the most conceptual work per minute, bridging four ideas in one activity.</p>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="3" type="button">Continue: The big idea →</button></div>
-        </div>
-
-      </div>
-
-      </div>
-
-      <div class="slide" id="slide3">
-      <div class="subslide active" data-sub="0">
   <!-- ===================== Big idea ===================== -->
   <section class="card prose">
     <div class="section-title"><span class="num">3</span><h2>The big idea, before any activity</h2></div>
@@ -357,30 +195,11 @@
     </div>
   </section>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
-          <div class="callout reflect">
-            <h4>🤔 Quick check-in</h4>
-            <p>In your own words: what's the difference between meeting a pattern first vs. meeting a rule first?</p>
-          </div>
-          <button class="btn btn-ghost" id="rc3Btn" type="button">💭 See a sample thought</button>
-          <div id="rc3Box" style="display:none" class="callout idea">
-            <p>A pattern met first is something you own — you can re-derive it if you forget the name. A rule met first is something you either remember or don't. This module is a bet that the first kind sticks longer.</p>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="4" type="button">Continue: Readiness check →</button></div>
-        </div>
-
-      </div>
-
-      </div>
-
-      <div class="slide" id="slide4">
-      <div class="subslide active" data-sub="0">
-        <div class="card" id="gateQuiz">
+  <!-- ===================== Seven-activity workspace (gated) ===================== -->
+  <section class="card">
     <div class="section-title"><span class="num">4</span><h2>The nine activities</h2></div>
 
+    <div id="gateQuiz">
       <div class="callout idea">
         <h4>🔑 Before we unlock the activities</h4>
         <p>Seven quick questions. The first three check the prerequisites listed at the top of this page —
@@ -416,12 +235,7 @@
         <label><input type="radio" name="gq-p3" value="c"> 2</label>
         <label><input type="radio" name="gq-p3" value="d"> 4</label>
       </div>
-        </div>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
       <div class="gate-q" data-qkey="d1" data-correct="a" data-explain="A matrix's whole job is to say where two arrows (î and ĵ) land — every other point moves along with them. Activity 2 builds exactly this, by hand.">
         <span class="tag-mini-badge diagnostic">Pre-test — today's topic</span>
         <p class="gate-question">4. Which best pictures what matrix multiplication does to the plane?</p>
@@ -461,27 +275,28 @@
       <button class="btn btn-primary" id="gateSubmit">Check my answers</button>
       <div id="gateFeedback"></div>
       <button class="btn btn-ghost" id="gateSkip">⚙️ Dev: skip gate (remove this button before the live session)</button>
+    </div>
 
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="5" type="button">Continue: Activity 1 →</button></div>
-        </div>
+    <div id="gateUnlocked" style="display:none">
+    <div class="m5-layout">
+      <nav class="m5-nav" id="m5nav">
+        <button data-panel="p0" class="active"><span class="tag-mini">ACTIVITY 1</span>Familiar Moves, New Notation<span class="visited-dot"></span></button>
+        <button data-panel="p1"><span class="tag-mini">ACTIVITY 2</span>Match the Shape<span class="visited-dot"></span></button>
+        <button data-panel="p2"><span class="tag-mini">ACTIVITY 3</span>Same Point, Two Rulers<span class="visited-dot"></span></button>
+        <button data-panel="p3"><span class="tag-mini">ACTIVITY 4</span>Where the Formula Comes From<span class="visited-dot"></span></button>
+        <button data-panel="p4"><span class="tag-mini">ACTIVITY 5</span>Area Detective<span class="visited-dot"></span></button>
+        <button data-panel="p5"><span class="tag-mini">ACTIVITY 6</span>The Undo Button<span class="visited-dot"></span></button>
+        <button data-panel="p6"><span class="tag-mini">ACTIVITY 7</span>One Machine, Many Points<span class="visited-dot"></span></button>
+        <button data-panel="pbridge"><span class="tag-mini">ACTIVITY 8</span>One Equation, Then a System<span class="visited-dot"></span></button>
+        <button data-panel="p7"><span class="tag-mini">ACTIVITY 9</span>Arrows → Real Problems<span class="visited-dot"></span></button>
+      </nav>
 
-      </div>
-
-      </div>
-
-      <div class="slide" id="slide5">
-        <div class="locked-msg">
-          <div class="card">
-            <span class="lock-emoji">🔒</span>
-            <p style="margin:0 0 14px">This activity unlocks once you pass the readiness check above.</p>
-            <button class="btn btn-primary" data-jump="4" type="button">Go there →</button>
-          </div>
-        </div>
-        <div class="slide-body">
-      <div class="subslide active" data-sub="0">
-        <div class="card">
+      <div>
+        <!-- ===== Activity 0 (displayed as "Activity 1") ===== -->
+        <div class="m5-panel active" id="p0">
           <h3>Activity 1 — Familiar Moves, New Notation</h3>
           <p class="section-sub">Before anything new: three transformations you already know — translation, rotation, reflection — and a new way to write them down.</p>
+
           <div class="callout idea">
             <h4>Writing points as a matrix</h4>
             <p>A point (x, y) is one column. Three points side by side become a matrix with three columns — one column per point. For <span style="color:#c23b3b;font-weight:700">P₁(1, 1)</span>, <span style="color:#7a3fd1;font-weight:700">P₂(3, 1)</span>, <span style="color:#1d5fb8;font-weight:700">P₃(1, 3)</span>:</p>
@@ -489,6 +304,7 @@
             <p style="margin-top:10px"><strong>How to read it:</strong> the top row is every point's <em>x</em>-coordinate, in order (1, 3, 1). The bottom row is every point's <em>y</em>-coordinate, in order (1, 1, 3). Each column, read top-to-bottom, is one point — column 2 reads (3, 1), which is P₂. Try it yourself: what point does column 3 give you?</p>
             <p style="margin-top:10px">This is a <span class="term-tag">points list</span> — a tidy way to list points, nothing is being "done" to them yet. Later activities use a different kind of matrix, called <span class="term-tag">the machine</span>: it doesn't just sit there like this one — it moves every point somewhere new. Same bracket notation, two different jobs — worth keeping straight.</p>
           </div>
+
           <div class="lab-stage">
             <div class="lab-head"><span class="name" id="p0OpName">Try a transformation</span><button class="btn btn-ghost" id="p0Reset">Reset</button></div>
             <div class="lab-body">
@@ -513,16 +329,7 @@
               </div>
             </div>
           </div>
-          <div class="callout facilitator">
-            <h4>👩‍🏫 Advanced insight — for teachers</h4>
-            <p>Translation uses <span class="term-tag">addition</span> because it isn't a <span class="term-tag">linear</span> transformation — the origin itself moves. Rotation and reflection keep the origin fixed, so each can be written as <span class="term-tag">multiplying</span> every point by a fixed 2×2 matrix. You'll build exactly how that multiplication arithmetic works in Activity 4 — for now, just notice that a 2×2 bracket of numbers shows up either way.</p>
-          </div>
-        </div>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
           <div class="lab-stage">
             <div class="lab-head"><span class="name">✋ Now you try — drag each point yourself</span><button class="btn btn-ghost" id="p0dragReset">Reset</button></div>
             <div class="lab-body">
@@ -540,44 +347,20 @@
               </div>
             </div>
           </div>
+
+          <div class="callout facilitator">
+            <h4>👩‍🏫 Advanced insight — for teachers</h4>
+            <p>Translation uses <span class="term-tag">addition</span> because it isn't a <span class="term-tag">linear</span> transformation — the origin itself moves. Rotation and reflection keep the origin fixed, so each can be written as <span class="term-tag">multiplying</span> every point by a fixed 2×2 matrix. You'll build exactly how that multiplication arithmetic works in Activity 4 — for now, just notice that a 2×2 bracket of numbers shows up either way.</p>
+          </div>
+
           <div class="callout reflect">
             <h4>🔜 Coming up next</h4>
             <p>In Activity 2, you'll get to build one of these transformation-machines yourself, by hand — dragging two arrows until a shape matches a target.</p>
           </div>
         </div>
 
-      </div>
-
-      <div class="subslide" data-sub="2">
-        <div class="card">
-          <div class="mini-check" id="mc5">
-            <p class="mini-check-q">Which of the three moves you just tried does NOT keep the origin (0,0) fixed?</p>
-            <div class="btn-row">
-            <button class="btn btn-ghost" data-mc-answer="a" type="button">Rotation</button>
-            <button class="btn btn-ghost" data-mc-answer="b" type="button">Translation</button>
-            <button class="btn btn-ghost" data-mc-answer="c" type="button">Reflection</button>
-            </div>
-            <div class="mini-check-fb"></div>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="6" type="button">Continue: Activity 2 →</button></div>
-        </div>
-
-      </div>
-
-        </div>
-      </div>
-
-      <div class="slide" id="slide6">
-        <div class="locked-msg">
-          <div class="card">
-            <span class="lock-emoji">🔒</span>
-            <p style="margin:0 0 14px">This activity unlocks once you pass the readiness check above.</p>
-            <button class="btn btn-primary" data-jump="4" type="button">Go there →</button>
-          </div>
-        </div>
-        <div class="slide-body">
-      <div class="subslide active" data-sub="0">
-        <div class="card">
+        <!-- ===== Activity 1 (internal id p1, displayed as "Activity 2") ===== -->
+        <div class="m5-panel" id="p1">
           <h3>Activity 2 — Match the Shape</h3>
           <p class="section-sub">An orange dashed outline shows a target. Drag the tips of the two arrows until your green house matches it. No vocabulary needed yet — just play.</p>
           <div class="lab-stage">
@@ -603,12 +386,7 @@
               </div>
             </div>
           </div>
-        </div>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
           <div class="callout reflect">
             <h4>🤔 Notice something?</h4>
             <p>You only ever dragged <strong>two arrows</strong> — yet all ten points of the house (roof, walls, even the little door notch) landed in exactly the right new spot, automatically. You never touched most of those points directly. How is that possible?</p>
@@ -617,50 +395,15 @@
           </div>
         </div>
 
-      </div>
-
-      <div class="subslide" data-sub="2">
-        <div class="card">
-          <div class="mini-check" id="mc6">
-            <p class="mini-check-q">You only ever dragged two arrows (î, ĵ) — yet all ten points of the house moved correctly. Why?</p>
-            <div class="btn-row">
-            <button class="btn btn-ghost" data-mc-answer="a" type="button">Every point is stored as a recipe in î and ĵ, not fixed screen coordinates</button>
-            <button class="btn btn-ghost" data-mc-answer="b" type="button">The computer redraws each point by hand</button>
-            <button class="btn btn-ghost" data-mc-answer="c" type="button">It's a coincidence that only works for houses</button>
-            </div>
-            <div class="mini-check-fb"></div>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="7" type="button">Continue: Activity 3 →</button></div>
-        </div>
-
-      </div>
-
-        </div>
-      </div>
-
-      <div class="slide" id="slide7">
-        <div class="locked-msg">
-          <div class="card">
-            <span class="lock-emoji">🔒</span>
-            <p style="margin:0 0 14px">This activity unlocks once you pass the readiness check above.</p>
-            <button class="btn btn-primary" data-jump="4" type="button">Go there →</button>
-          </div>
-        </div>
-        <div class="slide-body">
-      <div class="subslide active" data-sub="0">
-        <div class="card">
+        <!-- ===== Activity 2 ===== -->
+        <div class="m5-panel" id="p2">
           <h3>Activity 3 — Same Point, Two Rulers</h3>
           <p class="section-sub">There is only <strong>one point (D)</strong> here — but its address depends on which reference frame you read it against. Activity 2 asked "where did this point move?"; this activity asks a different question about the very same picture.</p>
           <div class="grid cols-2">
             <div class="callout idea" style="margin:0"><h4>Viewpoint A (Activity 2)</h4><p>The grid <em>moves</em>. A point moves with it. We ask: "where did (x, y) go?"</p></div>
             <div class="callout reflect" style="margin:0"><h4>Viewpoint B (this activity)</h4><p>One point. Two reference frames. We ask: "if D's address is <span id="p2coords">(1, 3)</span> on the frame built from the red and purple lines — what is that same point's address on the standard frame?"</p></div>
           </div>
-        </div>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
           <div class="lab-stage">
             <div class="lab-head">
               <span class="name" id="p2StageName">Step 1 of 4 — move only the red line</span>
@@ -701,38 +444,8 @@
           </div>
         </div>
 
-      </div>
-
-      <div class="subslide" data-sub="2">
-        <div class="card">
-          <div class="mini-check" id="mc7">
-            <p class="mini-check-q">D's address on “my frame” never changed while you dragged the red/purple lines. Why not?</p>
-            <div class="btn-row">
-            <button class="btn btn-ghost" data-mc-answer="a" type="button">Because that address is defined relative to the frame itself, not the standard grid</button>
-            <button class="btn btn-ghost" data-mc-answer="b" type="button">Because D was locked in place</button>
-            <button class="btn btn-ghost" data-mc-answer="c" type="button">Because the lines didn't actually move</button>
-            </div>
-            <div class="mini-check-fb"></div>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="8" type="button">Continue: Activity 4 →</button></div>
-        </div>
-
-      </div>
-
-        </div>
-      </div>
-
-      <div class="slide" id="slide8">
-        <div class="locked-msg">
-          <div class="card">
-            <span class="lock-emoji">🔒</span>
-            <p style="margin:0 0 14px">This activity unlocks once you pass the readiness check above.</p>
-            <button class="btn btn-primary" data-jump="4" type="button">Go there →</button>
-          </div>
-        </div>
-        <div class="slide-body">
-      <div class="subslide active" data-sub="0">
-        <div class="card">
+        <!-- ===== Activity 3 ===== -->
+        <div class="m5-panel" id="p3">
           <h3>Activity 4 — Where the Formula Comes From</h3>
           <p class="section-sub">This machine's arrows are fixed — you can't drag them. Instead, drag the free point anywhere and watch its image. Before checking, try predicting.</p>
           <div class="lab-stage">
@@ -766,39 +479,8 @@
           </div>
         </div>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
-          <div class="callout idea">🌍 Row-times-column isn't just a classroom rule — it's the exact operation behind rotating a photo, resizing an image, and warping a character on screen, done billions of times a second.</div>
-          <div class="mini-check" id="mc8">
-            <p class="mini-check-q">For the machine [[1, 1], [0, 1]], where does (2, 3) land?</p>
-            <div class="btn-row">
-            <button class="btn btn-ghost" data-mc-answer="a" type="button">(5, 3)</button>
-            <button class="btn btn-ghost" data-mc-answer="b" type="button">(2, 3)</button>
-            <button class="btn btn-ghost" data-mc-answer="c" type="button">(3, 5)</button>
-            </div>
-            <div class="mini-check-fb"></div>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="9" type="button">Continue: Activity 5 →</button></div>
-        </div>
-
-      </div>
-
-        </div>
-      </div>
-
-      <div class="slide" id="slide9">
-        <div class="locked-msg">
-          <div class="card">
-            <span class="lock-emoji">🔒</span>
-            <p style="margin:0 0 14px">This activity unlocks once you pass the readiness check above.</p>
-            <button class="btn btn-primary" data-jump="4" type="button">Go there →</button>
-          </div>
-        </div>
-        <div class="slide-body">
-      <div class="subslide active" data-sub="0">
-        <div class="card">
+        <!-- ===== Activity 4 ===== -->
+        <div class="m5-panel" id="p4">
           <h3>Activity 5 — Area Detective</h3>
           <p class="section-sub">Same dragging, new question: what happens to the area of the blue unit square?</p>
           <div class="lab-stage">
@@ -819,39 +501,8 @@
           </div>
         </div>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
-          <div class="callout idea">🌍 Checking det(M) before solving anything is like checking there's fuel before a trip. Activity 8 uses exactly this — one number says instantly whether a system even has one clean answer, before you solve it.</div>
-          <div class="mini-check" id="mc9">
-            <p class="mini-check-q">If det(M) = 0, what happened to the unit square?</p>
-            <div class="btn-row">
-            <button class="btn btn-ghost" data-mc-answer="a" type="button">It flattened into a line (zero area)</button>
-            <button class="btn btn-ghost" data-mc-answer="b" type="button">It got twice as big</button>
-            <button class="btn btn-ghost" data-mc-answer="c" type="button">It flipped orientation but kept its area</button>
-            </div>
-            <div class="mini-check-fb"></div>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="10" type="button">Continue: Activity 6 →</button></div>
-        </div>
-
-      </div>
-
-        </div>
-      </div>
-
-      <div class="slide" id="slide10">
-        <div class="locked-msg">
-          <div class="card">
-            <span class="lock-emoji">🔒</span>
-            <p style="margin:0 0 14px">This activity unlocks once you pass the readiness check above.</p>
-            <button class="btn btn-primary" data-jump="4" type="button">Go there →</button>
-          </div>
-        </div>
-        <div class="slide-body">
-      <div class="subslide active" data-sub="0">
-        <div class="card">
+        <!-- ===== Activity 5 ===== -->
+        <div class="m5-panel" id="p5">
           <h3>Activity 6 — The Undo Button</h3>
           <p class="section-sub">The green shape has already been transformed by a fixed matrix M = [[2, 1], [1, 1]]. Drag î / ĵ until it matches the plain orange square again.</p>
           <div class="lab-stage">
@@ -881,39 +532,8 @@
           </div>
         </div>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
-          <div class="callout idea">🌍 This “undo” move is exactly how GPS correction and decompressing an image work: solve the inverse once, then instantly reverse-engineer any output back to its input.</div>
-          <div class="mini-check" id="mc10">
-            <p class="mini-check-q">If det(M) = 0, can M ever have an inverse?</p>
-            <div class="btn-row">
-            <button class="btn btn-ghost" data-mc-answer="a" type="button">No — never</button>
-            <button class="btn btn-ghost" data-mc-answer="b" type="button">Yes, always</button>
-            <button class="btn btn-ghost" data-mc-answer="c" type="button">Only if M is the identity</button>
-            </div>
-            <div class="mini-check-fb"></div>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="11" type="button">Continue: Activity 7 →</button></div>
-        </div>
-
-      </div>
-
-        </div>
-      </div>
-
-      <div class="slide" id="slide11">
-        <div class="locked-msg">
-          <div class="card">
-            <span class="lock-emoji">🔒</span>
-            <p style="margin:0 0 14px">This activity unlocks once you pass the readiness check above.</p>
-            <button class="btn btn-primary" data-jump="4" type="button">Go there →</button>
-          </div>
-        </div>
-        <div class="slide-body">
-      <div class="subslide active" data-sub="0">
-        <div class="card">
+        <!-- ===== Activity 6 ===== -->
+        <div class="m5-panel" id="p6">
           <h3>Activity 7 — One Machine, Many Points</h3>
           <p class="section-sub" id="p6StageLabel">Step 1 of 2 — one matrix, one point</p>
           <div class="scaffold-q" id="p6StageText"></div>
@@ -945,41 +565,19 @@
           </div>
         </div>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
-          <div class="callout idea">🌍 Chaining two matrices like this is how a game character combines “rotate the shoulder” with “rotate the elbow” into one smooth motion — multiply once, then apply the combined move forever after.</div>
-          <div class="mini-check" id="mc11">
-            <p class="mini-check-q">Applying B, then applying A to the result — is the same as applying which single matrix?</p>
-            <div class="btn-row">
-            <button class="btn btn-ghost" data-mc-answer="a" type="button">A·B (in that order)</button>
-            <button class="btn btn-ghost" data-mc-answer="b" type="button">B·A</button>
-            <button class="btn btn-ghost" data-mc-answer="c" type="button">A+B</button>
-            </div>
-            <div class="mini-check-fb"></div>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="12" type="button">Continue: Activity 8 →</button></div>
-        </div>
-
-      </div>
-
-        </div>
-      </div>
-
-      <div class="slide" id="slide12">
-        <div class="locked-msg">
-          <div class="card">
-            <span class="lock-emoji">🔒</span>
-            <p style="margin:0 0 14px">This activity unlocks once you pass the readiness check above.</p>
-            <button class="btn btn-primary" data-jump="4" type="button">Go there →</button>
-          </div>
-        </div>
-        <div class="slide-body">
-      <div class="subslide active" data-sub="0">
-        <div class="card">
+        <!-- ===== Activity 7b (internal id pbridge, displayed as "Activity 8") =====
+             Inserted between Activity 7 and the word-problem activity (now Activity 9)
+             to give students the "vector combination" skill BEFORE it appears dressed
+             up in a word problem — built as a generalization chain, smallest case
+             first: 1 equation/1 unknown -> 1 equation/2 unknowns (a line) -> a system
+             (two lines crossing, the method every textbook already teaches) -> the
+             exact same system read as vectors combining. Same numbers (2x+y=8,
+             x+y=5, answer (3,2)) as Activity 9's first word problem on purpose, so
+             the numbers are already familiar by the time the word problem arrives. -->
+        <div class="m5-panel" id="pbridge">
           <h3>Activity 8 — One Equation, Then a System</h3>
           <p class="section-sub">No word problem yet — just the bare numbers. We'll build up from the smallest possible case to the exact system Activity 9 asks you to solve, one extra piece of generality at a time.</p>
+
           <div class="lab-stage">
             <div class="lab-head"><span class="name">Step 1 — one equation, one unknown</span><button class="btn btn-ghost" id="pbridge0Reset">Reset</button></div>
             <div class="lab-body">
@@ -996,6 +594,7 @@
               </div>
             </div>
           </div>
+
           <div class="lab-stage">
             <div class="lab-head"><span class="name">Step 2 — one equation, TWO unknowns</span><button class="btn btn-ghost" id="pbridge1Reset">Reset</button></div>
             <div class="lab-body">
@@ -1017,12 +616,7 @@
               </div>
             </div>
           </div>
-        </div>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
           <div class="lab-stage">
             <div class="lab-head"><span class="name">Step 3 — a SYSTEM of two equations</span><button class="btn btn-ghost" id="pbridge2Reset">Reset</button></div>
             <div class="lab-body">
@@ -1041,12 +635,7 @@
               </div>
             </div>
           </div>
-        </div>
 
-      </div>
-
-      <div class="subslide" data-sub="2">
-        <div class="card">
           <div class="lab-stage">
             <div class="lab-head"><span class="name">Step 4 — the same system, read as vectors</span><button class="btn btn-ghost" id="pbridge3Reset">Reset</button></div>
             <div class="lab-body" style="grid-template-columns:1fr">
@@ -1067,12 +656,7 @@
             <h4>👩‍🏫 Facilitator note</h4>
             <p>You just solved the exact same system two completely different-looking ways — intersecting lines, and combining vectors — and landed on the identical answer both times. That's not a coincidence, and it's not two separate topics to memorize. It's one structure, seen from two angles. Noticing that is what doing mathematics actually feels like.</p>
           </div>
-        </div>
 
-      </div>
-
-      <div class="subslide" data-sub="3">
-        <div class="card">
           <div class="callout idea" style="margin-top:14px">
             <h4>💡 Why bother with the matrix at all?</h4>
             <p>Graphing two lines works fine for 2 unknowns — so what does the matrix actually add? Two things a picture alone can't give you: <strong>det(M)</strong> — one number that answers "exactly one solution?" with no drawing at all, and works the same whether there are 2 unknowns or 200. <strong>M⁻¹</strong> — solved once, it re-solves the very same system instantly for any new target, no re-graphing needed. Both are the same move as everything above: take something you can already check by eye, and turn it into a number or formula that keeps working long after the picture runs out of dimensions to draw in.</p>
@@ -1082,34 +666,10 @@
             <h4>🔜 Coming up next</h4>
             <p>Activity 9 puts real words around this exact same system (2x + y = 8, x + y = 5, answer (3, 2)) — a word problem you'll solve both by picture and by formula.</p>
           </div>
-          <div class="mini-check" id="mc12">
-            <p class="mini-check-q">Why did adding a second equation pin the answer down to exactly one point, instead of a whole line?</p>
-            <div class="btn-row">
-              <button class="btn btn-ghost" data-mc-answer="a" type="button">Each extra equation removes one degree of freedom from the answer set</button>
-              <button class="btn btn-ghost" data-mc-answer="b" type="button">The second equation cancels the first one out</button>
-              <button class="btn btn-ghost" data-mc-answer="c" type="button">It doesn't — there are still infinitely many answers</button>
-            </div>
-            <div class="mini-check-fb"></div>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="13" type="button">Continue: Activity 9 →</button></div>
         </div>
 
-      </div>
-
-        </div>
-      </div>
-
-      <div class="slide" id="slide13">
-        <div class="locked-msg">
-          <div class="card">
-            <span class="lock-emoji">🔒</span>
-            <p style="margin:0 0 14px">This activity unlocks once you pass the readiness check above.</p>
-            <button class="btn btn-primary" data-jump="4" type="button">Go there →</button>
-          </div>
-        </div>
-        <div class="slide-body">
-      <div class="subslide active" data-sub="0">
-        <div class="card">
+        <!-- ===== Activity 7 ===== -->
+        <div class="m5-panel" id="p7">
           <h3>Activity 9 — From Arrows to Real Problems</h3>
 
           <div class="btn-row" style="margin-bottom:10px" id="p7ContextSwitch">
@@ -1118,6 +678,7 @@
             <button class="btn btn-ghost" data-p7ctx="2" type="button">🧵 Batik keychains</button>
           </div>
           <p class="section-sub" id="p7Intro">A word problem: 2 pencils + 1 eraser cost Rp 8,000. 1 pencil + 1 eraser cost Rp 5,000. What does one pencil cost? One eraser?</p>
+
           <div class="accordion" id="p7DerivAccordion">
             <button class="accordion-head" type="button" id="p7DerivHead">
               <span>📝 See how the word problem becomes this matrix, step by step</span><span class="chev">▶</span>
@@ -1131,6 +692,7 @@
               <div class="deriv-step" style="border-bottom:none"><span class="step-label">Step 6 — the whole system, in one line</span><p style="margin:4px 0 0"><span class="eq">M · (<span class="eq-var">x</span>, <span class="eq-var">y</span>) = (8, 5)</span> — exactly the picture below.</p></div>
             </div>
           </div>
+
           <div class="callout idea" id="p7BuildBlock">
             <h4>👆 Build the picture yourself — click each part of the problem, in order</h4>
             <div class="btn-row" style="flex-wrap:wrap;margin-bottom:10px">
@@ -1142,12 +704,7 @@
             <p>Sentence 1 and 2, stacked as rows: M = <span id="p7SetupM"></span> &nbsp;&nbsp;·&nbsp;&nbsp; the two totals, as a target: <b><span id="p7SetupTarget">(?, ?)</span></b></p>
             <p class="scaffold-q" style="margin-top:8px" id="p7BuildHint"><b>Watch the graph below</b>Click ① and ② first — a row alone isn't enough to draw an arrow, but once <em>both</em> rows of M are known, the red arrow (one pencil's effect) and purple arrow (one eraser's effect) appear together. Then click ③ and ④ to mark the target, one coordinate at a time.</p>
           </div>
-        </div>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
           <div class="lab-stage" style="margin-top:14px">
             <div class="lab-head"><span class="name">🎯 Left: drag your guess. Right: does it land on the target?</span><button class="btn btn-ghost" id="p7Reset">Reset</button></div>
             <div class="lab-body" style="grid-template-columns:1fr">
@@ -1164,36 +721,29 @@
               <div class="lab-readout" id="p7readout" style="max-width:none;margin-top:14px">current guess (x, y) = (1, 1)</div>
             </div>
           </div>
+
           <div class="callout facilitator" style="margin-top:14px">
             <h4>🔀 Two ways to read the same multiplication</h4>
             <p>Activity 4 read each new coordinate row by row — "a row of M, dotted with the point." Here we'll read the very same multiplication a different way: column by column, as <em>x copies of column 1, plus y copies of column 2</em>. Both readings always give exactly the same numbers; row-reading is quick for computing one coordinate at a time, column-reading is what makes "how much of each ingredient reaches this total" problems visible as a picture — like the dashed path you just dragged toward the target above.</p>
           </div>
+
           <div class="scaffold-q" style="margin-top:14px"><b>By picture</b>Drag the input point until the output lands exactly on the target crosshair. Read off (x, y) — that's your answer.</div>
           <button class="btn btn-primary" id="p7Reveal" style="margin-top:6px">Reveal the symbolic method too</button>
           <div id="p7RevealBox" style="display:none;margin-top:12px" class="callout idea">
             <h4>💡 By formula</h4>
             <p>M⁻¹ = <span class="eq" style="color:#c23b3b;font-weight:800">(1/det(M))</span> · <span class="mat"><span class="mat-bracket left"></span><span class="mat-grid"><span>1</span><span>−1</span><span>−1</span><span>2</span></span><span class="mat-bracket right"></span></span> (same as Activity 6, det(M) = 1). So <span class="eq">(<span class="eq-var">x</span>, <span class="eq-var">y</span>) = M⁻¹·(8, 5) = (1·8 + (−1)·5, (−1)·8 + 2·5) = (3, 2)</span>. <span id="p7RevealConclusion">One pencil = Rp 3,000, one eraser = Rp 2,000</span> — matching wherever you landed by dragging.</p>
           </div>
-        </div>
 
-      </div>
-
-      <div class="subslide" data-sub="2">
-        <div class="card">
           <div class="callout facilitator" style="margin-top:14px">
             <h4>🌉 The visual ↔ algebra bridge</h4>
             <p>Dragging the input point until it lands on the target <em>is</em> the same act as multiplying both sides of <span class="eq">M·(<span class="eq-var">x</span>,<span class="eq-var">y</span>) = (8,5)</span> by M⁻¹ — both are ways of "undoing" M. The picture doesn't approximate the algebra; it <em>is</em> the algebra, just performed by hand instead of by formula.</p>
           </div>
+
           <div class="callout idea" style="margin-top:14px">
             <h4>📐 Why matrices — and why this scales</h4>
             <p>The same idea works for 3, 4, or 50 unknowns: name them, translate each sentence into one row of coefficients, stack the rows into a bigger matrix, and multiply by its inverse. The only thing that stops working past 2–3 variables is the <em>picture</em> — we can't easily draw a 4-dimensional arrow. But the algebra keeps working exactly the same way, which is exactly why it's worth learning the algebra and not just the picture: the picture builds the intuition, the algebra carries it further than a picture ever could.</p>
           </div>
-        </div>
 
-      </div>
-
-      <div class="subslide" data-sub="3">
-        <div class="card">
           <div class="lab-stage" style="margin-top:20px">
             <div class="lab-head"><span class="name">✍️ Your turn — solve this one without our hints</span><button class="btn btn-ghost" id="p7bReset">Reset</button></div>
             <div class="lab-body" style="grid-template-columns:1fr">
@@ -1231,66 +781,29 @@
             <h4>💡 By formula</h4>
             <p>N = <span id="p7bN"></span>, det(N) = 3·1 − 1·2 = 1, so N⁻¹ = <span id="p7bNinv"></span>. <span class="eq">(<span class="eq-var">x</span>, <span class="eq-var">y</span>) = N⁻¹·(10, 8) = (2, 4)</span>. <span id="p7bRevealConclusion">Rice = Rp 2,000/kg, sugar = Rp 4,000/kg.</span></p>
           </div>
-        </div>
 
-      </div>
-
-      <div class="subslide" data-sub="4">
-        <div class="card">
           <div class="callout reflect" style="margin-top:14px">
             <h4>🤔 Closing reflection</h4>
             <p>What if the second sentence had been "2 pencils + 2 erasers cost Rp 10,000" instead? Does the target point still have exactly one input that reaches it? Connect this back to Activity 5's flattened square.</p>
             <p style="margin-top:10px">And a bigger question: after solving both problems by dragging <em>before</em> seeing the formula, do you think about M⁻¹ differently now than if you'd only ever seen it as a rule to apply? What would change if your own students met matrices in this order?</p>
           </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="14" type="button">Continue: Reconnecting →</button></div>
         </div>
 
       </div>
+    </div>
+    </div>
+  </section>
 
-        </div>
-      </div>
-
-      <div class="slide" id="slide14">
-        <div class="locked-msg">
-          <div class="card">
-            <span class="lock-emoji">🔒</span>
-            <p style="margin:0 0 14px">This section unlocks once you've opened all nine activities at least once.</p>
-            <button class="btn btn-primary" data-jump="5" type="button">Go there →</button>
-          </div>
-        </div>
-        <div class="slide-body">
-      <div class="subslide active" data-sub="0">
-        <div class="card prose">
+  <!-- ===================== Reconnect to textbook ===================== -->
+  <section class="card prose" id="reconnectSection" style="display:none">
     <div class="section-title"><span class="num">5</span><h2>Reconnecting to the textbook</h2></div>
     <div class="callout facilitator" style="margin-bottom:16px"><h4>👩‍🏫 Unlocked</h4><p>You've now opened all nine activities — this section ties everything back to the notation your students will meet in their textbook.</p></div>
     <div class="formula">M = [ [a, b], [c, d] ] &nbsp;→&nbsp; î lands at (a, c), ĵ lands at (b, d)</div>
     <div class="formula">M · (x, y) = (a·x + b·y, c·x + d·y)</div>
     <div class="formula">det(M) = ad − bc &nbsp;·&nbsp; M⁻¹ = (1/det) · [ [d, −b], [−c, a] ]</div>
     <p>Every line above is something the room built by hand before seeing it written this way.</p>
-        </div>
+  </section>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
-          <div class="callout reflect">
-            <h4>🤔 Quick check-in</h4>
-            <p>Of the three boxed formulas above, which one would your students recognize instantly from their textbook — and which would surprise them?</p>
-          </div>
-          <button class="btn btn-ghost" id="rc14Btn" type="button">💭 See a sample thought</button>
-          <div id="rc14Box" style="display:none" class="callout idea">
-            <p>Most facilitators say det(M) = ad − bc is instantly familiar, but M⁻¹ written this way surprises students who only ever memorized “1/det times swap-and-negate” without knowing why those particular entries swap.</p>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="15" type="button">Continue: Extensions →</button></div>
-        </div>
-
-      </div>
-
-        </div>
-      </div>
-
-      <div class="slide" id="slide15">
-      <div class="subslide active" data-sub="0">
   <!-- ===================== Extending into the toolkit ===================== -->
   <section class="card">
     <div class="section-title"><span class="num">6</span><h2>Taking this further in Desmos, Mathigon, and Graspable Math</h2></div>
@@ -1310,59 +823,19 @@
     </div>
   </section>
 
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card">
-          <div class="callout reflect">
-            <h4>🤔 Quick check-in</h4>
-            <p>Which of these three tools would you introduce first in your own classroom, and why?</p>
-          </div>
-          <button class="btn btn-ghost" id="rc15Btn" type="button">💭 See a sample thought</button>
-          <div id="rc15Box" style="display:none" class="callout idea">
-            <p>Many facilitators start with Desmos, since students often already have an account from earlier algebra units — lowering the barrier to trying this the same week.</p>
-          </div>
-          <div class="unit-bridge"><button class="btn btn-primary" data-jump="16" type="button">Continue: Facilitator guide →</button></div>
-        </div>
-
-      </div>
-
-      </div>
-
-      <div class="slide" id="slide16">
-      <div class="subslide active" data-sub="0">
-        <div class="card prose">
+  <!-- ===================== Facilitator guide ===================== -->
+  <section class="card prose">
     <div class="section-title"><span class="num">7</span><h2>Facilitator guide</h2></div>
     <p><strong>Common misconception:</strong> students often think matrix multiplication is "just a rule to memorize" — Activities 4 and 7 exist specifically so the rule is discovered, not handed down.</p>
     <p><strong>For students who find this hard:</strong> Activity 1 has no prerequisite either — it's built entirely from transformations most students already know from their "transformasi geometri" unit.</p>
     <p><strong>For students who finish early:</strong> in Activity 7, challenge them to find A such that AB = the identity matrix — that's another route into "inverse," from a different direction than Activity 6.</p>
-        </div>
-      </div>
-
-      <div class="subslide" data-sub="1">
-        <div class="card prose">
     <div class="callout reflect">
       <h4>🤔 Reflection questions for participants</h4>
       <p>Which of the nine activities would you use <em>first</em> with your own students, and why?<br>
       Where does your textbook introduce the matrix — could this sequence slot in before that page?<br>
       What local context (market prices, batik motifs, traditional patterns) could replace the pencil-and-eraser problem in Activity 9?</p>
     </div>
-          <p style="margin-top:16px;text-align:center;color:var(--muted);font-size:13px">🎉 That's the whole session outline.</p>
-        </div>
-      </div>
-
-      </div>
-
-      </div>
-
-      <div class="unit-progress" id="unitProgress"></div>
-      <div class="bottom-nav">
-        <button class="nav-round" id="prevBtn" type="button">←</button>
-        <div class="dots" id="dots"></div>
-        <button class="nav-round" id="nextBtn" type="button">→</button>
-      </div>
-    </div>
-  </div>
+  </section>
 
 </main>
 
@@ -1489,7 +962,8 @@
   (function () {
     const PREREQ = ["p1", "p2", "p3"];
     function unlock() {
-      if (window.__onGatePassed) window.__onGatePassed();
+      document.getElementById("gateQuiz").style.display = "none";
+      document.getElementById("gateUnlocked").style.display = "block";
     }
     document.getElementById("gateSubmit").addEventListener("click", () => {
       let allPrereqCorrect = true;
@@ -1523,6 +997,28 @@
       }
     });
     document.getElementById("gateSkip").addEventListener("click", unlock);
+  })();
+
+  /* ---- tab switching + visited-tab tracking (unlocks "Reconnecting to the textbook") ---- */
+  (function () {
+    const visited = new Set(["p0"]); // p0 is the default active panel on load (displayed as "Activity 1")
+    function checkAllVisited() {
+      if (visited.size >= 9) document.getElementById("reconnectSection").style.display = "block";
+    }
+    document.querySelectorAll("#m5nav button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#m5nav button").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".m5-panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        const panelId = btn.getAttribute("data-panel");
+        document.getElementById(panelId).classList.add("active");
+        btn.classList.add("visited");
+        visited.add(panelId);
+        checkAllVisited();
+      });
+    });
+    document.querySelector('#m5nav button[data-panel="p0"]').classList.add("visited");
+    checkAllVisited();
   })();
 
   /* ================= Activity 0 (displayed as "Activity 1"): Familiar Moves, New Notation =================
@@ -1684,15 +1180,7 @@
       range: 5, showBasisVectors: true, draggableBasis: true, showGhostIdentity: true,
       shape: MATRIX_LAB_PRESETS.house.map((p) => ({ ...p })),
       targetShape: targetShape,
-      onMatrixChange: (m) => {
-        const dist = Math.max(
-          Math.abs(m.a - TARGET_M.a), Math.abs(m.b - TARGET_M.b),
-          Math.abs(m.c - TARGET_M.c), Math.abs(m.d - TARGET_M.d)
-        );
-        const matched = dist < 0.12;
-        document.getElementById("p1readout").innerHTML = `matrix = ${matrixHTML(m)}` +
-          (matched ? ` <span style="color:${COLORS.green};font-weight:800">✅ matches the target!</span>` : ``);
-      },
+      onMatrixChange: (m) => { document.getElementById("p1readout").innerHTML = `matrix = ${matrixHTML(m)}`; },
     });
     document.getElementById("p1Reset").addEventListener("click", () => p1.resetMatrix());
     makeToggle(
@@ -1909,14 +1397,7 @@
       shape: preShape,
       targetShape: unitSquare,
       onMatrixChange: (m) => {
-        const INV_M = { a: M.d / Mdet, b: -M.b / Mdet, c: -M.c / Mdet, d: M.a / Mdet };
-        const posDist = Math.max(
-          Math.abs(m.a - INV_M.a), Math.abs(m.b - INV_M.b),
-          Math.abs(m.c - INV_M.c), Math.abs(m.d - INV_M.d)
-        );
-        const posMatch = posDist < 0.1;
-        document.getElementById("p5readout").innerHTML = `your matrix = ${matrixHTML(m)}` +
-          (posMatch ? ` <span style="color:${COLORS.green};font-weight:800">✅ Exact match — this IS M⁻¹</span>` : ``);
+        document.getElementById("p5readout").innerHTML = `your matrix = ${matrixHTML(m)}`;
         const yourDet = roundTo2dp(m.a * m.d - m.b * m.c);
         const product = roundTo2dp(yourDet * Mdet);
         const match = Math.abs(product - 1) < 0.05;
@@ -2448,218 +1929,6 @@
        build progress — the reveal box is a separate, deliberately-final answer key */
     document.getElementById("p7bN").innerHTML = matrixHTML(N, [COLORS.red, COLORS.purple]);
   })();
-
-  /* ================= Unit + sub-slide navigation (v2: two-level nav) ================= */
-  (function () {
-    const units = Array.from(document.querySelectorAll(".slide"));
-    const sidebarButtons = Array.from(document.querySelectorAll(".sidebar button[data-unit]"));
-    const unitProgress = document.getElementById("unitProgress");
-    const dotsWrap = document.getElementById("dots");
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const menuBtn = document.getElementById("menuBtn");
-    const overlay = document.getElementById("overlay");
-    const sidebar = document.getElementById("sidebar");
-
-    const LOCKED_ACTIVITY_UNITS = [5, 6, 7, 8, 9, 10, 11, 12, 13];
-    const ACTIVITY_PANEL_BY_UNIT = { 5: "p0", 6: "p1", 7: "p2", 8: "p3", 9: "p4", 10: "p5", 11: "p6", 12: "pbridge", 13: "p7" };
-    const RECONNECT_UNIT = 14;
-    const UNIT_NAMES = [
-      "Before you start", "Objectives", "Session flow", "The big idea", "Readiness check",
-      "Activity 1", "Activity 2", "Activity 3", "Activity 4", "Activity 5",
-      "Activity 6", "Activity 7", "Activity 8", "Activity 9",
-      "Reconnecting", "Extensions", "Facilitator guide",
-    ];
-
-    let gatePassed = false;
-    const visitedActivities = new Set();
-    let currentUnit = 0;
-    const subIndexByUnit = {};
-
-    function isLocked(idx) {
-      if (LOCKED_ACTIVITY_UNITS.includes(idx)) return !gatePassed;
-      if (idx === RECONNECT_UNIT) return visitedActivities.size < 9;
-      return false;
-    }
-
-    function refreshLockUI() {
-      sidebarButtons.forEach((btn) => {
-        const idx = parseInt(btn.getAttribute("data-unit"), 10);
-        btn.classList.toggle("locked", isLocked(idx));
-      });
-      units.forEach((el, idx) => el.classList.toggle("locked", isLocked(idx)));
-    }
-
-    function subslidesOf(unitIdx) {
-      return Array.from(units[unitIdx].querySelectorAll(".subslide"));
-    }
-
-    function renderUnit() {
-      units.forEach((el, i) => el.classList.toggle("active", i === currentUnit));
-      sidebarButtons.forEach((btn) => btn.classList.toggle("active", parseInt(btn.getAttribute("data-unit"), 10) === currentUnit));
-
-      const subs = subslidesOf(currentUnit);
-      let subIdx = subIndexByUnit[currentUnit] || 0;
-      if (subIdx >= subs.length) subIdx = 0;
-      subs.forEach((el, i) => el.classList.toggle("active", i === subIdx));
-      subIndexByUnit[currentUnit] = subIdx;
-
-      unitProgress.textContent = subs.length > 1
-        ? `${UNIT_NAMES[currentUnit]} · Step ${subIdx + 1} of ${subs.length}`
-        : UNIT_NAMES[currentUnit];
-
-      dotsWrap.innerHTML = "";
-      subs.forEach((_, i) => {
-        const d = document.createElement("button");
-        d.className = "dot" + (i === subIdx ? " active" : "");
-        d.type = "button";
-        d.addEventListener("click", () => goToSub(i));
-        dotsWrap.appendChild(d);
-      });
-
-      prevBtn.disabled = subIdx === 0;
-      nextBtn.disabled = subIdx === subs.length - 1;
-
-      if (ACTIVITY_PANEL_BY_UNIT[currentUnit] && gatePassed) {
-        visitedActivities.add(ACTIVITY_PANEL_BY_UNIT[currentUnit]);
-        const btn = sidebarButtons.find((b) => parseInt(b.getAttribute("data-unit"), 10) === currentUnit);
-        if (btn) btn.classList.add("visited");
-      }
-      refreshLockUI();
-    }
-
-    // Bring the slide content back to a consistent starting position when
-    // switching units/sub-slides — but only when it's actually scrolled out
-    // of place, and only up to just below the sticky top nav, never all the
-    // way to the literal top of the page (past the header + hero banner).
-    // A hard `window.scrollTo(0,0)` here was the cause of the "menu click
-    // always bounces to the very top" complaint.
-    function scrollToUnitTop() {
-      const shell = document.querySelector(".app-shell");
-      if (!shell) return;
-      const header = document.querySelector("header.site-nav");
-      const headerH = header ? header.getBoundingClientRect().height : 0;
-      const desiredTop = headerH + 12;
-      const rect = shell.getBoundingClientRect();
-      if (Math.abs(rect.top - desiredTop) > 4) {
-        const y = Math.max(0, window.scrollY + rect.top - desiredTop);
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }
-    }
-
-    function goToUnit(idx) {
-      if (idx < 0 || idx >= units.length) return;
-      currentUnit = idx;
-      renderUnit();
-      closeMobileSidebar();
-      scrollToUnitTop();
-    }
-
-    function goToSub(i) {
-      const subs = subslidesOf(currentUnit);
-      if (i < 0 || i >= subs.length) return;
-      subIndexByUnit[currentUnit] = i;
-      renderUnit();
-      scrollToUnitTop();
-    }
-
-    sidebarButtons.forEach((btn) => {
-      btn.addEventListener("click", () => goToUnit(parseInt(btn.getAttribute("data-unit"), 10)));
-    });
-    prevBtn.addEventListener("click", () => goToSub((subIndexByUnit[currentUnit] || 0) - 1));
-    nextBtn.addEventListener("click", () => goToSub((subIndexByUnit[currentUnit] || 0) + 1));
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowLeft") prevBtn.click();
-      else if (e.key === "ArrowRight") nextBtn.click();
-    });
-
-    let touchStartX = null;
-    document.addEventListener("touchstart", (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
-    document.addEventListener("touchend", (e) => {
-      if (touchStartX === null) return;
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(dx) > 60) { dx < 0 ? nextBtn.click() : prevBtn.click(); }
-      touchStartX = null;
-    }, { passive: true });
-
-    function openMobileSidebar() { sidebar.classList.add("open"); overlay.classList.add("open"); }
-    function closeMobileSidebar() { sidebar.classList.remove("open"); overlay.classList.remove("open"); }
-    menuBtn.addEventListener("click", () => {
-      sidebar.classList.contains("open") ? closeMobileSidebar() : openMobileSidebar();
-    });
-    overlay.addEventListener("click", closeMobileSidebar);
-
-    document.querySelectorAll("[data-jump]").forEach((btn) => {
-      btn.addEventListener("click", () => goToUnit(parseInt(btn.getAttribute("data-jump"), 10)));
-    });
-
-    window.__onGatePassed = function () {
-      gatePassed = true;
-      refreshLockUI();
-    };
-
-    window.bindMiniCheck = function (containerId, correctValue, correctMsg, wrongMsg) {
-      const el = document.getElementById(containerId);
-      if (!el) return;
-      const fb = el.querySelector(".mini-check-fb");
-      el.querySelectorAll("[data-mc-answer]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          el.querySelectorAll("[data-mc-answer]").forEach((b) => b.classList.remove("correct", "wrong"));
-          const isRight = btn.getAttribute("data-mc-answer") === correctValue;
-          btn.classList.add(isRight ? "correct" : "wrong");
-          fb.innerHTML = isRight
-            ? `<b style="color:${COLORS.green}">✅ ${correctMsg}</b>`
-            : `<b style="color:${COLORS.red}">Not quite.</b> ${wrongMsg}`;
-        });
-      });
-    };
-
-    refreshLockUI();
-    goToUnit(0);
-  })();
-
-  /* ---- mini-check bindings (one per activity's closing concept-check) ---- */
-  bindMiniCheck("mc5", "b",
-    "Translation is the only one that shifts the origin itself — that's why it needs addition, not just a matrix multiply.",
-    "Translation is the one that moves the origin — rotation and reflection both pivot around it and leave it fixed.");
-  bindMiniCheck("mc6", "a",
-    "Exactly — move the two arrows, and every point's î/ĵ-recipe automatically points somewhere new.",
-    "Nothing is redrawn by hand, and it isn't a coincidence — every point's position is really a recipe in terms of î and ĵ.");
-  bindMiniCheck("mc7", "a",
-    "Right — \u201cmy frame\u201d address means \u201cthis many steps along the red line, this many along purple\u201d — that recipe stays fixed even as the lines move.",
-    "D's standard-grid address did change — its my-frame address stayed fixed because that address is relative to the frame, not the grid.");
-  bindMiniCheck("mc8", "a",
-    "new_x = 1·2 + 1·3 = 5, new_y = 0·2 + 1·3 = 3 — each row of the matrix, dotted with the point.",
-    "Try it row by row: new_x = 1·2+1·3, new_y = 0·2+1·3.");
-  bindMiniCheck("mc9", "a",
-    "Zero area means the square has been squashed flat — î and ĵ now point along the same line.",
-    "A zero determinant means zero area — the square has flattened into a line, not just resized or flipped.");
-  bindMiniCheck("mc10", "a",
-    "Right — det(M)=0 means M squashes different inputs onto the same output, so there's no way to undo it and recover which input you started from.",
-    "det(M)=0 means points get squashed onto the same output — there's no way to reverse that, so no inverse can exist.");
-  bindMiniCheck("mc11", "a",
-    "Yes — \u201cB then A\u201d collapses into one matrix, A·B, applied once.",
-    "Order matters here: \u201cB then A\u201d collapses into A·B, not B·A or A+B.");
-  bindMiniCheck("mc12", "a",
-    "Exactly — one equation alone allows a whole line of answers; each further condition removes freedom until just one point survives.",
-    "The first equation still matters — the second one narrows the whole line down to a single point by adding one more condition.");
-
-  /* ---- reflect check-in toggles (informational units) ---- */
-  bindHint2("rc0Btn", "rc0Box");
-  bindHint2("rc1Btn", "rc1Box");
-  bindHint2("rc2Btn", "rc2Box");
-  bindHint2("rc3Btn", "rc3Box");
-  bindHint2("rc14Btn", "rc14Box");
-  bindHint2("rc15Btn", "rc15Box");
-  function bindHint2(btnId, boxId) {
-    const btn = document.getElementById(btnId), box = document.getElementById(boxId);
-    if (!btn || !box) return;
-    btn.addEventListener("click", () => {
-      const isOpen = box.style.display === "block";
-      box.style.display = isOpen ? "none" : "block";
-      btn.textContent = isOpen ? "💭 See a sample thought" : "Hide the sample thought";
-    });
-  }
 </script>
 </body>
 </html>

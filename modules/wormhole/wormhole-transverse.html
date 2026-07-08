@@ -1,0 +1,2913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wormhole Transverse — A Matrix Game</title>
+<style>
+  :root {
+    --bg: #f3f6fb;
+    --card: #ffffff;
+    --ink: #1c2733;
+    --muted: #5b6b7c;
+    --line: #dbe3ec;
+    --brand: #1d5fb8;
+    --brand-soft: #e8f0fc;
+    --green: #178a4c;
+    --green-soft: #e6f6ec;
+    --red: #c23b3b;
+    --purple: #7a3fd1;
+    --orange: #d97a1f;
+    --orange-soft: #fdf1e2;
+    --amber: #b8860b;
+    --amber-soft: #fff6e0;
+    --facil: #5b4fc4;
+    --facil-soft: #efecfb;
+    --radius: 16px;
+    --shadow: 0 2px 14px rgba(20,30,50,0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", system-ui, -apple-system, "Inter", "Sarabun", sans-serif;
+  }
+
+  .app-shell { display: flex; height: 100vh; overflow: hidden; }
+
+  .sidebar {
+    width: 260px; flex-shrink: 0; background: var(--card); border-right: 1px solid var(--line);
+    padding: 18px 14px; overflow-y: auto;
+  }
+  .sidebar h1 { font-size: 15px; margin: 4px 8px 14px; line-height: 1.35; }
+  .sidebar button {
+    display: block; width: 100%; text-align: left; background: none; border: none;
+    padding: 10px 12px; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+    color: var(--muted); cursor: pointer; margin-bottom: 3px; font-family: inherit;
+  }
+  .sidebar button:hover { background: #f4f7fb; }
+  .sidebar button.active { background: var(--brand-soft); color: var(--brand); }
+  .sidebar button .idx { display: inline-block; width: 20px; opacity: .6; }
+
+  .mobile-menu-btn {
+    display: none; position: fixed; top: 14px; left: 14px; z-index: 40;
+    width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--card); box-shadow: var(--shadow); font-size: 18px; cursor: pointer;
+  }
+  .slide-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(20,30,50,0.35); z-index: 30;
+  }
+  .slide-overlay.open { display: block; }
+
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .slide-viewport { flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 34px 20px 20px; }
+  .slide { display: none; max-width: 780px; width: 100%; }
+  .slide.active { display: block; }
+
+  .eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; color: var(--brand); margin-bottom: 6px; }
+  h2.slide-title { font-size: 24px; margin: 0 0 10px; }
+  p.lead { font-size: 15.5px; color: var(--muted); margin: 0 0 20px; line-height: 1.5; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 16px; }
+
+  canvas { display: block; margin: 0 auto; width: 100%; max-width: 320px; height: auto; aspect-ratio: 1/1; border-radius: 12px; background: #fbfdff; border: 1px solid var(--line); touch-action: none; }
+  .mini-canvas { max-width: 200px; }
+  .dual-canvas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .dual-canvas .cap { text-align: center; font-size: 12.5px; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+  @media (max-width: 620px) { .dual-canvas { grid-template-columns: 1fr; } }
+
+  .status-banner {
+    margin-top: 14px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 14px;
+    text-align: center; background: var(--brand-soft); color: var(--brand); transition: background .15s, color .15s;
+  }
+  .status-banner.close { background: var(--amber-soft); color: var(--amber); }
+  .status-banner.win { background: var(--green-soft); color: var(--green); }
+
+  .compare-box {
+    margin-top: 14px; padding: 12px 16px; border-radius: 12px; background: #f4f7fb;
+    border: 1px solid var(--line); font-size: 14px; line-height: 1.7;
+  }
+  .compare-box b.tag { display: inline-block; min-width: 190px; }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+  .btn { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--ink); font-family: inherit; }
+  .btn:hover { background: #f4f7fb; }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .btn.primary:disabled { background: #a9c2e8; border-color: #a9c2e8; }
+
+  .hint-toggle {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; background: var(--amber-soft);
+    color: var(--amber); border: 1px dashed #e0b34d; border-radius: 10px; padding: 8px 14px; font-size: 13px;
+    font-weight: 700; cursor: pointer; font-family: inherit;
+  }
+  .hint-body {
+    display: none; margin-top: 8px; background: var(--amber-soft); border-left: 3px solid var(--amber);
+    border-radius: 8px; padding: 12px 14px; font-size: 13.5px; line-height: 1.5;
+  }
+  .hint-body.open { display: block; }
+
+  .facil-note {
+    margin-top: 14px; background: var(--facil-soft); border-left: 3px solid var(--facil);
+    border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.5; color: #3a3470;
+  }
+  .facil-note b { display: block; margin-bottom: 4px; color: var(--facil); font-size: 12px; text-transform: uppercase; letter-spacing: .3px; }
+
+  table.trial-log { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+  table.trial-log th, table.trial-log td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: center; }
+  table.trial-log th { color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: .3px; }
+  table.trial-log td.match { color: var(--green); font-weight: 800; }
+  table.trial-log tr.general-row td { background: rgba(23, 138, 76, 0.08); font-weight: 700; }
+  .empty-log { color: var(--muted); font-size: 13px; text-align: center; padding: 10px 0; }
+
+  .bottom-nav { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 14px 16px; border-top: 1px solid var(--line); background: var(--card); }
+  .nav-round { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: #fff; font-size: 18px; cursor: pointer; }
+  .nav-round:disabled { opacity: .35; cursor: default; }
+  .dots { display: flex; gap: 7px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); border: none; cursor: pointer; padding: 0; }
+  .dot.active { background: var(--brand); width: 22px; border-radius: 5px; }
+
+  /* ===== Wormhole Transverse — game-specific additions ===== */
+  .jack-readout { text-align: center; font-weight: 700; font-size: 14.5px; margin: 10px 0; color: var(--ink); }
+
+  .answer-row { display: flex; gap: 16px; justify-content: center; margin: 14px 0; flex-wrap: wrap; }
+  .answer-row label { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+  .answer-row input[type=number] {
+    width: 74px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 14px; font-family: inherit;
+  }
+
+  .round-dots { display: flex; gap: 6px; justify-content: center; margin-top: 12px; }
+  .rdot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+  .rdot.done { background: var(--green); }
+
+  .formula-row { display: flex; flex-direction: column; gap: 10px; align-items: center; margin: 14px 0; font-size: 16px; font-weight: 700; }
+  .formula-row select {
+    padding: 5px 8px; border-radius: 8px; border: 1px solid var(--line);
+    font-family: inherit; font-weight: 700; font-size: 15px;
+  }
+
+  .status-chip { display: inline-block; padding: 6px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 800; margin-top: 10px; }
+  .status-chip.stable { background: var(--green-soft); color: var(--green); }
+  .status-chip.glitch { background: #fdeaea; color: var(--red); }
+  .status-chip.mirror { background: var(--facil-soft); color: var(--facil); }
+
+  code { background: #eef2f8; border-radius: 5px; padding: 1px 6px; font-size: 13px; }
+
+  /* ---- fake-LaTeX matrix/vector bracket notation, no math library needed ----
+     Ported verbatim from this module's main index.html (matrixHTML/colVectorHTML
+     helpers below use these classes) so the win-celebration notation reads as
+     properly typeset math instead of plain "(x, y)" text. */
+  .mat { display: inline-flex; align-items: stretch; vertical-align: middle; margin: 0 4px; font-family: "Cambria Math", Cambria, "Times New Roman", serif; }
+  .mat-bracket { width: 6px; border-top: 2.5px solid currentColor; border-bottom: 2.5px solid currentColor; }
+  .mat-bracket.left { border-left: 2.5px solid currentColor; }
+  .mat-bracket.right { border-right: 2.5px solid currentColor; }
+  .mat-grid { display: grid; grid-template-columns: auto auto; gap: 3px 12px; padding: 3px 8px; align-items: center; justify-items: center; font-weight: 800; font-style: italic; }
+  .mat-grid span { font-style: normal; }
+
+  /* ---- per-canvas answer controls (Trial I-A/I-B redesign) ---- */
+  .canvas-col { display: flex; flex-direction: column; }
+  .canvas-col .sub-answer-row { display: flex; gap: 12px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+  .canvas-col .sub-answer-row label { font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 5px; }
+  .canvas-col .sub-answer-row input[type=number] {
+    width: 68px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 13.5px; font-family: inherit;
+  }
+  .canvas-col .jack-readout { font-size: 13px; margin: 10px 0 0; }
+
+  /* ---- staged win-celebration + matrix-notation reveal ---- */
+  .celebrate-box { margin-top: 14px; padding: 14px 16px; border-radius: 12px; background: var(--green-soft); border: 1px solid #bfe6cf; text-align: center; }
+  .celebrate-box .notation-line { font-size: 15px; margin: 8px 0 0; min-height: 1.6em; }
+  .celebrate-box .btn-row { margin-top: 12px; }
+
+  /* ---- point-9 multiple-choice reflection ---- */
+  .mcq-option { display: block; width: 100%; text-align: left; background: #fff; border: 1.5px solid var(--line);
+    border-radius: 10px; padding: 10px 14px; font-size: 13.5px; font-weight: 600; color: var(--ink);
+    cursor: pointer; font-family: inherit; margin-bottom: 8px; }
+  .mcq-option:hover { background: #f4f7fb; }
+  .mcq-option.wrong { background: #fdeaea; border-color: var(--red); color: #7a2020; }
+  .mcq-option.correct { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+  .mcq-explain { display: none; margin-top: 4px; margin-bottom: 10px; padding: 8px 12px; border-radius: 8px; background: var(--amber-soft); font-size: 13px; line-height: 1.5; }
+  .mcq-explain.open { display: block; }
+
+  @media (max-width: 820px) {
+    .sidebar { display: none; }
+    .sidebar.open { display: block; position: fixed; inset: 0; z-index: 35; width: 84vw; max-width: 320px; }
+    .mobile-menu-btn { display: block; }
+    .slide-viewport { padding-top: 64px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="mobile-menu-btn" id="menuBtn" type="button">☰</button>
+<div class="slide-overlay" id="overlay"></div>
+
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar">
+    <h1>Wormhole Transverse<br>A Matrix Game</h1>
+    <button data-slide="0" class="active"><span class="idx">0</span>Enter the Construct</button>
+    <button data-slide="1"><span class="idx">1</span>Trial I-A — Decode</button>
+    <button data-slide="2"><span class="idx">2</span>Trial I-B — Crack the Code</button>
+    <button data-slide="3"><span class="idx">3</span>Trial II-A — Reverse the Signal</button>
+    <button data-slide="4"><span class="idx">4</span>Trial II-B — Crack the Inverse</button>
+    <button data-slide="5"><span class="idx">5</span>Trial III — Measure the Warp</button>
+    <button data-slide="6"><span class="idx">6</span>Debrief</button>
+  </nav>
+
+  <div class="main">
+    <div class="slide-viewport">
+
+      <!-- ===== Slide 0: intro ===== -->
+      <div class="slide active" id="slide0">
+        <div class="eyebrow">Wormhole Transverse · a companion game for Module 5</div>
+        <h2 class="slide-title">Enter the Construct</h2>
+        <p class="lead">Two linked realities. One is Prime — the world as it is. The other is the Warp — the same world, restructured by a hidden Architecture. A Jack Point keeps opening between them.</p>
+        <div class="card">
+          <p style="margin:0 0 12px">Welcome, Operator. Across four Trials you'll decode a Jack Point, reverse the signal, then measure how much the Warp bends space itself. No formulas are named up front — you'll meet each one by doing the thing it describes first.</p>
+          <div class="btn-row"><button class="btn primary" id="startBtn" type="button">Begin →</button></div>
+        </div>
+        <div class="facil-note"><b>For facilitators</b>This is a standalone companion for Module 5's matrix activities — best played after Activities 2, 3, 5 and 6, since each Trial quietly reuses one of those ideas (matching a shape, change of basis, area/determinant, inverse) without naming it up front. Works equally well as a warm-up recap or a closing consolidation game.</div>
+      </div>
+
+      <!-- ===== Slide 1: Trial I-A ===== -->
+      <div class="slide" id="slide1">
+        <div class="eyebrow">Trial I-A · Round <span id="ia-roundNum">1</span> of 3</div>
+        <h2 class="slide-title">Decode the Jack Point</h2>
+        <p class="lead">A Jack Point has opened inside the Warp, at native coordinates (m, n) — read against Strand-i (red) and Strand-j (purple). The same two strands are traced on Prime too — where does that combination really land?</p>
+        <div class="card" id="ia-answercard">
+          <div class="dual-canvas">
+            <div class="canvas-col">
+              <div class="cap">Prime Construct</div>
+              <canvas id="ia-prime" width="300" height="300"></canvas>
+              <div class="sub-answer-row">
+                <label>x = <input type="number" id="ia-x" step="1"></label>
+                <label>y = <input type="number" id="ia-y" step="1"></label>
+              </div>
+            </div>
+            <div class="canvas-col">
+              <div class="cap">The Warp</div>
+              <canvas id="ia-warp" width="300" height="300"></canvas>
+              <div class="jack-readout" id="ia-jack">(m, n) = (?, ?)</div>
+            </div>
+          </div>
+          <div class="status-banner" id="ia-banner">🌀 Enter your answer</div>
+          <div class="round-dots" id="ia-dots"></div>
+          <div class="btn-row"><button class="btn" id="ia-rerollBtn" type="button">🔄 New question (doesn't use up a round)</button></div>
+          <div class="celebrate-box" id="ia-celebrate" style="display:none">
+            <div id="ia-celebrateMsg">✅ Correct!</div>
+            <div class="notation-line" id="ia-notation"></div>
+            <div class="btn-row"><button class="btn primary" id="ia-continueBtn" type="button" style="display:none">Continue →</button></div>
+          </div>
+        </div>
+        <div class="card" id="ia-mcq" style="display:none">
+          <p style="margin:0 0 10px"><b>One more thing before you move on.</b> Across all three rounds, what did you actually compute each time?</p>
+          <div id="ia-mcqOptions"></div>
+          <div class="mcq-explain" id="ia-mcqExplain"></div>
+        </div>
+        <div class="card" id="ia-reveal" style="display:none">
+          <p style="margin:0"><b>🔑 The Architecture behind it:</b> real position = structure matrix × native coordinates. Prime isn't "unstructured" — it's just the special case where that matrix is the identity.</p>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="2">Continue: Trial I-B →</button></div>
+        </div>
+      </div>
+
+      <!-- ===== Slide 2: Trial I-B ===== -->
+      <div class="slide" id="slide2">
+        <div class="eyebrow">Trial I-B</div>
+        <h2 class="slide-title">Crack the Architecture</h2>
+        <p class="lead">Same Architecture (M) the whole Trial — Strand-i (red) and Strand-j (purple) are traced on both Prime and the Warp. Three quick reads, then one you can't just look up.</p>
+        <div class="card" id="ib-answercard">
+          <div class="dual-canvas">
+            <div class="canvas-col">
+              <div class="cap">Prime Construct</div>
+              <canvas id="ib-prime" width="300" height="300"></canvas>
+              <div class="sub-answer-row">
+                <label>x = <input type="number" id="ib-x" step="1"></label>
+                <label>y = <input type="number" id="ib-y" step="1"></label>
+              </div>
+            </div>
+            <div class="canvas-col">
+              <div class="cap">The Warp</div>
+              <canvas id="ib-warp" width="300" height="300"></canvas>
+              <div class="jack-readout" id="ib-jack">(m, n) = (?, ?)</div>
+            </div>
+          </div>
+          <div class="status-banner" id="ib-banner">🌀 Enter your answer</div>
+          <div class="round-dots" id="ib-dots"></div>
+          <!-- reroll only ever shown during the hard (no-picture) round — the
+               three anchor rounds are specific fixed points (1,0)/(0,1)/(1,1),
+               not a random draw, so there's nothing to reroll about them. -->
+          <div class="btn-row"><button class="btn" id="ib-rerollBtn" type="button" style="display:none">🔄 New number (doesn't use up a round)</button></div>
+          <button class="hint-toggle" id="ib-hintBtn" type="button" style="display:none">💡 Need a nudge?</button>
+          <div class="hint-body" id="ib-hintBody">Look at the Decoded Log below — compare each row's (m, n) against its (x, y). Does x always relate to m and n the same way, row after row?</div>
+          <div class="celebrate-box" id="ib-celebrate" style="display:none">
+            <div id="ib-celebrateMsg">✅ Correct!</div>
+            <div class="notation-line" id="ib-notation"></div>
+            <div class="btn-row"><button class="btn primary" id="ib-continueBtn" type="button" style="display:none">Continue →</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <table class="trial-log" id="ib-log">
+            <thead><tr><th>Round</th><th>Native (m, n)</th><th>Computation</th><th>Real (x, y)</th></tr></thead>
+            <tbody id="ib-logbody"></tbody>
+          </table>
+          <div class="empty-log" id="ib-logempty">No rounds decoded yet.</div>
+        </div>
+
+        <div class="card" id="ib-formulacard" style="display:none">
+          <p style="margin:0 0 10px"><b>Crack the code.</b> The Architecture is this 2×2 grid of unknowns — one column per strand, î (red) on the left, ĵ (purple) on the right:</p>
+          <p class="jack-readout" id="ib-formulaMatrixLine" style="margin:0 0 10px"></p>
+          <p style="margin:0 0 10px">Fill in which letter — a, b, c, or d — belongs in each blank:</p>
+          <div class="formula-row">
+            <div>x&nbsp;=&nbsp;
+              <select id="ib-sel-xm"><option value="">?</option><option>a</option><option>b</option><option>c</option><option>d</option></select>
+              &nbsp;·&nbsp;m&nbsp;+&nbsp;
+              <select id="ib-sel-xn"><option value="">?</option><option>a</option><option>b</option><option>c</option><option>d</option></select>
+              &nbsp;·&nbsp;n
+            </div>
+            <div>y&nbsp;=&nbsp;
+              <select id="ib-sel-ym"><option value="">?</option><option>a</option><option>b</option><option>c</option><option>d</option></select>
+              &nbsp;·&nbsp;m&nbsp;+&nbsp;
+              <select id="ib-sel-yn"><option value="">?</option><option>a</option><option>b</option><option>c</option><option>d</option></select>
+              &nbsp;·&nbsp;n
+            </div>
+          </div>
+          <div class="btn-row"><button class="btn primary" id="ib-formulaCheck" type="button">Check</button></div>
+          <div class="status-banner" id="ib-formulabanner">🌀 Choose a letter for every blank</div>
+        </div>
+
+        <div class="card" id="ib-verifycard" style="display:none">
+          <p style="margin:0 0 10px"><b>Prove it generalizes.</b> Two fresh Architectures, no picture this time — just your formula.</p>
+          <p class="jack-readout" id="ib-verifyprompt">—</p>
+          <div class="answer-row">
+            <label>x = <input type="number" id="ib-vx" step="1"></label>
+            <label>y = <input type="number" id="ib-vy" step="1"></label>
+          </div>
+          <div class="status-banner" id="ib-verifybanner">🌀 Enter your answer</div>
+          <div class="round-dots" id="ib-verifydots"></div>
+        </div>
+
+        <div class="card" id="ib-revealcard" style="display:none">
+          <p style="margin:0"><b>🔑 Decoded:</b> <code>x = a·m + b·n</code>, <code>y = c·m + d·n</code> — for ANY Architecture, any native point. This is matrix–vector multiplication. You just derived it by reading three grids and refusing to count a fourth.</p>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="3">Continue: Trial II-A →</button></div>
+        </div>
+      </div>
+
+      <!-- ===== Slide 3: Trial II-A ===== -->
+      <div class="slide" id="slide3">
+        <div class="eyebrow">Trial II-A · Round <span id="t2-roundNum">1</span> of 3</div>
+        <h2 class="slide-title">Reverse the Signal — Read It</h2>
+        <p class="lead">Now it runs backward. The Jack Point's real position is given in Prime — Strand-i (red) and Strand-j (purple) are traced on both sides. Find its native (m, n) inside the Warp by eye.</p>
+        <div class="card" id="t2-answercard">
+          <div class="dual-canvas">
+            <div class="canvas-col">
+              <div class="cap">Prime Construct</div>
+              <canvas id="t2-prime" width="300" height="300"></canvas>
+              <div class="jack-readout" id="t2-jack">(x, y) = (?, ?)</div>
+            </div>
+            <div class="canvas-col">
+              <div class="cap">The Warp</div>
+              <canvas id="t2-warp" width="300" height="300"></canvas>
+              <div class="sub-answer-row">
+                <label>m = <input type="number" id="t2-m" step="1"></label>
+                <label>n = <input type="number" id="t2-n" step="1"></label>
+              </div>
+            </div>
+          </div>
+          <div class="status-banner" id="t2-banner">🌀 Enter native coordinates</div>
+          <div class="round-dots" id="t2-dots"></div>
+          <div class="celebrate-box" id="t2-celebrate" style="display:none">
+            <div id="t2-celebrateMsg">✅ Correct!</div>
+            <div class="notation-line" id="t2-notation"></div>
+            <div class="btn-row"><button class="btn primary" id="t2-continueBtn" type="button" style="display:none">Continue →</button></div>
+          </div>
+        </div>
+        <div class="card" id="t2-reveal" style="display:none">
+          <p style="margin:0"><b>👀 Reading the picture works</b> — but it doesn't scale to numbers too big to fit on a grid. Next: the arithmetic that's been happening under the hood the whole time.</p>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="4">Continue: Trial II-B →</button></div>
+        </div>
+      </div>
+
+      <!-- ===== Slide 3b: Trial II-B ===== -->
+      <div class="slide" id="slide3b">
+        <div class="eyebrow">Trial II-B · Round <span id="t2b-roundNum">1</span> of 4</div>
+        <h2 class="slide-title">Crack the Inverse</h2>
+        <p class="lead">Same Architecture (M) the whole Trial. In II-A you found (m, n) by SEEING how far along i and how far along j the target sat. Here's that same idea made exact: swap a strand for the target and compare the shaded area it makes — that ratio IS (m, n).</p>
+        <div class="card" id="t2b-answercard">
+          <div class="dual-canvas">
+            <div class="canvas-col">
+              <div class="cap">Prime Construct</div>
+              <canvas id="t2b-prime" width="300" height="300"></canvas>
+              <div class="jack-readout" id="t2b-jack">(x, y) = (?, ?)</div>
+            </div>
+            <div class="canvas-col">
+              <div class="cap">The Warp</div>
+              <canvas id="t2b-warp" width="300" height="300"></canvas>
+              <div class="sub-answer-row">
+                <label>m = <input type="number" id="t2b-m" step="1"></label>
+                <label>n = <input type="number" id="t2b-n" step="1"></label>
+              </div>
+            </div>
+          </div>
+          <div class="status-banner" id="t2b-banner">🌀 Enter native coordinates</div>
+          <div class="round-dots" id="t2b-dots"></div>
+          <div class="celebrate-box" id="t2b-celebrate" style="display:none">
+            <div id="t2b-celebrateMsg">✅ Correct!</div>
+            <div class="notation-line" id="t2b-notation"></div>
+            <div class="btn-row"><button class="btn primary" id="t2b-continueBtn" type="button" style="display:none">Continue →</button></div>
+          </div>
+        </div>
+        <div class="card" id="t2b-logcard">
+          <p style="margin:0 0 8px"><b>Forward / inverse log.</b> Each round's going (→) and coming-back (←) arithmetic, side by side, so the pattern is there to compare.</p>
+          <table class="trial-log" id="t2b-log">
+            <thead><tr><th>Round</th><th>Given (x, y)</th><th>Forward (→) / Inverse (←)</th><th>Found (m, n)</th></tr></thead>
+            <tbody id="t2b-logbody"></tbody>
+          </table>
+          <div class="empty-log" id="t2b-logempty">No rounds solved yet.</div>
+        </div>
+        <div class="card" id="t2b-inversecard" style="display:none">
+          <p style="margin:0 0 8px"><b>Build M⁻¹ directly from M.</b> No rounds to solve for this — just the recipe the log above has been demonstrating every time:</p>
+          <div class="jack-readout" id="t2b-inverseLine" style="line-height:2.4"></div>
+        </div>
+        <div class="card" id="t2b-mcq" style="display:none">
+          <p style="margin:0 0 10px"><b>One more thing before Trial III.</b> Look back at the log's inverse (←) side — solving for m only ever used one strand's numbers, and solving for n only used the other's. Which is it?</p>
+          <div id="t2b-mcqOptions"></div>
+          <div class="mcq-explain" id="t2b-mcqExplain"></div>
+        </div>
+        <div class="card" id="t2b-reveal" style="display:none">
+          <p style="margin:0"><b>🔑 Going forward means multiplying by M. Coming back means multiplying by M⁻¹</b> — the inverse. Multiplying and un-multiplying are opposite moves, not the same move done twice — and notice that same (ad − bc) showed up again, doing the same job every round.</p>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="5">Continue: Trial III →</button></div>
+        </div>
+      </div>
+
+      <!-- ===== Slide 4: Trial III ===== -->
+      <div class="slide" id="slide4">
+        <div class="eyebrow">Trial III</div>
+        <h2 class="slide-title">Measure the Warp</h2>
+        <p class="lead">Every capsule sent through a Jack Point gets stretched or squeezed by the Warp's own density — its area. A dashed rectangle marks exactly how much area you're aiming for. Drag Strand-i (red) and Strand-j (purple) so the shaded parallelogram covers the same amount of space.</p>
+        <div class="card">
+          <canvas id="t3-warp" width="340" height="340"></canvas>
+          <div class="jack-readout" id="t3-readout">Density = |det| = 2.00 · target = 5 (dashed rectangle, 1×5)</div>
+          <div class="status-banner" id="t3-banner">🎯 Drag i (red) and j (purple) to fill as much area as the dashed rectangle</div>
+          <div style="text-align:center"><span class="status-chip stable" id="t3-chip">🟢 Construct stable</span></div>
+          <div class="round-dots" id="t3-dots"></div>
+        </div>
+        <button class="hint-toggle" id="t3-hintBtn" type="button">💡 Something to try</button>
+        <div class="hint-body" id="t3-hintBody">Try dragging i and j until they point almost the same direction — watch the density and the status chip. Then try dragging one past the other's line entirely.</div>
+        <div class="card" id="t3-reveal" style="display:none">
+          <p style="margin:0"><b>🔑 Density = |det(M)| = |ad − bc|.</b> This is also why Trial II always had an answer — reversing the signal only works when Density ≠ 0.</p>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="6">Continue: Debrief →</button></div>
+        </div>
+      </div>
+
+      <!-- ===== Slide 5: debrief ===== -->
+      <div class="slide" id="slide5">
+        <div class="eyebrow">Debrief</div>
+        <h2 class="slide-title">What you just did, named</h2>
+        <div class="card">
+          <p style="margin:0 0 10px"><b>Trial I</b> was matrix–vector multiplication: <code>x = a·m + b·n</code>, <code>y = c·m + d·n</code>.</p>
+          <p style="margin:0 0 10px"><b>Trial II</b> was the inverse matrix M⁻¹ — undoing that same multiplication.</p>
+          <p style="margin:0"><b>Trial III</b> was the determinant, <code>ad − bc</code> — the factor by which the Warp stretches or shrinks area, and the exact number that decides whether Trial II even has an answer.</p>
+        </div>
+        <div class="facil-note"><b>For facilitators</b>Consider replaying Trial III as a group and deliberately hunting for a Glitch (det ≈ 0) and a Mirror Anomaly (det &lt; 0) together — both are easy to trigger and make excellent whole-room discussion prompts about what a "structure" can and can't do.</div>
+      </div>
+
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-round" id="prevBtn" type="button">←</button>
+      <div class="dots" id="dots"></div>
+      <button class="nav-round" id="nextBtn" type="button">→</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ============================================================
+     Matrix Lab v2 — inlined directly into this file on purpose.
+     This game is meant to be a fully standalone, self-contained
+     single HTML file (per the zero-dependency design philosophy —
+     open it anywhere, on any machine, with no surrounding folder
+     structure required). An earlier version loaded this engine via
+     <script src="../../assets/js/matrix-lab.js">, a path that only
+     resolves inside the full site's folder tree — opening just this
+     one file elsewhere left MatrixLab undefined, which threw during
+     the very first Trial's setup and (since everything below runs
+     as one sequential script) silently aborted every remaining
+     line, including the navigation wiring at the bottom. That is
+     why nothing was clickable. Inlining the class here removes the
+     dependency entirely; the identical engine is still used inside
+     the main course site from its own shared file.
+     ============================================================ */
+
+/* ============================================================
+   Matrix Lab v2 — a small, dependency-free interactive engine
+   ------------------------------------------------------------
+   Used across Module 5's seven activities. Plain HTML5 <canvas> +
+   JavaScript, no external service — nothing here can go down,
+   time out, or need an API key.
+
+   THE CORE IDEA:
+   A 2x2 matrix M = [[a, b], [c, d]] is an instruction for where
+   the two basis arrows land:
+     - î (1,0) lands at (a, c)  — column 1
+     - ĵ (0,1) lands at (b, d)  — column 2
+   Every other point's new home is x·(î's new spot) + y·(ĵ's new
+   spot). Dragging the tips of î/ĵ *is* editing the matrix.
+
+   This version adds, on top of the original engine:
+     - a faint "ghost" of the untransformed (standard) grid, so
+       before/after are visible at once
+     - a list of extra points, each optionally showing a "ghost"
+       dot at its own untransformed position (for the change-of-
+       basis activity: same coordinates, different actual spot)
+     - a dashed "combination" construction (a copies of î, then
+       b copies of ĵ) for a chosen point
+     - one freely-draggable point independent of the basis
+       vectors (used for the systems-of-equations activity)
+     - a fixed, non-transformed "target" marker
+   ============================================================ */
+
+class MatrixLab {
+  constructor(canvas, opts) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.size = canvas.width;
+    this.range = opts.range || 5;
+    this.scale = this.size / (2 * this.range);
+
+    this.matrix = opts.matrix || { a: 1, b: 0, c: 0, d: 1 };
+    this.showBasisVectors = opts.showBasisVectors !== false;
+    this.draggableBasis = !!opts.draggableBasis;
+    this.showUnitSquare = !!opts.showUnitSquare;
+    this.showDeterminant = !!opts.showDeterminant;
+    this.detOutputId = opts.detOutputId || null;
+    this.showGhostIdentity = !!opts.showGhostIdentity;
+    this.showLiveGrid = opts.showLiveGrid !== false; // set false to hide the M-skewed solid grid, keeping only showGhostIdentity's plain orthogonal one — for canvases where the skewed grid is pure clutter (nothing is actually being dragged/transformed on it) rather than a teaching aid
+    // showLiveAxis: the emphasized origin-crossing "axis" lines that showLiveGrid
+    // draws THROUGH applyM alongside the grid cells — since they're transformed
+    // the same way, they visibly tilt to run along the current i/j directions
+    // whenever M isn't the identity. Split out from showLiveGrid so a canvas can
+    // keep the skewed grid (needed for reading native coordinates by counting
+    // cells) while suppressing just this axis emphasis — used on Wormhole
+    // Transverse's Warp canvas, which shows a separate, un-skewed reference axis
+    // instead (see standardAxisColor below). Default true keeps every existing
+    // activity's appearance unchanged.
+    this.showLiveAxis = opts.showLiveAxis !== false;
+    // standardAxisColor: when set, draws a solid, RAW (unwarped — NOT run through
+    // applyM) perpendicular axis pair through the origin in this color. A fixed
+    // "true Cartesian" reference to contrast against a skewed native grid —
+    // distinct from showGhostIdentity's dashed full grid (which shows every
+    // gridline, not just the two axes, and is meant as a later reveal rather
+    // than an always-on reference).
+    this.standardAxisColor = opts.standardAxisColor || null;
+    this.showOriginLabel = !!opts.showOriginLabel;
+    this.lockedBasis = opts.lockedBasis || null; // "i" | "j" | null — that arrow can't be dragged while locked
+
+    // basisColors: {i, j} — lets a caller recolor showBasisVectors' two arrows
+    // (and the _strokeCombination dashed path, which reuses the same colors).
+    // Defaults to the site-wide red/purple convention so every existing
+    // activity that doesn't pass this is completely unaffected — this game's
+    // Trial I-A/I-B/III opt in to a black(standard)/faded-orange(transformed)
+    // convention instead (see the Wormhole Transverse redesign notes below).
+    this.basisColors = opts.basisColors || { i: "#c23b3b", j: "#7a3fd1" };
+    // combinationColors: separate from basisColors on purpose — Wormhole
+    // Transverse's win-celebration needs to briefly draw a showCombinationFor
+    // path in a DIFFERENT color than the instance's own standing basis arrows
+    // (e.g. Prime's basis stays black throughout, but a celebration combination
+    // path drawn "as if using Warp's borrowed orange vectors" needs its own
+    // color without recoloring Prime's real basis arrows). Defaults to
+    // basisColors so every existing use of showCombinationFor is unaffected.
+    this.combinationColors = opts.combinationColors || this.basisColors;
+
+    // which world point sits at the canvas's visual center — default (0,0), same as
+    // always. Activities whose numbers are all positive (e.g. Activity 8's word
+    // problems) can shift this so the origin sits toward a corner instead of
+    // wasting half the canvas on a quadrant nothing ever visits.
+    this.center = opts.center || { x: 0, y: 0 };
+    this.axisLabels = opts.axisLabels || null; // {x: "label for the x axis", y: "label for the y axis"}
+    this.guideLines = opts.guideLines || []; // [{axis:"x"|"y", value, color, label}] — dashed full-width/height reference lines
+    this.systemLines = opts.systemLines || []; // [{a,b,c,color,label}] — the solution set of ax+by=c, drawn as a full (possibly slanted) line clipped to the visible window. Unlike guideLines (always axis-aligned), this handles any coefficients — used for "one equation in two unknowns is a whole line" and "two equations intersect at one point".
+    this.parallelograms = opts.parallelograms || []; // [{v1:{x,y}, v2:{x,y}, color, label, alpha}] — filled parallelogram spanned by two vectors from the origin (v1, v2, v1+v2), with its area shown as a live label. Generic (not tied to the instance's own matrix) — used for teaching Cramer's Rule as a ratio of areas: unlike the det/area readout above (always the current matrix's own two columns), any two arbitrary vectors can be passed here, e.g. (target, col2) instead of (col1, col2).
+    this.vectorArrows = opts.vectorArrows || []; // [{v:{x,y}, color, label}] — a labeled arrow drawn raw from the origin to `v`, NOT run through applyM (unlike showBasisVectors' î/ĵ, which are always this instance's own matrix columns). Use this to draw an arbitrary vector — e.g. a target vector, or another activity's column — on a canvas where it isn't literally "this matrix's column."
+
+    this.shape = opts.shape || null;
+    this.drawable = !!opts.drawable;
+    this.drawModeOn = false;
+
+    this.points = opts.points || []; // [{x,y,color,label,ghost}]
+    this.showCombinationFor = opts.showCombinationFor || null; // {x,y,color}
+
+    this.freePoint = opts.freePoint || null; // {x,y,color,label}
+    this.targetPoint = opts.targetPoint || null; // {x,y,color,label} — drawn raw, not transformed
+    this.targetPoints = opts.targetPoints || []; // array of {x,y,color,label} — same as targetPoint, but plural (one crosshair per point)
+    this.targetShape = opts.targetShape || null; // array of {x,y} — drawn raw (dashed outline), a "match this" reference
+
+    this.draggablePoints = opts.draggablePoints || null; // [{x,y,color,label}] — each independently grabbable and draggable, unlike the single freePoint
+    this.dragAxisLock = opts.dragAxisLock || null; // "x" | "y" | null — while dragging any draggablePoint, restrict movement to just that axis (the other stays put)
+
+    this.onMatrixChange = opts.onMatrixChange || function () {};
+    this.onFreePointChange = opts.onFreePointChange || function () {};
+    this.onDraggablePointsChange = opts.onDraggablePointsChange || function () {};
+
+    this._dragging = null; // "i" | "j" | "free" | null
+    this._draggingPointIndex = null; // index into draggablePoints currently being dragged, or null
+    this._penDown = false;
+    this._animT = null; // 0..1 progress of the "count the combination" pulse animation, or null when idle
+
+    this._bindEvents();
+    this.draw();
+  }
+
+  // ---- coordinate helpers ----
+  // both formulas fold in `center` — the world point drawn at the canvas's visual
+  // middle. center defaults to (0,0), which makes these reduce to the original
+  // "origin is always dead-center" formulas exactly — every activity that doesn't
+  // pass `center` is completely unaffected.
+  toScreen(x, y) { return { x: this.size / 2 + (x - this.center.x) * this.scale, y: this.size / 2 - (y - this.center.y) * this.scale }; }
+  toWorld(px, py) { return { x: (px - this.size / 2) / this.scale + this.center.x, y: (this.size / 2 - py) / this.scale + this.center.y }; }
+  applyM(x, y) { const m = this.matrix; return { x: m.a * x + m.b * y, y: m.c * x + m.d * y }; }
+  _applyMatrix(m, x, y) { return { x: m.a * x + m.b * y, y: m.c * x + m.d * y }; }
+  canvasPointFromEvent(evt) {
+    const rect = this.canvas.getBoundingClientRect();
+    const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+    const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+    const scaleX = this.canvas.width / rect.width;
+    const scaleY = this.canvas.height / rect.height;
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+  }
+
+  // ---- public controls ----
+  setMatrix(m) { this.matrix = m; this.draw(); this.onMatrixChange(this.matrix); }
+  resetMatrix() { this.setMatrix({ a: 1, b: 0, c: 0, d: 1 }); }
+  setDrawMode(on) { this.drawModeOn = on; if (on) this.resetMatrix(); }
+  clearShape() { this.shape = []; this.draw(); }
+  setShape(points) { this.shape = points; this.draw(); }
+  setPoints(points) { this.points = points; this.draw(); }
+  setFreePoint(p) { this.freePoint = p; this.draw(); }
+  setTargetPoint(p) { this.targetPoint = p; this.draw(); }
+  setTargetShape(points) { this.targetShape = points; this.draw(); }
+  setCombinationFor(p) { this.showCombinationFor = p; this.draw(); }
+  setShowGhostIdentity(on) { this.showGhostIdentity = on; this.draw(); }
+  setLockedBasis(which) { this.lockedBasis = which; this.draw(); }
+  setShowBasisVectors(on) { this.showBasisVectors = on; this.draw(); }
+  setGuideLines(lines) { this.guideLines = lines || []; this.draw(); }
+  setSystemLines(lines) { this.systemLines = lines || []; this.draw(); }
+  setParallelograms(list) { this.parallelograms = list || []; this.draw(); }
+  setVectorArrows(list) { this.vectorArrows = list || []; this.draw(); }
+  setAxisLabels(labels) { this.axisLabels = labels || null; this.draw(); }
+  setDraggablePoints(points) { this.draggablePoints = points; this.draw(); }
+  setTargetPoints(points) { this.targetPoints = points; this.draw(); }
+  setBasisColors(colors) { this.basisColors = colors || { i: "#c23b3b", j: "#7a3fd1" }; this.draw(); }
+  setCombinationColors(colors) { this.combinationColors = colors || this.basisColors; this.draw(); }
+  setShowLiveAxis(on) { this.showLiveAxis = on; this.draw(); }
+  setStandardAxisColor(color) { this.standardAxisColor = color || null; this.draw(); }
+  /* ---- change the visible window (range + optionally center) after the fact
+     and redraw — added for Wormhole Transverse's Trial I-A/I-B, where the
+     round generator picks the zoom level per round/Architecture so a target
+     is never cropped, rather than keeping one fixed range and only narrowing
+     the numbers the generator is allowed to pick (see genForwardRoundView /
+     computeDynamicView below). Reduces to a no-op re-draw if neither changes. ---- */
+  setRange(range, center) {
+    this.range = range || this.range;
+    if (center) this.center = center;
+    this.scale = this.size / (2 * this.range);
+    this.draw();
+  }
+  /* Animate a small pulsing marker walking the "a copies of î, then b copies of ĵ"
+     path — a copies of î. Used as an answer-key style animation showing exactly how
+     to count the standard-basis coordinate by hand. Safe no-op if nothing to count. */
+  pulseCombinationPath(durationMs) {
+    if (!this.showCombinationFor) return;
+    durationMs = durationMs || 1600;
+    const startTime = performance.now();
+    const self = this;
+    function step(now) {
+      const t = Math.min((now - startTime) / durationMs, 1);
+      self._animT = t;
+      self.draw();
+      if (t < 1) requestAnimationFrame(step);
+      else { self._animT = null; self.draw(); }
+    }
+    requestAnimationFrame(step);
+  }
+
+  // ---- drawing ----
+  draw() {
+    const ctx = this.ctx, size = this.size, range = this.range;
+    ctx.clearRect(0, 0, size, size);
+
+    // grid/axis extent — normally just [-range, range], but when `center` shifts
+    // the visual middle away from (0,0) the visible window shifts with it, so the
+    // grid must span [center ± range] to still cover the whole canvas. With the
+    // default center (0,0) this reduces to exactly [-range, range] as before.
+    const gx0 = Math.floor(this.center.x - range), gx1 = Math.ceil(this.center.x + range);
+    const gy0 = Math.floor(this.center.y - range), gy1 = Math.ceil(this.center.y + range);
+
+    if (this.showGhostIdentity) {
+      // dashed + gray = the FIXED standard grid, never moves. Solid + blue (below) = the
+      // LIVE grid, moves with i/j. Two overlaid solid grids at low opacity turned out to
+      // be genuinely hard to tell apart (color alone wasn't enough contrast) — dashing
+      // one of them makes the two unmistakable regardless of color perception or a
+      // washed-out projector.
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(28,39,51,0.3)";
+      ctx.setLineDash([4, 4]);
+      for (let i = gx0; i <= gx1; i++) {
+        this._strokeRawLine({ x: i, y: gy0 }, { x: i, y: gy1 });
+      }
+      for (let j = gy0; j <= gy1; j++) {
+        this._strokeRawLine({ x: gx0, y: j }, { x: gx1, y: j });
+      }
+      ctx.setLineDash([]);
+    }
+
+    if (this.showLiveGrid) {
+      // NOTE: this whole block (including the "axis" lines just below) runs
+      // through _strokeLine, i.e. through applyM — so on a canvas where M is
+      // being reused purely as a computation (not an actual shape being
+      // transformed), even the main x/y axis lines end up visibly skewed,
+      // not just the grid cells. showLiveGrid:false skips all of this,
+      // leaving only showGhostIdentity's true orthogonal dashed grid (if on).
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(29,95,184,0.4)";
+      for (let i = gx0; i <= gx1; i++) {
+        this._strokeLine({ x: i, y: gy0 }, { x: i, y: gy1 });
+      }
+      for (let j = gy0; j <= gy1; j++) {
+        this._strokeLine({ x: gx0, y: j }, { x: gx1, y: j });
+      }
+      if (this.showLiveAxis) {
+        ctx.strokeStyle = "rgba(28,39,51,0.4)";
+        ctx.lineWidth = 1.6;
+        this._strokeLine({ x: gx0, y: 0 }, { x: gx1, y: 0 });
+        this._strokeLine({ x: 0, y: gy0 }, { x: 0, y: gy1 });
+      }
+    }
+
+    if (this.standardAxisColor) {
+      // a fixed, un-skewed perpendicular axis through the origin — drawn RAW
+      // (not through applyM), unlike showLiveGrid's axis lines above, which
+      // tilt along the current i/j directions. Solid, not dashed, so it reads
+      // as a real reference axis rather than a hint that fades in later.
+      ctx.setLineDash([]);
+      ctx.strokeStyle = this.standardAxisColor;
+      ctx.lineWidth = 1.8;
+      this._strokeRawLine({ x: gx0, y: 0 }, { x: gx1, y: 0 });
+      this._strokeRawLine({ x: 0, y: gy0 }, { x: 0, y: gy1 });
+    }
+
+    if (this.showOriginLabel) {
+      const o = this.toScreen(0, 0);
+      ctx.font = "11px sans-serif";
+      ctx.fillStyle = "rgba(28,39,51,0.6)";
+      ctx.fillText("(0, 0)", o.x + 6, o.y + 15);
+    }
+
+    if (this.axisLabels) {
+      // parked on the SIDE of each axis that positive-quadrant-only content
+      // (like Activity 8's word problems) never touches — below the x-axis,
+      // left of the y-axis — so labels never fight with points, arrows, or a
+      // target that happens to sit near the range's far edge.
+      ctx.font = "bold 12px sans-serif";
+      ctx.fillStyle = "rgba(28,39,51,0.7)";
+      if (this.axisLabels.x) {
+        const p = this.toScreen(this.center.x + range * 0.94, this.center.y);
+        ctx.textAlign = "right";
+        ctx.fillText(this.axisLabels.x, p.x, p.y + 16);
+        ctx.textAlign = "left";
+      }
+      if (this.axisLabels.y) {
+        const p = this.toScreen(this.center.x, this.center.y + range * 0.94);
+        ctx.textAlign = "right";
+        ctx.fillText(this.axisLabels.y, p.x - 8, p.y + 4);
+        ctx.textAlign = "left";
+      }
+    }
+
+    if (this.parallelograms && this.parallelograms.length) {
+      // drawn before lines/points so the shaded fills sit underneath everything
+      // that's actually being read as a specific value (points, arrows, lines)
+      this.parallelograms.forEach((p) => this._fillParallelogram(p));
+    }
+
+    if (this.vectorArrows && this.vectorArrows.length) {
+      this.vectorArrows.forEach((v) => this._strokeRawVector(v));
+    }
+
+    if (this.guideLines && this.guideLines.length) {
+      this.guideLines.forEach((g) => this._strokeGuideLine(g));
+    }
+
+    if (this.systemLines && this.systemLines.length) {
+      this.systemLines.forEach((l) => this._strokeSystemLine(l));
+    }
+
+    if (this.showUnitSquare) {
+      this._strokePolygon(
+        [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 1 }],
+        "#1d5fb8", "rgba(29,95,184,0.16)", true
+      );
+    }
+    if (this.targetShape && this.targetShape.length > 1) {
+      this._strokeRawPolygon(this.targetShape, "#d97a1f");
+    }
+    if (this.shape && this.shape.length > 1) {
+      this._strokePolygon(this.shape, "#178a4c", "rgba(23,138,76,0.14)", false);
+    }
+
+    if (this.showCombinationFor) {
+      this._strokeCombination(this.showCombinationFor);
+      if (this._animT !== null) this._drawAnimPulse();
+    }
+
+    this.points.forEach((p) => this._strokePointWithGhost(p));
+
+    if (this.showBasisVectors) {
+      this._strokeVector({ x: 1, y: 0 }, this.basisColors.i, "î", "i");
+      this._strokeVector({ x: 0, y: 1 }, this.basisColors.j, "ĵ", "j");
+    }
+
+    if (this.targetPoint) this._strokeRawDot(this.targetPoint, true);
+    if (this.targetPoints && this.targetPoints.length) {
+      this.targetPoints.forEach((p) => this._strokeRawDot(p, true));
+    }
+    if (this.freePoint) this._strokeRawDot(this.freePoint, false);
+    if (this.draggablePoints && this.draggablePoints.length) {
+      this.draggablePoints.forEach((p) => this._strokeRawDot(p, false));
+    }
+
+    if (this.showDeterminant && this.detOutputId) {
+      const el = document.getElementById(this.detOutputId);
+      if (el) el.innerHTML = this._detReadoutHTML();
+    }
+  }
+
+  _strokeRawLine(p1, p2) {
+    const a = this.toScreen(p1.x, p1.y), b = this.toScreen(p2.x, p2.y);
+    const ctx = this.ctx;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  }
+  _strokeLine(p1, p2) {
+    const w1 = this.applyM(p1.x, p1.y), w2 = this.applyM(p2.x, p2.y);
+    const a = this.toScreen(w1.x, w1.y), b = this.toScreen(w2.x, w2.y);
+    const ctx = this.ctx;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  }
+  _strokePolygon(points, stroke, fill, closed) {
+    const ctx = this.ctx;
+    const screenPts = points.map((p) => { const w = this.applyM(p.x, p.y); return this.toScreen(w.x, w.y); });
+    ctx.beginPath();
+    screenPts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+    if (closed) ctx.closePath();
+    ctx.fillStyle = fill; ctx.fill();
+    ctx.strokeStyle = stroke; ctx.lineWidth = 2.5; ctx.stroke();
+  }
+  _strokeRawPolygon(points, stroke) {
+    const ctx = this.ctx;
+    const screenPts = points.map((p) => this.toScreen(p.x, p.y));
+    ctx.setLineDash([7, 6]); ctx.lineWidth = 2.5; ctx.strokeStyle = stroke;
+    ctx.beginPath();
+    screenPts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+    ctx.closePath(); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  _strokeVector(base, color, label, key) {
+    const locked = key && this.lockedBasis === key;
+    const w = this.applyM(base.x, base.y);
+    const tip = this.toScreen(w.x, w.y);
+    const origin = this.toScreen(0, 0);
+    const ctx = this.ctx;
+    const drawColor = locked ? this._fadeColor(color) : color;
+    ctx.strokeStyle = drawColor; ctx.fillStyle = drawColor; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(origin.x, origin.y); ctx.lineTo(tip.x, tip.y); ctx.stroke();
+    const ang = Math.atan2(tip.y - origin.y, tip.x - origin.x);
+    ctx.beginPath();
+    ctx.moveTo(tip.x, tip.y);
+    ctx.lineTo(tip.x - 10 * Math.cos(ang - 0.3), tip.y - 10 * Math.sin(ang - 0.3));
+    ctx.lineTo(tip.x - 10 * Math.cos(ang + 0.3), tip.y - 10 * Math.sin(ang + 0.3));
+    ctx.closePath(); ctx.fill();
+    ctx.font = "bold 15px sans-serif";
+    ctx.fillStyle = drawColor;
+    ctx.fillText(label, tip.x + 8, tip.y - 8);
+    if (this.draggableBasis && !locked) {
+      ctx.beginPath(); ctx.arc(tip.x, tip.y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = color; ctx.fill();
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+  }
+  _fadeColor(hex) {
+    // quick hex->rgba fade, used to show a locked (currently non-draggable) arrow as dimmed
+    const n = parseInt(hex.replace("#", ""), 16);
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return `rgba(${r},${g},${b},0.35)`;
+  }
+  _strokePointWithGhost(p) {
+    const ctx = this.ctx;
+    const live = this.toScreen(this.applyM(p.x, p.y).x, this.applyM(p.x, p.y).y);
+    if (p.ghost) {
+      const ghost = this.toScreen(p.x, p.y);
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = "rgba(28,39,51,0.35)"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(ghost.x, ghost.y); ctx.lineTo(live.x, live.y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(ghost.x, ghost.y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(28,39,51,0.35)"; ctx.fill();
+      ctx.font = "12px sans-serif"; ctx.fillStyle = "rgba(28,39,51,0.55)";
+      ctx.fillText(`(${p.x}, ${p.y}) in standard`, ghost.x + 8, ghost.y + 14);
+    }
+    ctx.beginPath(); ctx.arc(live.x, live.y, 7, 0, Math.PI * 2);
+    ctx.fillStyle = p.color || "#c23b3b"; ctx.fill();
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.stroke();
+    if (p.label) {
+      ctx.font = "bold 13px sans-serif"; ctx.fillStyle = p.color || "#c23b3b";
+      ctx.fillText(p.label, live.x + 9, live.y - 9);
+    }
+  }
+  _strokeCombination(p) {
+    const ctx = this.ctx;
+    // matrixOverride: draw the combination as if it used a DIFFERENT matrix's
+    // columns than this instance's own `this.matrix` — used by Wormhole
+    // Transverse's win-celebration to show "m copies of the Warp's own î plus
+    // n copies of its ĵ" on the Prime canvas, whose own matrix is always the
+    // identity and would otherwise draw an axis-aligned (untilted) path.
+    const M = p.matrixOverride || this.matrix;
+    const iTip = this._applyMatrix(M, 1, 0), jTip = this._applyMatrix(M, 0, 1);
+    const aTimesI = { x: p.x * iTip.x, y: p.x * iTip.y };
+    const full = { x: aTimesI.x + p.y * jTip.x, y: aTimesI.y + p.y * jTip.y };
+    const o = this.toScreen(0, 0), mid = this.toScreen(aTimesI.x, aTimesI.y), end = this.toScreen(full.x, full.y);
+    const colI = this.combinationColors.i, colJ = this.combinationColors.j;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 5]);
+    ctx.strokeStyle = colI;
+    ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(mid.x, mid.y); ctx.stroke();
+    ctx.strokeStyle = colJ;
+    ctx.beginPath(); ctx.moveTo(mid.x, mid.y); ctx.lineTo(end.x, end.y); ctx.stroke();
+    ctx.setLineDash([]);
+    this._drawArrowhead(o, mid, colI);
+    this._drawArrowhead(mid, end, colJ);
+  }
+  _drawAnimPulse() {
+    const p = this.showCombinationFor;
+    if (!p) return;
+    const M = p.matrixOverride || this.matrix;
+    const iTip = this._applyMatrix(M, 1, 0), jTip = this._applyMatrix(M, 0, 1);
+    const aTimesI = { x: p.x * iTip.x, y: p.x * iTip.y };
+    const full = { x: aTimesI.x + p.y * jTip.x, y: aTimesI.y + p.y * jTip.y };
+    const o = this.toScreen(0, 0), mid = this.toScreen(aTimesI.x, aTimesI.y), end = this.toScreen(full.x, full.y);
+    const t = this._animT;
+    let pos, color;
+    if (t < 0.5) {
+      const tt = t / 0.5;
+      pos = { x: o.x + (mid.x - o.x) * tt, y: o.y + (mid.y - o.y) * tt };
+      color = this.combinationColors.i;
+    } else {
+      const tt = (t - 0.5) / 0.5;
+      pos = { x: mid.x + (end.x - mid.x) * tt, y: mid.y + (end.y - mid.y) * tt };
+      color = this.combinationColors.j;
+    }
+    const ctx = this.ctx;
+    ctx.beginPath(); ctx.arc(pos.x, pos.y, 9, 0, Math.PI * 2);
+    ctx.globalAlpha = 0.85; ctx.fillStyle = color; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.arc(pos.x, pos.y, 13, 0, Math.PI * 2);
+    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+  }
+  _drawArrowhead(from, to, color) {
+    if (Math.hypot(to.x - from.x, to.y - from.y) < 1) return; // zero-length segment, nothing to point
+    const ctx = this.ctx;
+    const ang = Math.atan2(to.y - from.y, to.x - from.x);
+    const size = 8;
+    ctx.beginPath();
+    ctx.moveTo(to.x, to.y);
+    ctx.lineTo(to.x - size * Math.cos(ang - 0.3), to.y - size * Math.sin(ang - 0.3));
+    ctx.lineTo(to.x - size * Math.cos(ang + 0.3), to.y - size * Math.sin(ang + 0.3));
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+  _strokeRawDot(p, isTarget) {
+    const ctx = this.ctx;
+    const s = this.toScreen(p.x, p.y);
+    ctx.beginPath();
+    if (isTarget) {
+      // crosshair style for targets
+      ctx.strokeStyle = p.color || "#d97a1f"; ctx.lineWidth = 2.5;
+      ctx.moveTo(s.x - 10, s.y); ctx.lineTo(s.x + 10, s.y);
+      ctx.moveTo(s.x, s.y - 10); ctx.lineTo(s.x, s.y + 10); ctx.stroke();
+      ctx.beginPath(); ctx.arc(s.x, s.y, 11, 0, Math.PI * 2);
+      ctx.strokeStyle = p.color || "#d97a1f"; ctx.stroke();
+    } else {
+      ctx.arc(s.x, s.y, 8, 0, Math.PI * 2);
+      ctx.fillStyle = p.color || "#178a4c"; ctx.fill();
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+    }
+    if (p.label) {
+      ctx.font = "bold 13px sans-serif"; ctx.fillStyle = p.color || "#178a4c";
+      if (isTarget) {
+        // targets label to the LOWER-LEFT, points label to the upper-right (see
+        // _strokePointWithGhost) — deliberately opposite corners, so when a
+        // dragged point lands exactly on its target (the whole point of these
+        // activities!) the two labels don't stack into unreadable overlapping
+        // text right at the moment a student gets the answer right.
+        ctx.textAlign = "right";
+        ctx.fillText(p.label, s.x - 14, s.y + 24);
+        ctx.textAlign = "left";
+      } else {
+        ctx.fillText(p.label, s.x + 12, s.y - 10);
+      }
+    }
+  }
+  _strokeGuideLine(g) {
+    // a dashed line spanning the whole canvas at one fixed x or y — used to build
+    // a target point up one coordinate at a time (e.g. "sentence 1's total = 8"
+    // appears as a vertical guide before the full (8, 5) target point exists).
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.setLineDash([5, 5]);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = g.color || "#d97a1f";
+    ctx.beginPath();
+    if (g.axis === "x") {
+      const sx = this.toScreen(g.value, 0).x;
+      ctx.moveTo(sx, 0); ctx.lineTo(sx, this.size);
+    } else {
+      const sy = this.toScreen(0, g.value).y;
+      ctx.moveTo(0, sy); ctx.lineTo(this.size, sy);
+    }
+    ctx.stroke();
+    ctx.restore();
+    if (g.label) {
+      // flip the label to the other side of its line whenever the default side
+      // would run the text off the canvas — happens often here since a guide
+      // line's whole point is to sit near the target, and the target is often
+      // deliberately placed close to the range's edge for a snug, big-cell fit.
+      ctx.font = "bold 12px sans-serif";
+      ctx.fillStyle = g.color || "#d97a1f";
+      if (g.axis === "x") {
+        const sx = this.toScreen(g.value, 0).x;
+        if (sx > this.size - 90) {
+          ctx.textAlign = "right";
+          ctx.fillText(g.label, sx - 5, 14);
+          ctx.textAlign = "left";
+        } else {
+          ctx.fillText(g.label, sx + 5, 14);
+        }
+      } else {
+        const sy = this.toScreen(0, g.value).y;
+        if (sy < 20) {
+          ctx.fillText(g.label, 5, sy + 16);
+        } else {
+          ctx.fillText(g.label, 5, sy - 6);
+        }
+      }
+    }
+  }
+
+  /* ---- clip the infinite line ax+by=c to an axis-aligned box [x0,x1]x[y0,y1].
+     Tests all 4 box edges, keeps the intersections that actually land inside the
+     box, and returns the two farthest apart (handles the box-corner edge case
+     where a line grazes exactly through a corner and math produces 3+ "hits"). ---- */
+  _clipLineToBox(a, b, c, x0, x1, y0, y1) {
+    const eps = 1e-9, tol = 1e-6;
+    const within = (v, lo, hi) => v >= lo - tol && v <= hi + tol;
+    const pts = [];
+    if (Math.abs(b) > eps) {
+      let y = (c - a * x0) / b;
+      if (within(y, y0, y1)) pts.push({ x: x0, y });
+      y = (c - a * x1) / b;
+      if (within(y, y0, y1)) pts.push({ x: x1, y });
+    }
+    if (Math.abs(a) > eps) {
+      let x = (c - b * y0) / a;
+      if (within(x, x0, x1)) pts.push({ x, y: y0 });
+      x = (c - b * y1) / a;
+      if (within(x, x0, x1)) pts.push({ x, y: y1 });
+    }
+    const uniq = [];
+    pts.forEach((p) => {
+      if (!uniq.some((q) => Math.hypot(q.x - p.x, q.y - p.y) < 1e-6)) uniq.push(p);
+    });
+    if (uniq.length < 2) return null; // line doesn't cross the visible window at all
+    let best = [uniq[0], uniq[1]], bestD = -1;
+    for (let i = 0; i < uniq.length; i++) {
+      for (let j = i + 1; j < uniq.length; j++) {
+        const d = Math.hypot(uniq[i].x - uniq[j].x, uniq[i].y - uniq[j].y);
+        if (d > bestD) { bestD = d; best = [uniq[i], uniq[j]]; }
+      }
+    }
+    return best;
+  }
+  /* ---- draw one line "ax + by = c" — the whole solution set of a single linear
+     equation in two unknowns. Solid (not dashed) since, unlike a guideLine, this
+     IS the mathematical object being taught here, not just a reference mark. ---- */
+  _strokeSystemLine(line) {
+    const range = this.range;
+    const x0 = this.center.x - range, x1 = this.center.x + range;
+    const y0 = this.center.y - range, y1 = this.center.y + range;
+    const seg = this._clipLineToBox(line.a, line.b, line.c, x0, x1, y0, y1);
+    if (!seg) return;
+    const p1 = this.toScreen(seg[0].x, seg[0].y), p2 = this.toScreen(seg[1].x, seg[1].y);
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = line.color || "#1d5fb8";
+    ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+    ctx.restore();
+    if (line.label) {
+      // nudged in from one clipped endpoint (not the exact edge) so the text
+      // never gets cut off by the canvas boundary
+      const t = 0.14;
+      const lx = p1.x + (p2.x - p1.x) * t, ly = p1.y + (p2.y - p1.y) * t;
+      ctx.font = "bold 12px sans-serif";
+      ctx.fillStyle = line.color || "#1d5fb8";
+      ctx.fillText(line.label, lx + 6, ly - 6);
+    }
+  }
+
+  /* ---- a raw (non-transformed) labeled arrow from the origin to an arbitrary
+     vector — the "any vector, not just this matrix's own columns" counterpart
+     to showBasisVectors/_strokeVector (which always runs through applyM). ---- */
+  _strokeRawVector(v) {
+    const origin = this.toScreen(0, 0);
+    const tip = this.toScreen(v.v.x, v.v.y);
+    const ctx = this.ctx;
+    const color = v.color || "#1d5fb8";
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(origin.x, origin.y); ctx.lineTo(tip.x, tip.y); ctx.stroke();
+    const ang = Math.atan2(tip.y - origin.y, tip.x - origin.x);
+    ctx.beginPath();
+    ctx.moveTo(tip.x, tip.y);
+    ctx.lineTo(tip.x - 10 * Math.cos(ang - 0.3), tip.y - 10 * Math.sin(ang - 0.3));
+    ctx.lineTo(tip.x - 10 * Math.cos(ang + 0.3), tip.y - 10 * Math.sin(ang + 0.3));
+    ctx.closePath(); ctx.fill();
+    if (v.label) {
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillStyle = color;
+      ctx.fillText(v.label, tip.x + 8, tip.y - 8);
+    }
+  }
+
+  /* ---- filled parallelogram spanned by two arbitrary vectors from the origin,
+     with its area shown as a live label — the visual half of "Cramer's Rule as
+     a ratio of areas" (see the `parallelograms` constructor option above). ---- */
+  _fillParallelogram(p) {
+    const o = this.toScreen(0, 0);
+    const a = this.toScreen(p.v1.x, p.v1.y);
+    const b = this.toScreen(p.v1.x + p.v2.x, p.v1.y + p.v2.y);
+    const c = this.toScreen(p.v2.x, p.v2.y);
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(o.x, o.y); ctx.lineTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c.x, c.y);
+    ctx.closePath();
+    ctx.fillStyle = p.color || "#1d5fb8";
+    ctx.globalAlpha = p.alpha != null ? p.alpha : 0.2;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = p.color || "#1d5fb8";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
+    if (p.label) {
+      const area = Math.abs(p.v1.x * p.v2.y - p.v1.y * p.v2.x);
+      const midX = (o.x + a.x + b.x + c.x) / 4, midY = (o.y + a.y + b.y + c.y) / 4;
+      ctx.font = "bold 12px sans-serif";
+      ctx.fillStyle = p.color || "#1d5fb8";
+      ctx.textAlign = "center";
+      ctx.fillText(`${p.label} = ${area.toFixed(2)}`, midX, midY);
+      ctx.textAlign = "left";
+    }
+  }
+
+  _detReadoutHTML() {
+    const m = this.matrix;
+    const det = m.a * m.d - m.b * m.c;
+    const area = Math.abs(det).toFixed(2);
+    let note;
+    if (Math.abs(det) < 0.05) {
+      note = `<span style="color:#c23b3b;font-weight:800">🫓 Flattened to a line! det ≈ 0 — every point on the square just collapsed onto that line.</span>`;
+    } else if (det < 0) {
+      note = `<span style="color:#7a3fd1;font-weight:800">🔄 Orientation flipped — det is negative.</span>`;
+    } else {
+      note = `<span style="color:#178a4c;font-weight:800">✅ Still a normal parallelogram (det &gt; 0).</span>`;
+    }
+    return `det = <b>${det.toFixed(2)}</b> &nbsp;·&nbsp; area scale factor = <b>${area}</b><br>${note}`;
+  }
+
+  // ---- interaction ----
+  _bindEvents() {
+    const start = (evt) => this._onDown(evt);
+    const move = (evt) => this._onMove(evt);
+    const end = () => this._onUp();
+    this.canvas.addEventListener("mousedown", start);
+    this.canvas.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", end);
+    this.canvas.addEventListener("touchstart", (e) => { start(e); }, { passive: true });
+    this.canvas.addEventListener("touchmove", (e) => { e.preventDefault(); move(e); }, { passive: false });
+    window.addEventListener("touchend", end);
+  }
+  _hitBasis(pt) {
+    // lockedBasis: "i" | "j" locks just that one arrow; "both" locks red and purple
+    // together (used when a stage needs a completely fixed matrix to read, not drag).
+    if (!this.draggableBasis || this.lockedBasis === "both") return null;
+    const iTip = this.toScreen(this.matrix.a, this.matrix.c);
+    const jTip = this.toScreen(this.matrix.b, this.matrix.d);
+    const dI = Math.hypot(pt.x - iTip.x, pt.y - iTip.y);
+    const dJ = Math.hypot(pt.x - jTip.x, pt.y - jTip.y);
+    const HIT = 22;
+    if (this.lockedBasis !== "i" && dI < HIT && dI <= dJ) return "i";
+    if (this.lockedBasis !== "j" && dJ < HIT) return "j";
+    return null;
+  }
+  _hitFreePoint(pt) {
+    if (!this.freePoint) return false;
+    const s = this.toScreen(this.freePoint.x, this.freePoint.y);
+    return Math.hypot(pt.x - s.x, pt.y - s.y) < 22;
+  }
+  _hitDraggablePoint(pt) {
+    if (!this.draggablePoints) return -1;
+    for (let i = 0; i < this.draggablePoints.length; i++) {
+      const s = this.toScreen(this.draggablePoints[i].x, this.draggablePoints[i].y);
+      if (Math.hypot(pt.x - s.x, pt.y - s.y) < 22) return i;
+    }
+    return -1;
+  }
+  _onDown(evt) {
+    const pt = this.canvasPointFromEvent(evt);
+    const hitBasis = this._hitBasis(pt);
+    if (hitBasis) { this._dragging = hitBasis; return; }
+    if (this._hitFreePoint(pt)) { this._dragging = "free"; return; }
+    const hitPointIdx = this._hitDraggablePoint(pt);
+    if (hitPointIdx !== -1) { this._draggingPointIndex = hitPointIdx; return; }
+    if (this.drawable && this.drawModeOn) {
+      this._penDown = true;
+      this.shape = [this.toWorld(pt.x, pt.y)];
+      this.draw();
+    }
+  }
+  _onMove(evt) {
+    if (this._dragging === "i" || this._dragging === "j") {
+      const pt = this.canvasPointFromEvent(evt);
+      const w = this.toWorld(pt.x, pt.y);
+      if (this._dragging === "i") { this.matrix.a = round2(w.x); this.matrix.c = round2(w.y); }
+      else { this.matrix.b = round2(w.x); this.matrix.d = round2(w.y); }
+      this.draw(); this.onMatrixChange(this.matrix);
+      return;
+    }
+    if (this._dragging === "free") {
+      const pt = this.canvasPointFromEvent(evt);
+      const w = this.toWorld(pt.x, pt.y);
+      this.freePoint.x = round2(w.x); this.freePoint.y = round2(w.y);
+      this.draw(); this.onFreePointChange(this.freePoint);
+      return;
+    }
+    if (this._draggingPointIndex !== null) {
+      const pt = this.canvasPointFromEvent(evt);
+      const w = this.toWorld(pt.x, pt.y);
+      const p = this.draggablePoints[this._draggingPointIndex];
+      if (this.dragAxisLock === "x" || this.dragAxisLock == null) p.x = round2(w.x);
+      if (this.dragAxisLock === "y" || this.dragAxisLock == null) p.y = round2(w.y);
+      this.draw();
+      this.onDraggablePointsChange(this.draggablePoints);
+      return;
+    }
+    if (this.drawable && this.drawModeOn && this._penDown) {
+      const pt = this.canvasPointFromEvent(evt);
+      this.shape.push(this.toWorld(pt.x, pt.y));
+      this.draw();
+    }
+  }
+  _onUp() { this._dragging = null; this._draggingPointIndex = null; this._penDown = false; }
+}
+
+function round2(n) {
+  // "magnet" — only snap when close to a whole number (within MAGNET_RANGE); otherwise move freely.
+  // Whole numbers are easy to count and pattern-find, but forcing every position to one feels sticky/jumpy.
+  const MAGNET_RANGE = 0.15;
+  const nearest = Math.round(n);
+  return Math.abs(n - nearest) < MAGNET_RANGE ? nearest : n;
+}
+
+const MATRIX_LAB_PRESETS = {
+  house: [
+    { x: -2, y: -2 }, { x: 2, y: -2 }, { x: 2, y: 1 }, { x: 0, y: 3 },
+    { x: -2, y: 1 }, { x: -2, y: -2 }, { x: -1, y: -2 }, { x: -1, y: -0.5 },
+    { x: 0, y: -0.5 }, { x: 0, y: -2 },
+  ],
+  star: (() => {
+    const pts = [];
+    for (let i = 0; i < 11; i++) {
+      const r = i % 2 === 0 ? 2.4 : 1.0;
+      const ang = (Math.PI / 5) * i - Math.PI / 2;
+      pts.push({ x: r * Math.cos(ang), y: r * Math.sin(ang) });
+    }
+    pts.push(pts[0]);
+    return pts;
+  })(),
+  arrow: [
+    { x: -2.5, y: -0.6 }, { x: 0.5, y: -0.6 }, { x: 0.5, y: -1.4 },
+    { x: 2.5, y: 0 }, { x: 0.5, y: 1.4 }, { x: 0.5, y: 0.6 },
+    { x: -2.5, y: 0.6 }, { x: -2.5, y: -0.6 },
+  ],
+  boat: [
+    { x: -2.5, y: -1 }, { x: 2.5, y: -1 }, { x: 1.6, y: -2.2 }, { x: -1.6, y: -2.2 }, { x: -2.5, y: -1 },
+    { x: 0, y: -1 }, { x: 0, y: 2.5 }, { x: 2, y: 0.5 }, { x: 0, y: -1 },
+  ],
+};
+
+  const COLORS = {
+    green: "#178a4c", red: "#c23b3b", purple: "#7a3fd1", orange: "#d97a1f", blue: "#1d5fb8",
+    // Trial I-A/I-B/III redesign convention: black = standard basis (the fixed,
+    // never-changing (1,0)/(0,1) reference), faded orange = transformed basis
+    // (whatever the current Architecture's own columns are). Kept as separate
+    // named colors rather than reusing `orange` above so the site-wide
+    // orange=target/reference convention and this basis convention can't be
+    // confused for each other even though they're visually close.
+    black: "#1c2733", orangeFade: "#e0954a",
+    // neutral reference tone for Trial II-B's area comparison — the ONE
+    // fixed shape (spanned by i, j themselves) that every round's swapped
+    // area gets measured against, so it needs its own color, distinct from
+    // every other meaning already in use.
+    gray: "#8a97a8",
+  };
+  const RANGE = 6, CENTER = { x: 3, y: 2 };
+  window.__wtTest = {}; // lightweight hooks used only by automated regression tests
+
+  function roundTo2dp(n) { return Math.round(n * 100) / 100; }
+  function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+  function applyM(M, x, y) { return { x: M.a * x + M.b * y, y: M.c * x + M.d * y }; }
+  function detM(M) { return M.a * M.d - M.b * M.c; }
+
+  /* ---- angle (in degrees) between the two column vectors of M. Used to reject
+     Architectures where î and j point nearly the same way, or nearly opposite
+     ways — both are genuinely hard to read by eye (Trial I-A/I-B redesign point 8:
+     "avoid setting problems where i and j are close together or nearly opposite,
+     since they're hard to count"). ---- */
+  function angleBetweenCols(M) {
+    const v1 = { x: M.a, y: M.c }, v2 = { x: M.b, y: M.d };
+    const n1 = Math.hypot(v1.x, v1.y), n2 = Math.hypot(v2.x, v2.y);
+    if (n1 < 1e-6 || n2 < 1e-6) return 0;
+    let cos = (v1.x * v2.x + v1.y * v2.y) / (n1 * n2);
+    cos = Math.max(-1, Math.min(1, cos));
+    return Math.acos(cos) * 180 / Math.PI;
+  }
+
+  function inView(x, y) {
+    return Math.abs(x - CENTER.x) <= RANGE - 1 && Math.abs(y - CENTER.y) <= RANGE - 1;
+  }
+  function randSmallM() {
+    let M, det, angle;
+    do {
+      M = { a: randInt(-3, 3), b: randInt(-3, 3), c: randInt(-3, 3), d: randInt(-3, 3) };
+      det = detM(M);
+      angle = angleBetweenCols(M);
+    } while (det <= 0 || det > 9 || angle < 25 || angle > 155);
+    return M;
+  }
+  /* ---- compute a per-round viewing window (range + center) that's guaranteed
+     to fit every point in `pts` with margin — the "adjust scale per round"
+     approach to redesign point 8 (rather than keeping one fixed range and just
+     narrowing which numbers the generator is allowed to produce). Centers on
+     the actual bounding box of the given points (NOT a fixed positive-quadrant
+     bias like the old fixed CENTER={3,2}) — a naive fixed-bias center breaks
+     as soon as a point is negative, since shifting the center further into
+     the positive quadrant only pushes a negative point further out of view. ---- */
+  function computeDynamicView(pts) {
+    let minX = 0, maxX = 0, minY = 0, maxY = 0;
+    pts.forEach((p) => {
+      minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+      minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+    });
+    const cx = Math.round((minX + maxX) / 2), cy = Math.round((minY + maxY) / 2);
+    const halfW = Math.max(maxX - cx, cx - minX), halfH = Math.max(maxY - cy, cy - minY);
+    const range = Math.max(5, Math.ceil(Math.max(halfW, halfH) * 1.3) + 2);
+    return { range, center: { x: cx, y: cy } };
+  }
+  function randNative() {
+    let m, n;
+    do { m = randInt(-2, 3); n = randInt(-2, 3); } while (m === 0 && n === 0);
+    return { m, n };
+  }
+  function randNativeHard() {
+    let m, n;
+    do { m = randInt(-5, 5); n = randInt(-5, 5); } while (Math.abs(m) <= 1 && Math.abs(n) <= 1);
+    return { m, n };
+  }
+  // Shared generator for Trial I-A & Trial II — identical underlying math
+  // (pick M, pick a native (m,n), compute the real position M·(m,n)); which
+  // value is revealed vs. asked-for is the only difference between the two.
+  function genForwardRound() {
+    for (let tries = 0; tries < 400; tries++) {
+      const M = randSmallM();
+      const t = randNative();
+      const ans = applyM(M, t.m, t.n);
+      if (inView(ans.x, ans.y)) return { M: M, m: t.m, n: t.n, x: ans.x, y: ans.y };
+    }
+    return { M: { a: 1, b: 1, c: 0, d: 1 }, m: 1, n: 1, x: 2, y: 1 }; // fallback, should not trigger in practice
+  }
+  // Trial I-B needs ONE Architecture that keeps (1,0), (0,1) AND (1,1) all
+  // visible on screen at once, since all three are shown across its rounds.
+  function genArchitectureM() {
+    for (let tries = 0; tries < 400; tries++) {
+      const M = randSmallM();
+      const p1 = applyM(M, 1, 0), p2 = applyM(M, 0, 1), p3 = applyM(M, 1, 1);
+      if (inView(p1.x, p1.y) && inView(p2.x, p2.y) && inView(p3.x, p3.y)) return M;
+    }
+    return { a: 2, b: 1, c: 1, d: 1 }; // fallback, should not trigger in practice
+  }
+
+  function bindHint(btnId, bodyId) {
+    const btn = document.getElementById(btnId), body = document.getElementById(bodyId);
+    btn.addEventListener("click", () => body.classList.toggle("open"));
+  }
+  bindHint("t3-hintBtn", "t3-hintBody");
+
+  /* ---- Trial I-A/I-B's own generator: unlike genForwardRound (fixed RANGE/
+     CENTER, rejection-sampled until inView), this one allows a wider spread of
+     native points and instead computes a per-round viewing window afterward
+     via computeDynamicView — the "adjust scale per round" resolution to
+     redesign point 8. Trial II is untouched and keeps using genForwardRound. ---- */
+  const MAX_DYNAMIC_RANGE = 12; // cap how far the dynamic scale is allowed to zoom out — an uncapped worst case (e.g. a large M times a large native point) can demand a range in the high 20s, which zooms the basis vectors down to a few pixels and defeats the point of showing them at all. Rejection-sampled below just like det/angle already are.
+  function randNativeWide() {
+    let m, n;
+    do { m = randInt(-3, 3); n = randInt(-3, 3); } while (m === 0 && n === 0);
+    return { m, n };
+  }
+  /* ---- scaffolding for Trial I-A's first two rounds: force exactly ONE of
+     m, n to be nonzero (the other is 0), so the round is "walk along a single
+     borrowed vector" — a bridge from ordinary scalar multiplication — before
+     round 3 asks the player to combine BOTH vectors at once. ---- */
+  function randNativeSingleAxis() {
+    let k;
+    do { k = randInt(-3, 3); } while (k === 0);
+    return Math.random() < 0.5 ? { m: k, n: 0 } : { m: 0, n: k };
+  }
+  function genForwardRoundDynamic(singleAxis) {
+    for (let tries = 0; tries < 400; tries++) {
+      const M = randSmallM();
+      const t = singleAxis ? randNativeSingleAxis() : randNativeWide();
+      const ans = applyM(M, t.m, t.n);
+      const view = computeDynamicView([
+        { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 },
+        { x: M.a, y: M.c }, { x: M.b, y: M.d },
+        { x: t.m, y: t.n }, { x: ans.x, y: ans.y },
+      ]);
+      if (view.range > MAX_DYNAMIC_RANGE) continue;
+      return { M: M, m: t.m, n: t.n, x: roundTo2dp(ans.x), y: roundTo2dp(ans.y), range: view.range, center: view.center };
+    }
+    // fallback, should not trigger in practice
+    return { M: { a: 1, b: 1, c: 0, d: 1 }, m: 1, n: 1, x: 2, y: 1, range: 6, center: { x: 3, y: 2 } };
+  }
+  /* ---- Trial I-B keeps ONE Architecture across all its rounds, so the view is
+     computed once per Architecture (from its columns + the three anchor points),
+     then the hard round's random native point is rejection-sampled against that
+     SAME view so the zoom level never jumps mid-Trial. ---- */
+  function genArchitectureMDynamic() {
+    for (let tries = 0; tries < 400; tries++) {
+      const M = randSmallM();
+      const p1 = applyM(M, 1, 0), p2 = applyM(M, 0, 1), p3 = applyM(M, 1, 1);
+      // also fold in a couple of representative "hard round" candidates
+      // (native points with |m| or |n| > 1) into the view computation itself
+      // — otherwise a compact Architecture can get a view so tight that NO
+      // non-trivial native point fits anywhere in it, and the hard round's
+      // own rejection sampling (randNativeHardInView) would have nothing
+      // valid to find.
+      const p4 = applyM(M, 2, 0), p5 = applyM(M, 0, 2), p6 = applyM(M, 2, 1), p7 = applyM(M, 1, 2);
+      const view = computeDynamicView([
+        { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 },
+        { x: M.a, y: M.c }, { x: M.b, y: M.d },
+        p1, p2, p3, p4, p5, p6, p7,
+      ]);
+      if (view.range > MAX_DYNAMIC_RANGE) continue;
+      return { M: M, range: view.range, center: view.center };
+    }
+    return { M: { a: 2, b: 1, c: 1, d: 1 }, range: 6, center: { x: 3, y: 2 } }; // fallback, should not trigger in practice
+  }
+  /* ---- Trial II-B's own anchors: unlike Trial I-B's (1,0)/(0,1)/(1,1) —
+     which deliberately include the two degenerate single-strand cases —
+     EVERY one of these has both m and n nonzero. The reason: II-B's whole
+     point is showing a genuinely different parallelogram appear when a
+     strand gets swapped for the target (Area(target,j) vs Area(i,j)); if
+     the target ever coincides exactly with i or j (m=1,n=0 or m=0,n=1),
+     the "swapped" shape is pixel-identical to the reference and nothing
+     visibly changes. Four rounds, each a distinct case: both-positive,
+     j-heavy, i-heavy, and one with a negative component so a swap can
+     visibly flip a shape's orientation too. Folds all four into its own
+     view computation (the same guarantee genArchitectureMDynamic gives
+     Trial I-B's anchors) so every one is guaranteed to fit on screen. ---- */
+  const IIB_ANCHORS = [{ m: 1, n: 1 }, { m: 2, n: 1 }, { m: 1, n: 2 }, { m: 2, n: -1 }];
+  function genArchitectureMDynamicIIB() {
+    for (let tries = 0; tries < 400; tries++) {
+      const M = randSmallM();
+      const anchorPts = IIB_ANCHORS.map((t) => applyM(M, t.m, t.n));
+      const view = computeDynamicView([
+        { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 },
+        { x: M.a, y: M.c }, { x: M.b, y: M.d },
+        ...anchorPts,
+      ]);
+      if (view.range > MAX_DYNAMIC_RANGE) continue;
+      return { M: M, range: view.range, center: view.center };
+    }
+    return { M: { a: 2, b: 1, c: 1, d: 1 }, range: 9, center: { x: 3, y: 2 } }; // fallback, should not trigger in practice
+  }
+  function randNativeHardInView(M, range, center) {
+    for (let tries = 0; tries < 400; tries++) {
+      const m = randInt(-5, 5), n = randInt(-5, 5);
+      if (Math.abs(m) <= 1 && Math.abs(n) <= 1) continue;
+      const ans = applyM(M, m, n);
+      if (Math.abs(ans.x - center.x) <= range - 1 && Math.abs(ans.y - center.y) <= range - 1) return { m, n };
+    }
+    return { m: 2, n: 0 }; // fallback — (2,0) is guaranteed to fit since genArchitectureMDynamic always folds applyM(M,2,0) into its own view computation; should not trigger in practice
+  }
+
+  /* ---- proper bracket-matrix notation, no external LaTeX library needed —
+     ported from this module's main index.html so the win-celebration can show
+     a real "(x,y) = M·(m,n)" picture instead of plain text. Optional `colColors`
+     tints the two columns (matches each column to its basis-vector color). ---- */
+  function matrixHTML(m, colColors) {
+    const cellStyle = (col) =>
+      colColors && colColors[col] ? ` style="color:${colColors[col]};font-weight:800"` : "";
+    return `<span class="mat"><span class="mat-bracket left"></span><span class="mat-grid"><span${cellStyle(0)}>${m.a}</span><span${cellStyle(1)}>${m.b}</span><span${cellStyle(0)}>${m.c}</span><span${cellStyle(1)}>${m.d}</span></span><span class="mat-bracket right"></span></span>`;
+  }
+  function colVectorHTML(x, y, color) {
+    const style = color ? ` style="color:${color};font-weight:800"` : "";
+    return `<span class="mat"><span class="mat-bracket left"></span><span class="mat-grid" style="grid-template-columns:auto"><span${style}>${x}</span><span${style}>${y}</span></span><span class="mat-bracket right"></span></span>`;
+  }
+  /* ---- the EXPANDED form of M·(m,n) — "(a×m)+(b×n)" per row — instead of
+     just the final product, so the win-celebration shows where the answer
+     actually came from, not just what it equals. The (a×m) term (î's
+     contribution) and (b×n) term (ĵ's contribution) are colored to match
+     their vector, same idea as matrixHTML's colColors. ---- */
+  function expandedProductHTML(M, m, n, colorI, colorJ) {
+    const styleI = colorI ? ` style="color:${colorI};font-weight:800"` : "";
+    const styleJ = colorJ ? ` style="color:${colorJ};font-weight:800"` : "";
+    const row1 = `<span${styleI}>(${M.a}×${m})</span>+<span${styleJ}>(${M.b}×${n})</span>`;
+    const row2 = `<span${styleI}>(${M.c}×${m})</span>+<span${styleJ}>(${M.d}×${n})</span>`;
+    return `<span class="mat"><span class="mat-bracket left"></span><span class="mat-grid" style="grid-template-columns:auto"><span>${row1}</span><span>${row2}</span></span><span class="mat-bracket right"></span></span>`;
+  }
+
+  /* ---- Trial II-B: WHY this specific arithmetic, tied back to the
+     "read the grid" action from Trial II-A instead of dropped in as bare
+     algebra. (d×x)−(b×y) is not an arbitrary combination — it is the
+     signed AREA of the parallelogram spanned by (target, j): swap î for
+     the target vector, keep ĵ exactly where it is, and the resulting
+     shape's area is exactly m times the reference (i, j) area (because
+     target = m·i + n·j, and sliding along ĵ's own direction never changes
+     a parallelogram's area — only the m·i part matters). So:
+       m = Area(target, j) ÷ Area(i, j)
+       n = Area(i, target) ÷ Area(i, j)
+     — the SAME "how far along i, how far along j" reading Trial II-A did
+     by eye, made exact via areas instead of eyeballing grid lines. The
+     celebration animation shows this as an actual shaded shape on the
+     Warp canvas (see startCelebration below); this text version repeats
+     the same labels so the log stays legible after the shapes are gone.
+     m's line stays in purple (only j's numbers, b/d, ever appear) and n's
+     in red (only i's, a/c) — called out in the MCQ that follows. Numbers
+     divide evenly by construction, so no rounding ever shows. ---- */
+  function inverseStepHTML(M, x, y, colorI, colorJ) {
+    const det = detM(M);
+    const mNum = M.d * x - M.b * y;
+    const nNum = M.a * y - M.c * x;
+    const styleJ = colorJ ? ` style="color:${colorJ};font-weight:800"` : "";
+    const styleI = colorI ? ` style="color:${colorI};font-weight:800"` : "";
+    // where the divisor actually comes from — without this line, "÷ 4" (or
+    // whatever the number is) looks like it fell out of the sky. Spelled out
+    // with THIS round's actual a, b, c, d before it's ever used as a divisor.
+    const detLine = `Area(i, j) = (${M.a}×${M.d}) − (${M.b}×${M.c}) = <b>${roundTo2dp(det)}</b>`;
+    const mLine = `m: Area(target, j) = <span${styleJ}>(${M.d}×${x})</span> − <span${styleJ}>(${M.b}×${y})</span> = ${roundTo2dp(mNum)} &nbsp;÷&nbsp; Area(i, j) = ${roundTo2dp(det)} &nbsp;=&nbsp; <b>${roundTo2dp(mNum / det)}</b>`;
+    const nLine = `n: Area(i, target) = <span${styleI}>(${M.a}×${y})</span> − <span${styleI}>(${M.c}×${x})</span> = ${roundTo2dp(nNum)} &nbsp;÷&nbsp; Area(i, j) = ${roundTo2dp(det)} &nbsp;=&nbsp; <b>${roundTo2dp(nNum / det)}</b>`;
+    return `<div>${detLine}</div><div style="margin-top:4px">${mLine}</div><div style="margin-top:4px">${nLine}</div>`;
+  }
+  function inverseGeneralHTML(colorI, colorJ) {
+    const styleJ = colorJ ? ` style="color:${colorJ};font-weight:800"` : "";
+    const styleI = colorI ? ` style="color:${colorI};font-weight:800"` : "";
+    const detLine = `Area(i, j) = (a×d) − (b×c)`;
+    const mLine = `m = Area(target, j) ÷ Area(i, j) = [<span${styleJ}>(d×x)</span> − <span${styleJ}>(b×y)</span>] ÷ [(a×d) − (b×c)]`;
+    const nLine = `n = Area(i, target) ÷ Area(i, j) = [<span${styleI}>(a×y)</span> − <span${styleI}>(c×x)</span>] ÷ [(a×d) − (b×c)]`;
+    return `<div>${detLine}</div><div style="margin-top:4px">${mLine}</div><div style="margin-top:4px">${nLine}</div>`;
+  }
+  /* ---- pair the FORWARD multiplication (M times (m,n) lands on (x,y)) with
+     the BACKWARD elimination (undoing it from (x,y)) for the same concrete
+     numbers, one under the other — so the relationship between "going" and
+     "coming back" is something the player reads directly off one screen,
+     round after round, instead of having to hold the forward version (seen
+     back in Trial I) in memory while looking at the backward one here. ---- */
+  function forwardBackwardHTML(M, m, n, x, y, colorI, colorJ) {
+    const forward = `→ ${expandedProductHTML(M, m, n, colorI, colorJ)} = ${colVectorHTML(x, y)}`;
+    const backward = `← ${inverseStepHTML(M, x, y, colorI, colorJ)}`;
+    return `<div>${forward}</div><div style="margin-top:6px">${backward}</div>`;
+  }
+  function forwardBackwardGeneralHTML(colorI, colorJ) {
+    const styleI = colorI ? ` style="color:${colorI};font-weight:800"` : "";
+    const styleJ = colorJ ? ` style="color:${colorJ};font-weight:800"` : "";
+    const forward = `→ x = <span${styleI}>a</span>·m + <span${styleJ}>b</span>·n, &nbsp; y = <span${styleI}>c</span>·m + <span${styleJ}>d</span>·n`;
+    const backward = `← ${inverseGeneralHTML(colorI, colorJ)}`;
+    return `<div>${forward}</div><div style="margin-top:6px">${backward}</div>`;
+  }
+  /* ---- the actual M -> M⁻¹ construction recipe, with THIS Trial's concrete
+     M plugged in: swap a and d, flip the sign of b and c, divide everything
+     by (ad − bc). Left neutral (uncolored) rather than reusing the i/j
+     column colors — M⁻¹'s rows mix a/d and b/c in a way that would fight the
+     established "one color per column" meaning if forced onto it here. ---- */
+  function inverseConstructionHTML(M) {
+    const det = detM(M);
+    const cofM = { a: M.d, b: -M.b, c: -M.c, d: M.a };
+    const finalM = {
+      a: roundTo2dp(M.d / det), b: roundTo2dp(-M.b / det),
+      c: roundTo2dp(-M.c / det), d: roundTo2dp(M.a / det),
+    };
+    // Derive the divisor from M's own actual numbers FIRST, as its own line
+    // — otherwise the "÷ (det)" that follows is just a number with no
+    // visible source, which is exactly the gap flagged from the screenshot.
+    const detLine = `(a×d) − (b×c) = (${M.a}×${M.d}) − (${M.b}×${M.c}) = <b>${roundTo2dp(det)}</b>`;
+    const buildLine = `M = ${matrixHTML(M, [COLORS.red, COLORS.purple])} &nbsp;—swap a,d · flip sign of b,c · ÷${roundTo2dp(det)}→&nbsp; ` +
+      `M⁻¹ = (1 ÷ ${roundTo2dp(det)})·${matrixHTML(cofM)} = ${matrixHTML(finalM)}`;
+    return `<div>${detLine}</div><div style="margin-top:8px">${buildLine}</div>`;
+  }
+
+  /* ---- Trial III: decompose a target density into a "nice" (w, h) integer
+     rectangle whose area is exactly that number and whose sides are as close
+     to each other as possible (e.g. 6 -> 2x3, not 1x6) — used to draw a
+     concrete axis-aligned target rectangle to drag-match against, instead of
+     leaving "match this number" as a purely abstract goal. ---- */
+  function niceFactorPair(target) {
+    let best = { w: 1, h: target };
+    for (let w = 1; w <= target; w++) {
+      if (target % w !== 0) continue;
+      const h = target / w;
+      if (Math.abs(w - h) < Math.abs(best.w - best.h)) best = { w, h };
+    }
+    return best;
+  }
+
+  /* ================= Slide navigation (moved to run FIRST) =================
+     Wiring up the sidebar/prev/next/dots/menu here, before any Trial's setup
+     code runs, means navigation still works even if a Trial's own IIFE throws
+     (each Trial below is also wrapped in try/catch for the same reason — one
+     broken Trial should never be able to lock a player out of the rest of the
+     game). ================================================================= */
+  (function () {
+    const SLIDES = ["slide0", "slide1", "slide2", "slide3", "slide3b", "slide4", "slide5"];
+    let current = 0;
+    const dotsWrap = document.getElementById("dots");
+    SLIDES.forEach((_, i) => {
+      const d = document.createElement("button");
+      d.className = "dot" + (i === 0 ? " active" : "");
+      d.type = "button";
+      d.addEventListener("click", () => goTo(i));
+      dotsWrap.appendChild(d);
+    });
+    function render() {
+      SLIDES.forEach((id, i) => document.getElementById(id).classList.toggle("active", i === current));
+      document.querySelectorAll(".sidebar button[data-slide]").forEach((b) =>
+        b.classList.toggle("active", Number(b.getAttribute("data-slide")) === current)
+      );
+      document.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("active", i === current));
+      document.getElementById("prevBtn").disabled = current === 0;
+      document.getElementById("nextBtn").disabled = current === SLIDES.length - 1;
+      document.getElementById("sidebar").classList.remove("open");
+      document.getElementById("overlay").classList.remove("open");
+      document.querySelector(".slide-viewport").scrollTop = 0;
+    }
+    function goTo(i) { current = Math.max(0, Math.min(SLIDES.length - 1, i)); render(); }
+    document.querySelectorAll(".sidebar button[data-slide]").forEach((b) => {
+      b.addEventListener("click", () => goTo(Number(b.getAttribute("data-slide"))));
+    });
+    document.querySelectorAll("[data-jump-slide]").forEach((b) => {
+      b.addEventListener("click", () => goTo(Number(b.getAttribute("data-jump-slide"))));
+    });
+    document.getElementById("prevBtn").addEventListener("click", () => goTo(current - 1));
+    document.getElementById("nextBtn").addEventListener("click", () => goTo(current + 1));
+    document.getElementById("startBtn").addEventListener("click", () => goTo(1));
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") goTo(current + 1);
+      else if (e.key === "ArrowLeft") goTo(current - 1);
+    });
+
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    menuBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      overlay.classList.toggle("open");
+    });
+    overlay.addEventListener("click", () => {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("open");
+    });
+
+    render();
+  })();
+
+  /* ================= Trial I-A: Decode the Jack Point ================= */
+  try {
+  (function () {
+    let round = 0;
+    const TOTAL = 3;
+    let locked = false;
+    let current = null;
+    let seq = 0; // bumped on every newRound() — timers/intervals check this before acting, so a reroll or slide-away never leaves a stray callback mutating a canvas that's moved on to a new question
+    let blinkTimer = null;
+    const timers = [];
+    function clearAllTimers() {
+      timers.forEach(clearTimeout); timers.length = 0;
+      if (blinkTimer) { clearInterval(blinkTimer); blinkTimer = null; }
+    }
+
+    // Prime has no basis vectors of its OWN worth drawing (its matrix is always
+    // the identity) — instead it always shows the SAME i,j as the Warp, raw
+    // (via vectorArrows, set per round in newRound()), in faded orange. This is
+    // the actual solving tool for the round: the player reads (m, n) off the
+    // Warp's native grid, then counts m copies of this same î plus n copies of
+    // this same ĵ here on Prime to find the real position.
+    const primeLab = new MatrixLab(document.getElementById("ia-prime"), {
+      range: RANGE, center: CENTER, showOriginLabel: true,
+      matrix: { a: 1, b: 0, c: 0, d: 1 }, showBasisVectors: false, draggableBasis: false,
+      // basisColors here is never actually DRAWN (showBasisVectors is false) —
+      // it only exists to give combinationColors (used by the live "vector
+      // follows your typed guess" path, point 6) a neutral blue default,
+      // distinct from the red/purple used for the actual î/ĵ during the
+      // win-celebration's combination animation.
+      basisColors: { i: COLORS.blue, j: COLORS.blue },
+    });
+    const warpLab = new MatrixLab(document.getElementById("ia-warp"), {
+      range: RANGE, center: CENTER, showOriginLabel: true,
+      matrix: { a: 1, b: 0, c: 0, d: 1 }, showBasisVectors: true, draggableBasis: false,
+      // its own transformed columns, always shown — red î, purple ĵ, matching
+      // the site-wide convention (and Prime's identical borrowed copy below).
+      basisColors: { i: COLORS.red, j: COLORS.purple },
+      // a fixed, un-skewed black perpendicular axis through the origin, as a
+      // "true Cartesian" reference — NOT the tilted axis showLiveGrid would
+      // otherwise draw through the same origin along the current i/j
+      // directions, which is suppressed here (showLiveAxis:false) so the two
+      // don't visually compete.
+      showLiveAxis: false, standardAxisColor: COLORS.black,
+      // the plain dashed reference grid stays hidden until a correct answer
+      // reveals it (redesign point 2) — the skewed native grid (showLiveGrid,
+      // on by default) is what the player reads (m, n) from meanwhile.
+      showGhostIdentity: false,
+    });
+
+    const xInput = document.getElementById("ia-x"), yInput = document.getElementById("ia-y");
+    const banner = document.getElementById("ia-banner");
+    const jackEl = document.getElementById("ia-jack");
+    const dotsWrap = document.getElementById("ia-dots");
+    const roundNum = document.getElementById("ia-roundNum");
+    const revealCard = document.getElementById("ia-reveal");
+    const rerollBtn = document.getElementById("ia-rerollBtn");
+    const celebrateBox = document.getElementById("ia-celebrate");
+    const celebrateMsg = document.getElementById("ia-celebrateMsg");
+    const notationEl = document.getElementById("ia-notation");
+    const continueBtn = document.getElementById("ia-continueBtn");
+    const mcqCard = document.getElementById("ia-mcq");
+    const mcqOptionsEl = document.getElementById("ia-mcqOptions");
+    const mcqExplainEl = document.getElementById("ia-mcqExplain");
+
+    function renderDots() {
+      dotsWrap.innerHTML = "";
+      for (let i = 0; i < TOTAL; i++) {
+        const s = document.createElement("span");
+        s.className = "rdot" + (i < round ? " done" : "");
+        dotsWrap.appendChild(s);
+      }
+      roundNum.textContent = Math.min(round + 1, TOTAL);
+    }
+
+    function newRound() {
+      seq++; clearAllTimers();
+      // Rounds 1-2 (round index 0,1): scaffold with a SINGLE borrowed vector
+      // (m or n forced to 0) — walking along just î or just ĵ, a bridge from
+      // ordinary scalar multiplication. Round 3 (index 2) combines both.
+      const g = genForwardRoundDynamic(round < 2);
+      current = g;
+      primeLab.setRange(g.range, g.center);
+      warpLab.setRange(g.range, g.center);
+      // Prime always shows the SAME i,j as this round's Warp — the solving
+      // tool, not a post-win reveal (see the constructor comment above).
+      primeLab.setVectorArrows([
+        { v: { x: g.M.a, y: g.M.c }, color: COLORS.red, label: "î" },
+        { v: { x: g.M.b, y: g.M.d }, color: COLORS.purple, label: "ĵ" },
+      ]);
+      primeLab.setTargetPoint(null);
+      primeLab.setCombinationFor(null);
+      primeLab.setCombinationColors({ i: COLORS.blue, j: COLORS.blue });
+      warpLab.setMatrix(g.M);
+      warpLab.setCombinationFor(null);
+      warpLab.setShowGhostIdentity(false); // hidden again until this round is answered correctly
+      warpLab.setTargetPoint({ x: g.x, y: g.y, color: COLORS.orange, label: `(${g.m}, ${g.n})` });
+      jackEl.textContent = `(m, n) = (${g.m}, ${g.n})`;
+      window.__wtTest.ia = current;
+      xInput.value = ""; yInput.value = "";
+      banner.className = "status-banner"; banner.textContent = "🌀 Enter your answer";
+      celebrateBox.style.display = "none";
+      continueBtn.style.display = "none";
+      locked = false;
+      rerollBtn.disabled = false;
+      renderDots();
+    }
+
+    /* ---- redesign point 4/6: live reference point + combination path on Prime
+       as the player types, BEFORE the round is solved — drawn in a neutral
+       blue (Prime's own matrix is the identity, so no matrixOverride is
+       needed here), distinct from the red/purple î/ĵ combination the
+       win-celebration draws below. ---- */
+    function updateLiveReference() {
+      if (locked) return;
+      if (xInput.value === "" || yInput.value === "") {
+        primeLab.setTargetPoint(null);
+        primeLab.setCombinationFor(null);
+        return;
+      }
+      const x = Number(xInput.value), y = Number(yInput.value);
+      primeLab.setTargetPoint({ x, y, color: COLORS.blue, label: "your guess" });
+      primeLab.setCombinationFor({ x, y });
+    }
+
+    function checkAnswer() {
+      if (locked) return;
+      if (xInput.value === "" || yInput.value === "") return;
+      const x = Number(xInput.value), y = Number(yInput.value);
+      const correct = Math.abs(x - current.x) < 0.01 && Math.abs(y - current.y) < 0.01;
+      if (correct) {
+        locked = true;
+        rerollBtn.disabled = true;
+        banner.className = "status-banner win";
+        banner.textContent = `✅ Correct! Real position = (${current.x}, ${current.y})`;
+        round++;
+        renderDots();
+        startCelebration();
+      } else {
+        banner.className = "status-banner close";
+        banner.textContent = "🌡️ Not quite — check the arithmetic";
+      }
+    }
+
+    function startCelebration() {
+      const mySeq = seq;
+      const { M, m, n, x, y } = current;
+      celebrateBox.style.display = "block";
+      celebrateMsg.textContent = "✅ Correct! Watch how the two Constructs connect.";
+      notationEl.innerHTML = "";
+      continueBtn.style.display = "none";
+
+      // Stage 1 (immediate): the i,j arrows are already shown on both planes
+      // throughout the round (redesign point 1) — what's newly revealed here
+      // is the Warp's plain dashed reference grid (point 2) and the exact
+      // target position on Prime (previously only the player's own guess dot
+      // was shown there).
+      warpLab.setShowGhostIdentity(true);
+      primeLab.setTargetPoint({ x, y, color: COLORS.green, label: `(${x}, ${y})` });
+
+      // Stage 2 (~700ms): combination-path animation running from (0,0) to
+      // the target on BOTH planes at once — î's leg in red, ĵ's leg in
+      // purple. Prime needs matrixOverride (its own matrix is always the
+      // identity, so it would otherwise draw an untilted path); Warp's own
+      // matrix already IS M, so no override is needed there.
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        primeLab.setCombinationColors({ i: COLORS.red, j: COLORS.purple });
+        primeLab.setCombinationFor({ x: m, y: n, matrixOverride: M });
+        primeLab.pulseCombinationPath(1600);
+        warpLab.setCombinationColors({ i: COLORS.red, j: COLORS.purple });
+        warpLab.setCombinationFor({ x: m, y: n });
+        warpLab.pulseCombinationPath(1600);
+      }, 700));
+
+      // Stage 3 (~2600ms): blink the target on both planes together — same
+      // wormhole, two viewpoints.
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        let count = 0;
+        blinkTimer = setInterval(() => {
+          if (seq !== mySeq) { clearInterval(blinkTimer); return; }
+          count++;
+          const on = count % 2 === 0;
+          primeLab.setTargetPoint(on ? { x, y, color: COLORS.green, label: `(${x}, ${y})` } : null);
+          warpLab.setTargetPoint(on ? { x, y, color: COLORS.orange, label: `(${m}, ${n})` } : null);
+          if (count >= 6) {
+            clearInterval(blinkTimer); blinkTimer = null;
+            primeLab.setTargetPoint({ x, y, color: COLORS.green, label: `(${x}, ${y})` });
+            warpLab.setTargetPoint({ x, y, color: COLORS.orange, label: `(${m}, ${n})` });
+          }
+        }, 260);
+      }, 2600));
+
+      // Stage 4 (~4400ms): the matrix-multiplication notation — shown EXPANDED
+      // (per-row (a×m)+(b×n) arithmetic, not just the final product) so the
+      // player sees where the answer came from — then the manual Continue
+      // button. The question itself doesn't change until it's clicked.
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        notationEl.innerHTML =
+          matrixHTML(M, [COLORS.red, COLORS.purple]) + " · " +
+          colVectorHTML(m, n) + " = " +
+          expandedProductHTML(M, m, n, COLORS.red, COLORS.purple) + " = " +
+          colVectorHTML(x, y, COLORS.green);
+        continueBtn.style.display = "inline-block";
+      }, 4400));
+    }
+
+    continueBtn.addEventListener("click", () => {
+      if (round >= TOTAL) {
+        celebrateBox.style.display = "none";
+        startMcq();
+      } else {
+        newRound();
+      }
+    });
+
+    rerollBtn.addEventListener("click", () => { if (!locked) newRound(); });
+
+    xInput.addEventListener("input", () => { updateLiveReference(); checkAnswer(); });
+    yInput.addEventListener("input", () => { updateLiveReference(); checkAnswer(); });
+
+    /* ---- redesign point 9: a post-3-round multiple-choice reflection —
+       "what multiplied what, and how" — before advancing to Trial I-B. Wrong
+       answers get a short explanation and stay answerable; the correct answer
+       advances to the named reveal. ---- */
+    const MCQ_OPTIONS = [
+      { text: "Real position (Prime) = Architecture (M) × native coordinates (Warp)", correct: true },
+      { text: "Native coordinates (Warp) = Architecture (M) × real position (Prime)",
+        explain: "That's actually the reverse direction — that's what Trial II (coming up) asks for, and reversing it needs M⁻¹, not M itself. Try again." },
+      { text: "Real position (Prime) = native coordinates (Warp) × Architecture (M) — vector written first",
+        explain: "Order matters here: it's M · (m, n) — the matrix first, then the native coordinates as a column. Try again." },
+      { text: "It doesn't matter — Prime and Warp always end up with the same numbers",
+        explain: "If that were true, none of the last three rounds would have taken any work — the two Constructs only look different because M is doing real, specific work on (m, n). Try again." },
+    ];
+    let mcqAnswered = false;
+    window.__wtTest.iaMcqCorrectIndex = MCQ_OPTIONS.findIndex((o) => o.correct);
+
+    function startMcq() {
+      mcqAnswered = false;
+      mcqExplainEl.className = "mcq-explain";
+      mcqExplainEl.textContent = "";
+      mcqOptionsEl.innerHTML = "";
+      MCQ_OPTIONS.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "mcq-option";
+        btn.textContent = opt.text;
+        btn.addEventListener("click", () => onMcqPick(i, btn));
+        mcqOptionsEl.appendChild(btn);
+      });
+      mcqCard.style.display = "block";
+    }
+
+    function onMcqPick(i, btn) {
+      if (mcqAnswered) return;
+      const opt = MCQ_OPTIONS[i];
+      if (opt.correct) {
+        mcqAnswered = true;
+        btn.classList.add("correct");
+        mcqExplainEl.className = "mcq-explain open";
+        mcqExplainEl.textContent = "Exactly — every 'find the real position' round was you computing M·(m, n) by hand.";
+        setTimeout(() => {
+          mcqCard.style.display = "none";
+          revealCard.style.display = "block";
+        }, 900);
+      } else {
+        btn.classList.add("wrong");
+        mcqExplainEl.className = "mcq-explain open";
+        mcqExplainEl.textContent = opt.explain;
+      }
+    }
+
+    newRound();
+  })();
+} catch (e) { console.error("Trial I-A failed to initialize:", e); }
+
+  /* ================= Trial I-B: Crack the Architecture ================= */
+  try {
+  (function () {
+    const ANCHORS = [{ m: 1, n: 0 }, { m: 0, n: 1 }, { m: 1, n: 1 }];
+    // One Architecture (and one viewing window) for the whole Trial — computed
+    // dynamically from M's own columns + the three anchor images (redesign
+    // point 8), then held fixed across every round so the zoom level doesn't
+    // jump mid-Trial while M itself never changes.
+    const arch = genArchitectureMDynamic();
+    const M = arch.M;
+    let stepIdx = 0; // 0,1,2 = anchor rounds; 3 = hard round; 4 = done with rounds
+    let locked = false;
+    let current = null;
+    let logCount = 0;
+    let seq = 0; // bumped each new round — cancels stale celebration timers, same pattern as Trial I-A
+    let blinkTimer = null;
+    const timers = [];
+    function clearAllTimers() {
+      timers.forEach(clearTimeout); timers.length = 0;
+      if (blinkTimer) { clearInterval(blinkTimer); blinkTimer = null; }
+    }
+
+    // Prime has no basis vectors of its own worth drawing (identity matrix) —
+    // it always shows the SAME i,j as the Warp instead (vectorArrows, set once
+    // below since M is fixed for this whole Trial) — red î, purple ĵ.
+    const primeLab = new MatrixLab(document.getElementById("ib-prime"), {
+      range: arch.range, center: arch.center, showOriginLabel: true,
+      matrix: { a: 1, b: 0, c: 0, d: 1 }, showBasisVectors: false, draggableBasis: false,
+      // never actually drawn (showBasisVectors is false) — only gives
+      // combinationColors a neutral blue default for the win-celebration to override.
+      basisColors: { i: COLORS.blue, j: COLORS.blue },
+    });
+    const warpLab = new MatrixLab(document.getElementById("ib-warp"), {
+      range: arch.range, center: arch.center, showOriginLabel: true,
+      matrix: M, showBasisVectors: true, draggableBasis: false,
+      // its own transformed columns, always shown — red î, purple ĵ:
+      basisColors: { i: COLORS.red, j: COLORS.purple },
+      // fixed black perpendicular reference axis instead of the tilted one
+      // showLiveGrid would otherwise draw — same as Trial I-A.
+      showLiveAxis: false, standardAxisColor: COLORS.black,
+      // plain dashed reference grid stays hidden until a correct answer
+      // reveals it (redesign point 2).
+      showGhostIdentity: false,
+    });
+    primeLab.setVectorArrows([
+      { v: { x: M.a, y: M.c }, color: COLORS.red, label: "î" },
+      { v: { x: M.b, y: M.d }, color: COLORS.purple, label: "ĵ" },
+    ]);
+
+    const jackEl = document.getElementById("ib-jack");
+    const xInput = document.getElementById("ib-x"), yInput = document.getElementById("ib-y");
+    const banner = document.getElementById("ib-banner");
+    const dotsWrap = document.getElementById("ib-dots");
+    const logBody = document.getElementById("ib-logbody");
+    const logEmpty = document.getElementById("ib-logempty");
+    const hintBtn = document.getElementById("ib-hintBtn");
+    const hintBody = document.getElementById("ib-hintBody");
+    const answerCard = document.getElementById("ib-answercard");
+    const formulaCard = document.getElementById("ib-formulacard");
+    const verifyCard = document.getElementById("ib-verifycard");
+    const revealCard = document.getElementById("ib-revealcard");
+    const rerollBtn = document.getElementById("ib-rerollBtn");
+    const celebrateBox = document.getElementById("ib-celebrate");
+    const celebrateMsg = document.getElementById("ib-celebrateMsg");
+    const notationEl = document.getElementById("ib-notation");
+    const continueBtn = document.getElementById("ib-continueBtn");
+
+    function renderDots() {
+      dotsWrap.innerHTML = "";
+      for (let i = 0; i < 4; i++) {
+        const s = document.createElement("span");
+        s.className = "rdot" + (i < stepIdx ? " done" : "");
+        dotsWrap.appendChild(s);
+      }
+    }
+
+    function appendLog(m, n, x, y) {
+      logEmpty.style.display = "none";
+      logCount++;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${logCount}</td><td>(${m}, ${n})</td><td>${expandedProductHTML(M, m, n, COLORS.red, COLORS.purple)}</td><td>(${x}, ${y})</td>`;
+      logBody.appendChild(tr);
+    }
+
+    /* ---- the point of the log: once all 4 rounds are recorded, the LAST
+       line reruns the exact same computation but with the Architecture's
+       literal letters (a, b, c, d) and literal m, n in place of any one
+       round's numbers — so the pattern the player has been staring at,
+       row after row, resolves into the general formula they're about to be
+       asked for on the next card. Appended once, right as the log's
+       question-answering stage hands off to the symbolic formula stage. ---- */
+    function appendGeneralLogRow() {
+      const tr = document.createElement("tr");
+      tr.className = "general-row";
+      tr.innerHTML = `<td><b>General</b></td><td>(m, n)</td><td>${expandedProductHTML({ a: "a", b: "b", c: "c", d: "d" }, "m", "n", COLORS.red, COLORS.purple)}</td><td>(x, y)</td>`;
+      logBody.appendChild(tr);
+    }
+
+    function resetRoundUi() {
+      seq++; clearAllTimers();
+      // Prime's borrowed i,j arrows stay put — they're permanent for this
+      // whole Trial (M never changes), not a per-round or post-win reveal.
+      primeLab.setTargetPoint(null);
+      primeLab.setCombinationFor(null);
+      primeLab.setCombinationColors({ i: COLORS.blue, j: COLORS.blue });
+      warpLab.setCombinationFor(null);
+      warpLab.setShowGhostIdentity(false); // hidden again until this round is answered correctly
+      celebrateBox.style.display = "none";
+      continueBtn.style.display = "none";
+      xInput.value = ""; yInput.value = "";
+      banner.className = "status-banner"; banner.textContent = "🌀 Enter your answer";
+      locked = false;
+      rerollBtn.disabled = false;
+    }
+
+    function newAnchorRound() {
+      resetRoundUi();
+      const t = ANCHORS[stepIdx];
+      const ans = applyM(M, t.m, t.n);
+      current = { m: t.m, n: t.n, x: ans.x, y: ans.y };
+      warpLab.setTargetPoint({ x: ans.x, y: ans.y, color: COLORS.orange, label: `(${t.m}, ${t.n})` });
+      jackEl.textContent = `(m, n) = (${t.m}, ${t.n})`;
+      window.__wtTest.ib = current;
+      hintBtn.style.display = stepIdx >= 1 ? "inline-flex" : "none";
+      rerollBtn.style.display = "none"; // the three anchors are fixed points, not a random draw — nothing to reroll
+      renderDots();
+    }
+
+    function newHardRound() {
+      resetRoundUi();
+      const t = randNativeHardInView(M, arch.range, arch.center);
+      const ans = applyM(M, t.m, t.n);
+      current = { m: t.m, n: t.n, x: ans.x, y: ans.y };
+      warpLab.setTargetPoint(null);
+      jackEl.textContent = `No picture this time — (m, n) = (${t.m}, ${t.n}). Compute it.`;
+      window.__wtTest.ib = current;
+      rerollBtn.style.display = "inline-block"; // redesign point 7: this one round IS a random draw, so a reroll makes sense here
+      renderDots();
+    }
+
+    /* ---- redesign point 4: live reference point on Prime as the player
+       types — kept for Trial I-B. Point 6 (the vector-combination path that
+       follows the typed number) is explicitly EXCLUDED for Trial I-B per the
+       user's instruction, so no setCombinationFor call happens here — only
+       inside the win-celebration below, which is point 5, not point 6. ---- */
+    function updateLiveReference() {
+      if (locked) return;
+      if (xInput.value === "" || yInput.value === "") { primeLab.setTargetPoint(null); return; }
+      const x = Number(xInput.value), y = Number(yInput.value);
+      primeLab.setTargetPoint({ x, y, color: COLORS.blue, label: "your guess" });
+    }
+
+    function checkAnchorOrHard() {
+      if (locked) return;
+      if (xInput.value === "" || yInput.value === "") return;
+      const x = Number(xInput.value), y = Number(yInput.value);
+      const correct = Math.abs(x - current.x) < 0.01 && Math.abs(y - current.y) < 0.01;
+      if (correct) {
+        locked = true;
+        rerollBtn.disabled = true;
+        banner.className = "status-banner win";
+        banner.textContent = `✅ Correct! (${current.x}, ${current.y})`;
+        appendLog(current.m, current.n, current.x, current.y);
+        stepIdx++;
+        renderDots();
+        startCelebration();
+      } else {
+        banner.className = "status-banner close";
+        banner.textContent = "🌡️ Not quite — check the arithmetic";
+      }
+    }
+    xInput.addEventListener("input", () => { updateLiveReference(); checkAnchorOrHard(); });
+    yInput.addEventListener("input", () => { updateLiveReference(); checkAnchorOrHard(); });
+
+    /* ---- redesign point 5: the same staged win-celebration as Trial I-A
+       (reveal both bases → combination animation → cross-plane blink →
+       matrix notation → manual Continue). Since M is fixed for this whole
+       Trial, the revealed overlay looks the same every round by design —
+       that's the point ("same Architecture the whole Trial"). ---- */
+    function startCelebration() {
+      const mySeq = seq;
+      const { m, n, x, y } = current;
+      celebrateBox.style.display = "block";
+      celebrateMsg.textContent = "✅ Correct! Watch how the two Constructs connect.";
+      notationEl.innerHTML = "";
+      continueBtn.style.display = "none";
+
+      // The i,j arrows are already shown throughout on both planes (redesign
+      // point 1) — what's newly revealed on a correct answer is the Warp's
+      // plain dashed reference grid (point 2) and the exact target on Prime.
+      warpLab.setShowGhostIdentity(true);
+      primeLab.setTargetPoint({ x, y, color: COLORS.green, label: `(${x}, ${y})` });
+
+      // Combination animation runs from (0,0) to the target on BOTH planes —
+      // î's leg red, ĵ's leg purple. Warp's own matrix already IS M, so it
+      // needs no matrixOverride (unlike Prime, whose matrix is the identity).
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        primeLab.setCombinationColors({ i: COLORS.red, j: COLORS.purple });
+        primeLab.setCombinationFor({ x: m, y: n, matrixOverride: M });
+        primeLab.pulseCombinationPath(1600);
+        warpLab.setCombinationColors({ i: COLORS.red, j: COLORS.purple });
+        warpLab.setCombinationFor({ x: m, y: n });
+        warpLab.pulseCombinationPath(1600);
+      }, 700));
+
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        let count = 0;
+        blinkTimer = setInterval(() => {
+          if (seq !== mySeq) { clearInterval(blinkTimer); return; }
+          count++;
+          const on = count % 2 === 0;
+          primeLab.setTargetPoint(on ? { x, y, color: COLORS.green, label: `(${x}, ${y})` } : null);
+          warpLab.setTargetPoint(on ? { x, y, color: COLORS.orange, label: `(${m}, ${n})` } : null);
+          if (count >= 6) {
+            clearInterval(blinkTimer); blinkTimer = null;
+            primeLab.setTargetPoint({ x, y, color: COLORS.green, label: `(${x}, ${y})` });
+            warpLab.setTargetPoint({ x, y, color: COLORS.orange, label: `(${m}, ${n})` });
+          }
+        }, 260);
+      }, 2600));
+
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        notationEl.innerHTML =
+          matrixHTML(M, [COLORS.red, COLORS.purple]) + " · " +
+          colVectorHTML(m, n) + " = " +
+          expandedProductHTML(M, m, n, COLORS.red, COLORS.purple) + " = " +
+          colVectorHTML(x, y, COLORS.green);
+        continueBtn.style.display = "inline-block";
+      }, 4400));
+    }
+
+    continueBtn.addEventListener("click", () => {
+      if (stepIdx < 3) newAnchorRound();
+      else if (stepIdx === 3) newHardRound();
+      else {
+        appendGeneralLogRow();
+        answerCard.style.display = "none";
+        formulaCard.style.display = "block";
+      }
+    });
+
+    rerollBtn.addEventListener("click", () => {
+      if (locked) return;
+      if (stepIdx === 3) newHardRound(); // only ever visible during the hard round
+    });
+
+    /* ---- symbolic formula stage ---- */
+    // a, b, c, d never appeared anywhere on screen before this card asked the
+    // player to place them — show the actual Architecture-as-letters grid
+    // first, so the blanks below refer to something the player has already
+    // seen defined, not four unexplained letters.
+    document.getElementById("ib-formulaMatrixLine").innerHTML =
+      "M = " + matrixHTML({ a: "a", b: "b", c: "c", d: "d" }, [COLORS.red, COLORS.purple]);
+    const selXM = document.getElementById("ib-sel-xm"), selXN = document.getElementById("ib-sel-xn");
+    const selYM = document.getElementById("ib-sel-ym"), selYN = document.getElementById("ib-sel-yn");
+    const formulaBanner = document.getElementById("ib-formulabanner");
+    document.getElementById("ib-formulaCheck").addEventListener("click", () => {
+      const ok = selXM.value === "a" && selXN.value === "b" && selYM.value === "c" && selYN.value === "d";
+      if (ok) {
+        formulaBanner.className = "status-banner win";
+        formulaBanner.textContent = "✅ That's the Architecture, decoded.";
+        setTimeout(() => {
+          formulaCard.style.display = "none";
+          verifyCard.style.display = "block";
+          startVerifyRound();
+        }, 900);
+      } else {
+        formulaBanner.className = "status-banner close";
+        formulaBanner.textContent = "🌡️ Not quite — check which letter multiplies which variable";
+      }
+    });
+
+    /* ---- verification stage: 2 fresh Architectures, formula only, no picture ---- */
+    let verifyIdx = 0;
+    let verifyLocked = false;
+    let verifyCurrent = null;
+    const verifyPrompt = document.getElementById("ib-verifyprompt");
+    const vx = document.getElementById("ib-vx"), vy = document.getElementById("ib-vy");
+    const verifyBanner = document.getElementById("ib-verifybanner");
+    const verifyDots = document.getElementById("ib-verifydots");
+
+    function renderVerifyDots() {
+      verifyDots.innerHTML = "";
+      for (let i = 0; i < 2; i++) {
+        const s = document.createElement("span");
+        s.className = "rdot" + (i < verifyIdx ? " done" : "");
+        verifyDots.appendChild(s);
+      }
+    }
+
+    function startVerifyRound() {
+      const vM = randSmallM();
+      const t = randNativeHard();
+      const ans = applyM(vM, t.m, t.n);
+      verifyCurrent = { m: t.m, n: t.n, x: ans.x, y: ans.y };
+      window.__wtTest.ibVerify = verifyCurrent;
+      verifyPrompt.textContent =
+        `New Architecture: a=${vM.a}, b=${vM.b}, c=${vM.c}, d=${vM.d}. Native (m, n) = (${t.m}, ${t.n}). Use your formula.`;
+      vx.value = ""; vy.value = "";
+      verifyBanner.className = "status-banner"; verifyBanner.textContent = "🌀 Enter your answer";
+      verifyLocked = false;
+      renderVerifyDots();
+    }
+
+    function checkVerify() {
+      if (verifyLocked) return;
+      if (vx.value === "" || vy.value === "") return;
+      const x = Number(vx.value), y = Number(vy.value);
+      const correct = Math.abs(x - verifyCurrent.x) < 0.01 && Math.abs(y - verifyCurrent.y) < 0.01;
+      if (correct) {
+        verifyLocked = true;
+        verifyBanner.className = "status-banner win";
+        verifyBanner.textContent = "✅ Correct!";
+        verifyIdx++;
+        renderVerifyDots();
+        setTimeout(() => {
+          if (verifyIdx < 2) startVerifyRound();
+          else { verifyCard.style.display = "none"; revealCard.style.display = "block"; }
+        }, 900);
+      } else {
+        verifyBanner.className = "status-banner close";
+        verifyBanner.textContent = "🌡️ Not quite — a fresh one is on its way";
+        verifyLocked = true;
+        setTimeout(startVerifyRound, 1200);
+      }
+    }
+    vx.addEventListener("input", checkVerify);
+    vy.addEventListener("input", checkVerify);
+
+    /* hint toggle */
+    hintBtn.addEventListener("click", () => hintBody.classList.toggle("open"));
+
+    newAnchorRound();
+  })();
+} catch (e) { console.error("Trial I-B failed to initialize:", e); }
+
+  /* ================= Trial II: Reverse the Signal ================= */
+  try {
+  (function () {
+    let round = 0;
+    const TOTAL = 3;
+    let locked = false;
+    let current = null;
+    let seq = 0; // same stale-timer guard pattern as Trial I-A/I-B
+    let blinkTimer = null;
+    const timers = [];
+    function clearAllTimers() {
+      timers.forEach(clearTimeout); timers.length = 0;
+      if (blinkTimer) { clearInterval(blinkTimer); blinkTimer = null; }
+    }
+
+    // Roles are reversed from Trial I-A: here the GIVEN clue is the real
+    // position (x, y), known on Prime from the moment the round starts, and
+    // the player solves for the native (m, n) that lives on the Warp. Prime
+    // still has no basis vectors of its own (its matrix is always the
+    // identity) — it shows the SAME borrowed i,j as the Warp, same as every
+    // other Trial, for display consistency.
+    const primeLab = new MatrixLab(document.getElementById("t2-prime"), {
+      range: RANGE, center: CENTER, showOriginLabel: true,
+      matrix: { a: 1, b: 0, c: 0, d: 1 }, showBasisVectors: false, draggableBasis: false,
+      basisColors: { i: COLORS.blue, j: COLORS.blue },
+    });
+    const warpLab = new MatrixLab(document.getElementById("t2-warp"), {
+      range: RANGE, center: CENTER, showOriginLabel: true,
+      matrix: { a: 1, b: 0, c: 0, d: 1 }, showBasisVectors: true, draggableBasis: false,
+      basisColors: { i: COLORS.red, j: COLORS.purple },
+      showLiveAxis: false, standardAxisColor: COLORS.black,
+      showGhostIdentity: false, // hidden until a correct answer reveals it
+    });
+
+    const mInput = document.getElementById("t2-m"), nInput = document.getElementById("t2-n");
+    const banner = document.getElementById("t2-banner");
+    const jackEl = document.getElementById("t2-jack");
+    const dotsWrap = document.getElementById("t2-dots");
+    const roundNum = document.getElementById("t2-roundNum");
+    const revealCard = document.getElementById("t2-reveal");
+    const celebrateBox = document.getElementById("t2-celebrate");
+    const celebrateMsg = document.getElementById("t2-celebrateMsg");
+    const notationEl = document.getElementById("t2-notation");
+    const continueBtn = document.getElementById("t2-continueBtn");
+
+    function renderDots() {
+      dotsWrap.innerHTML = "";
+      for (let i = 0; i < TOTAL; i++) {
+        const s = document.createElement("span");
+        s.className = "rdot" + (i < round ? " done" : "");
+        dotsWrap.appendChild(s);
+      }
+      roundNum.textContent = Math.min(round + 1, TOTAL);
+    }
+
+    function newRound() {
+      seq++; clearAllTimers();
+      const g = genForwardRoundDynamic();
+      current = g;
+      primeLab.setRange(g.range, g.center);
+      warpLab.setRange(g.range, g.center);
+      primeLab.setVectorArrows([
+        { v: { x: g.M.a, y: g.M.c }, color: COLORS.red, label: "î" },
+        { v: { x: g.M.b, y: g.M.d }, color: COLORS.purple, label: "ĵ" },
+      ]);
+      // The given (x, y) is the clue this Trial, so — unlike Trial I-A's
+      // hidden-until-win target — it's shown on BOTH planes from the start:
+      // trivially on Prime (real coords), and at the same raw pixel spot on
+      // the Warp, where the player reads it against the skewed native grid.
+      primeLab.setTargetPoint({ x: g.x, y: g.y, color: COLORS.orange, label: `(${g.x}, ${g.y})` });
+      primeLab.setCombinationFor(null);
+      warpLab.setMatrix(g.M);
+      warpLab.setCombinationFor(null);
+      warpLab.setCombinationColors({ i: COLORS.blue, j: COLORS.blue });
+      warpLab.setShowGhostIdentity(false); // hidden again until this round is answered correctly
+      warpLab.setTargetPoint({ x: g.x, y: g.y, color: COLORS.orange, label: `(${g.x}, ${g.y})` });
+      warpLab.setTargetPoints([]); // clears any live-guess dot left from a previous round
+      jackEl.textContent = `(x, y) = (${g.x}, ${g.y})`;
+      window.__wtTest.t2 = current;
+      mInput.value = ""; nInput.value = "";
+      banner.className = "status-banner"; banner.textContent = "🌀 Enter native coordinates";
+      celebrateBox.style.display = "none";
+      continueBtn.style.display = "none";
+      locked = false;
+      renderDots();
+    }
+
+    /* ---- live "your guess" feedback on the Warp as the player types m, n —
+       the mirror of Trial I-A's live reference on Prime. The guessed native
+       point is plotted at its REAL position (apply M to the typed m, n) as a
+       second raw dot on the Warp, next to the given (x, y) marker, so the
+       player can see at a glance how close their guess's landing spot is —
+       plus a live (blue) combination path, using the Warp's own matrix
+       directly since no override is needed there. ---- */
+    function updateLiveReference() {
+      if (locked) return;
+      if (mInput.value === "" || nInput.value === "") {
+        warpLab.setTargetPoints([]);
+        warpLab.setCombinationFor(null);
+        return;
+      }
+      const m = Number(mInput.value), n = Number(nInput.value);
+      const guess = applyM(current.M, m, n);
+      warpLab.setTargetPoints([{ x: guess.x, y: guess.y, color: COLORS.blue, label: "your guess" }]);
+      warpLab.setCombinationFor({ x: m, y: n });
+    }
+
+    function checkAnswer() {
+      if (locked) return;
+      if (mInput.value === "" || nInput.value === "") return;
+      const m = Number(mInput.value), n = Number(nInput.value);
+      const correct = Math.abs(m - current.m) < 0.01 && Math.abs(n - current.n) < 0.01;
+      if (correct) {
+        locked = true;
+        banner.className = "status-banner win";
+        banner.textContent = `✅ Correct! Native (m, n) = (${current.m}, ${current.n})`;
+        round++;
+        renderDots();
+        startCelebration();
+      } else {
+        banner.className = "status-banner close";
+        banner.textContent = "🌡️ Not quite — try solving am+bn=x, cm+dn=y";
+      }
+    }
+
+    function startCelebration() {
+      const mySeq = seq;
+      const { M, m, n, x, y } = current;
+      celebrateBox.style.display = "block";
+      celebrateMsg.textContent = "✅ Correct! Watch how the two Constructs connect.";
+      notationEl.innerHTML = "";
+      continueBtn.style.display = "none";
+
+      // Stage 1 (immediate): reveal the Warp's plain dashed reference grid;
+      // clear the live-guess dot now that the answer is locked in.
+      warpLab.setShowGhostIdentity(true);
+      warpLab.setTargetPoints([]);
+
+      // Stage 2 (~700ms): dual-plane combination-path animation from (0,0) to
+      // the target, î's leg red, ĵ's leg purple — Prime needs matrixOverride
+      // (its own matrix is always the identity); the Warp's own matrix
+      // already IS M.
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        primeLab.setCombinationColors({ i: COLORS.red, j: COLORS.purple });
+        primeLab.setCombinationFor({ x: m, y: n, matrixOverride: M });
+        primeLab.pulseCombinationPath(1600);
+        warpLab.setCombinationColors({ i: COLORS.red, j: COLORS.purple });
+        warpLab.setCombinationFor({ x: m, y: n });
+        warpLab.pulseCombinationPath(1600);
+      }, 700));
+
+      // Stage 3 (~2600ms): blink the target on both planes together.
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        let count = 0;
+        blinkTimer = setInterval(() => {
+          if (seq !== mySeq) { clearInterval(blinkTimer); return; }
+          count++;
+          const on = count % 2 === 0;
+          primeLab.setTargetPoint(on ? { x, y, color: COLORS.green, label: `(${x}, ${y})` } : null);
+          warpLab.setTargetPoint(on ? { x, y, color: COLORS.green, label: `(${m}, ${n})` } : null);
+          if (count >= 6) {
+            clearInterval(blinkTimer); blinkTimer = null;
+            primeLab.setTargetPoint({ x, y, color: COLORS.green, label: `(${x}, ${y})` });
+            warpLab.setTargetPoint({ x, y, color: COLORS.green, label: `(${m}, ${n})` });
+          }
+        }, 260);
+      }, 2600));
+
+      // Stage 4 (~4400ms): expanded-multiplication notation, then the manual
+      // Continue button.
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        notationEl.innerHTML =
+          matrixHTML(M, [COLORS.red, COLORS.purple]) + " · " +
+          colVectorHTML(m, n, COLORS.green) + " = " +
+          expandedProductHTML(M, m, n, COLORS.red, COLORS.purple) + " = " +
+          colVectorHTML(x, y);
+        continueBtn.style.display = "inline-block";
+      }, 4400));
+    }
+
+    continueBtn.addEventListener("click", () => {
+      if (round >= TOTAL) {
+        celebrateBox.style.display = "none";
+        setTimeout(() => { revealCard.style.display = "block"; }, 100);
+      } else {
+        newRound();
+      }
+    });
+
+    mInput.addEventListener("input", () => { updateLiveReference(); checkAnswer(); });
+    nInput.addEventListener("input", () => { updateLiveReference(); checkAnswer(); });
+    newRound();
+  })();
+} catch (e) { console.error("Trial II failed to initialize:", e); }
+
+  /* ================= Trial II-B: Crack the Inverse ================= */
+  try {
+  (function () {
+    const ANCHORS = IIB_ANCHORS; // (1,1), (2,1), (1,2), (2,-1) — see comment above genArchitectureMDynamicIIB
+    // One Architecture for the whole Trial, same approach as Trial I-B —
+    // the point here is watching the SAME elimination arithmetic play out
+    // round after round against a fixed M, not a fresh M every time.
+    const arch = genArchitectureMDynamicIIB();
+    const M = arch.M;
+    let stepIdx = 0; // 0..ANCHORS.length-1 = anchor rounds
+    const TOTAL = ANCHORS.length;
+    let locked = false;
+    let current = null;
+    let logCount = 0;
+    let seq = 0;
+    let blinkTimer = null;
+    const timers = [];
+    function clearAllTimers() {
+      timers.forEach(clearTimeout); timers.length = 0;
+      if (blinkTimer) { clearInterval(blinkTimer); blinkTimer = null; }
+    }
+
+    const primeLab = new MatrixLab(document.getElementById("t2b-prime"), {
+      range: arch.range, center: arch.center, showOriginLabel: true,
+      matrix: { a: 1, b: 0, c: 0, d: 1 }, showBasisVectors: false, draggableBasis: false,
+      basisColors: { i: COLORS.blue, j: COLORS.blue },
+    });
+    const warpLab = new MatrixLab(document.getElementById("t2b-warp"), {
+      range: arch.range, center: arch.center, showOriginLabel: true,
+      matrix: M, showBasisVectors: true, draggableBasis: false,
+      basisColors: { i: COLORS.red, j: COLORS.purple },
+      showLiveAxis: false, standardAxisColor: COLORS.black,
+      showGhostIdentity: false,
+    });
+    primeLab.setVectorArrows([
+      { v: { x: M.a, y: M.c }, color: COLORS.red, label: "î" },
+      { v: { x: M.b, y: M.d }, color: COLORS.purple, label: "ĵ" },
+    ]);
+
+    const mInput = document.getElementById("t2b-m"), nInput = document.getElementById("t2b-n");
+    const banner = document.getElementById("t2b-banner");
+    const jackEl = document.getElementById("t2b-jack");
+    const dotsWrap = document.getElementById("t2b-dots");
+    const roundNum = document.getElementById("t2b-roundNum");
+    const revealCard = document.getElementById("t2b-reveal");
+    const celebrateBox = document.getElementById("t2b-celebrate");
+    const celebrateMsg = document.getElementById("t2b-celebrateMsg");
+    const notationEl = document.getElementById("t2b-notation");
+    const continueBtn = document.getElementById("t2b-continueBtn");
+    const logEmpty = document.getElementById("t2b-logempty");
+    const logBody = document.getElementById("t2b-logbody");
+    const mcqCard = document.getElementById("t2b-mcq");
+    const mcqOptionsEl = document.getElementById("t2b-mcqOptions");
+    const mcqExplainEl = document.getElementById("t2b-mcqExplain");
+
+    function renderDots() {
+      dotsWrap.innerHTML = "";
+      for (let i = 0; i < TOTAL; i++) {
+        const s = document.createElement("span");
+        s.className = "rdot" + (i < stepIdx ? " done" : "");
+        dotsWrap.appendChild(s);
+      }
+      roundNum.textContent = Math.min(stepIdx + 1, TOTAL);
+    }
+
+    function appendLog(x, y, m, n) {
+      logEmpty.style.display = "none";
+      logCount++;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${logCount}</td><td>(${x}, ${y})</td><td>${forwardBackwardHTML(M, m, n, x, y, COLORS.red, COLORS.purple)}</td><td>(${m}, ${n})</td>`;
+      logBody.appendChild(tr);
+    }
+    function appendGeneralLogRow() {
+      const tr = document.createElement("tr");
+      tr.className = "general-row";
+      tr.innerHTML = `<td><b>General</b></td><td>(x, y)</td><td>${forwardBackwardGeneralHTML(COLORS.red, COLORS.purple)}</td><td>(m, n)</td>`;
+      logBody.appendChild(tr);
+    }
+
+    function newRound() {
+      seq++; clearAllTimers();
+      const t = ANCHORS[stepIdx];
+      const ans = applyM(M, t.m, t.n);
+      current = { m: t.m, n: t.n, x: ans.x, y: ans.y };
+      primeLab.setTargetPoint({ x: ans.x, y: ans.y, color: COLORS.orange, label: `(${ans.x}, ${ans.y})` });
+      primeLab.setCombinationFor(null);
+      warpLab.setCombinationFor(null);
+      warpLab.setCombinationColors({ i: COLORS.blue, j: COLORS.blue });
+      warpLab.setShowGhostIdentity(false);
+      warpLab.setTargetPoint({ x: ans.x, y: ans.y, color: COLORS.orange, label: `(${ans.x}, ${ans.y})` });
+      warpLab.setTargetPoints([]);
+      warpLab.setParallelograms([]); // clear last round's area-comparison shapes
+      jackEl.textContent = `(x, y) = (${ans.x}, ${ans.y})`;
+      window.__wtTest.t2b = current;
+      mInput.value = ""; nInput.value = "";
+      banner.className = "status-banner"; banner.textContent = "🌀 Enter native coordinates";
+      celebrateBox.style.display = "none";
+      continueBtn.style.display = "none";
+      locked = false;
+      renderDots();
+    }
+
+    function updateLiveReference() {
+      if (locked) return;
+      if (mInput.value === "" || nInput.value === "") {
+        warpLab.setTargetPoints([]);
+        warpLab.setCombinationFor(null);
+        return;
+      }
+      const m = Number(mInput.value), n = Number(nInput.value);
+      const guess = applyM(M, m, n);
+      warpLab.setTargetPoints([{ x: guess.x, y: guess.y, color: COLORS.blue, label: "your guess" }]);
+      warpLab.setCombinationFor({ x: m, y: n });
+    }
+
+    function checkAnswer() {
+      if (locked) return;
+      if (mInput.value === "" || nInput.value === "") return;
+      const m = Number(mInput.value), n = Number(nInput.value);
+      const correct = Math.abs(m - current.m) < 0.01 && Math.abs(n - current.n) < 0.01;
+      if (correct) {
+        locked = true;
+        banner.className = "status-banner win";
+        banner.textContent = `✅ Correct! Native (m, n) = (${current.m}, ${current.n})`;
+        appendLog(current.x, current.y, current.m, current.n);
+        stepIdx++;
+        renderDots();
+        startCelebration();
+      } else {
+        banner.className = "status-banner close";
+        banner.textContent = "🌡️ Not quite — try solving am+bn=x, cm+dn=y";
+      }
+    }
+
+    function startCelebration() {
+      const mySeq = seq;
+      const { m, n, x, y } = current;
+      celebrateBox.style.display = "block";
+      celebrateMsg.textContent = "✅ Correct! Here's the action that actually found it.";
+      notationEl.innerHTML = "";
+      continueBtn.style.display = "none";
+
+      warpLab.setShowGhostIdentity(true);
+      warpLab.setTargetPoints([]);
+
+      // The area-comparison shapes this whole celebration builds up, in raw
+      // (untransformed) coordinates — same convention as vectorArrows/
+      // targetPoint, so they land at their true screen position regardless
+      // of the Warp's own matrix.
+      const refPara = { v1: { x: M.a, y: M.c }, v2: { x: M.b, y: M.d }, color: COLORS.gray, label: "Area(i, j)", alpha: 0.16 };
+      const mPara = { v1: { x, y }, v2: { x: M.b, y: M.d }, color: COLORS.blue, label: "Area(target, j)", alpha: 0.24 };
+      const nPara = { v1: { x: M.a, y: M.c }, v2: { x, y }, color: COLORS.blue, label: "Area(i, target)", alpha: 0.24 };
+
+      // Stage 1 (immediate): the reference shape alone — the one thing
+      // that stays fixed all Trial, everything else gets compared against.
+      warpLab.setParallelograms([refPara]);
+
+      // Stage 2 (~700ms): swap î for the target (ĵ untouched) — the same
+      // combination-path animation as before, now alongside the actual
+      // shaded area it corresponds to. This IS the action: literally
+      // replacing one strand with the target and watching the shape (and
+      // its area) change.
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        celebrateMsg.textContent = "Swap Strand-i for the target (Strand-j stays put) — compare the shaded areas: that ratio is m.";
+        warpLab.setParallelograms([refPara, mPara]);
+        primeLab.setCombinationColors({ i: COLORS.red, j: COLORS.purple });
+        primeLab.setCombinationFor({ x: m, y: n, matrixOverride: M });
+        primeLab.pulseCombinationPath(1600);
+        warpLab.setCombinationColors({ i: COLORS.red, j: COLORS.purple });
+        warpLab.setCombinationFor({ x: m, y: n });
+        warpLab.pulseCombinationPath(1600);
+      }, 700));
+
+      // Stage 3 (~2000ms): the other swap — ĵ for the target, î untouched —
+      // for n.
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        celebrateMsg.textContent = "Now swap Strand-j for the target instead (Strand-i stays put) — that ratio is n.";
+        warpLab.setParallelograms([refPara, nPara]);
+      }, 2000));
+
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        let count = 0;
+        blinkTimer = setInterval(() => {
+          if (seq !== mySeq) { clearInterval(blinkTimer); return; }
+          count++;
+          const on = count % 2 === 0;
+          primeLab.setTargetPoint(on ? { x, y, color: COLORS.green, label: `(${x}, ${y})` } : null);
+          warpLab.setTargetPoint(on ? { x, y, color: COLORS.green, label: `(${m}, ${n})` } : null);
+          if (count >= 6) {
+            clearInterval(blinkTimer); blinkTimer = null;
+            primeLab.setTargetPoint({ x, y, color: COLORS.green, label: `(${x}, ${y})` });
+            warpLab.setTargetPoint({ x, y, color: COLORS.green, label: `(${m}, ${n})` });
+          }
+        }, 260);
+      }, 2600));
+
+      // Stage 5: forward (M times (m,n) lands on (x,y)) paired with backward
+      // (the elimination that undoes it) for these exact numbers, now using
+      // the SAME Area(...) labels as the shapes just shown — so the text
+      // is a record of the action, not a separate, unexplained formula.
+      timers.push(setTimeout(() => {
+        if (seq !== mySeq) return;
+        celebrateMsg.textContent = "✅ Correct! Here's the same swap, written as arithmetic.";
+        notationEl.innerHTML = forwardBackwardHTML(M, m, n, x, y, COLORS.red, COLORS.purple);
+        continueBtn.style.display = "inline-block";
+      }, 4400));
+    }
+
+    continueBtn.addEventListener("click", () => {
+      if (stepIdx < TOTAL) {
+        newRound();
+      } else {
+        appendGeneralLogRow();
+        // Once the pattern has shown up 3 times (log) and once symbolically
+        // (general row), spell out the actual M -> M⁻¹ construction recipe
+        // using THIS Trial's concrete M, before asking the reflection
+        // question — this is the step that lets a player go from "I can
+        // recognize the pattern" to "I can build M⁻¹ myself given any M."
+        document.getElementById("t2b-inverseLine").innerHTML = inverseConstructionHTML(M);
+        document.getElementById("t2b-inversecard").style.display = "block";
+        startMcq();
+      }
+    });
+
+    mInput.addEventListener("input", () => { updateLiveReference(); checkAnswer(); });
+    nInput.addEventListener("input", () => { updateLiveReference(); checkAnswer(); });
+
+    /* ---- reflection MCQ: the "strands swap roles under inversion" insight —
+       m's elimination line only ever used ĵ's numbers (b, d); n's only used
+       î's (a, c). Naming that out loud is the synthesis step before Trial III. ---- */
+    const MCQ_OPTIONS = [
+      { text: "Solving for m only used Strand-j's numbers (b, d); solving for n only used Strand-i's (a, c) — they swap", correct: true },
+      { text: "Solving for m and n both used all four letters (a, b, c, d) equally every time",
+        explain: "Look at the log again — each row's m-line only ever has b and d in it, never a or c. Try again." },
+      { text: "It was a coincidence specific to this Architecture — a different M wouldn't show the same split",
+        explain: "The elimination algebra doesn't depend on M's actual numbers — it's the SAME split (m uses j's numbers, n uses i's) for any Architecture with a nonzero (ad − bc). Try again." },
+      { text: "Solving backward needs completely different numbers than a, b, c, d",
+        explain: "Every number in the elimination log's Computation column IS a, b, c, or d (and x, y) — no new numbers appeared. Try again." },
+    ];
+    let mcqAnswered = false;
+
+    function startMcq() {
+      mcqAnswered = false;
+      mcqExplainEl.className = "mcq-explain";
+      mcqExplainEl.textContent = "";
+      mcqOptionsEl.innerHTML = "";
+      MCQ_OPTIONS.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "mcq-option";
+        btn.textContent = opt.text;
+        btn.addEventListener("click", () => onMcqPick(i, btn));
+        mcqOptionsEl.appendChild(btn);
+      });
+      celebrateBox.style.display = "none";
+      mcqCard.style.display = "block";
+    }
+
+    function onMcqPick(i, btn) {
+      if (mcqAnswered) return;
+      const opt = MCQ_OPTIONS[i];
+      if (opt.correct) {
+        mcqAnswered = true;
+        btn.classList.add("correct");
+        mcqExplainEl.className = "mcq-explain open";
+        mcqExplainEl.textContent = "Exactly — inverting doesn't just undo the multiplication, it swaps which strand's numbers matter for which unknown.";
+        setTimeout(() => {
+          mcqCard.style.display = "none";
+          revealCard.style.display = "block";
+        }, 900);
+      } else {
+        btn.classList.add("wrong");
+        mcqExplainEl.className = "mcq-explain open";
+        mcqExplainEl.textContent = opt.explain;
+      }
+    }
+
+    newRound();
+  })();
+} catch (e) { console.error("Trial II-B failed to initialize:", e); }
+
+  /* ================= Trial III: Measure the Warp ================= */
+  try {
+  (function () {
+    let target = randInt(3, 8);
+    let hits = 0;
+    const TOTAL = 3;
+    let awaitingNext = false;
+    const startM = { a: 2, b: 1, c: 1, d: 2 };
+
+    /* ---- a "nice" (near-square) integer w×h rectangle with area exactly
+       `t`, anchored at the origin — see niceFactorPair() above. This is the
+       fixed reference shape the player compares the live (draggable)
+       parallelogram against. ---- */
+    function rectShapeFor(t) {
+      const { w, h } = niceFactorPair(t);
+      return [{ x: 0, y: 0 }, { x: w, y: 0 }, { x: w, y: h }, { x: 0, y: h }];
+    }
+
+    const warpLab = new MatrixLab(document.getElementById("t3-warp"), {
+      range: RANGE, center: CENTER, showOriginLabel: true,
+      matrix: { a: startM.a, b: startM.b, c: startM.c, d: startM.d },
+      showBasisVectors: true, draggableBasis: true,
+      // Trial I-A/I-B settled on red î / purple ĵ (matching the site-wide
+      // convention), so Trial III uses the same pair for consistency across
+      // the whole file — this is also MatrixLab's own default, so this line
+      // is technically redundant, but kept explicit as a reminder that it's
+      // an intentional match, not an accident.
+      basisColors: { i: COLORS.red, j: COLORS.purple },
+      parallelograms: [{ v1: { x: startM.a, y: startM.c }, v2: { x: startM.b, y: startM.d }, color: COLORS.blue, label: "density", alpha: 0.18 }],
+      // A concrete, fixed rectangle whose integer area equals the current
+      // target density — a real shape to aim for instead of a bare number,
+      // per the "what am I even dragging toward" redesign ask. Anchored at
+      // the origin, same as the live parallelogram, so the two shapes'
+      // relative size is a direct visual comparison, not just two numbers.
+      targetShape: rectShapeFor(target),
+      onMatrixChange: (m) => renderT3(m),
+    });
+    window.__wtTest.t3 = {
+      setMatrix: (m) => warpLab.setMatrix(m),
+      getTarget: () => target,
+      getHits: () => hits,
+    };
+
+    const banner = document.getElementById("t3-banner");
+    const readout = document.getElementById("t3-readout");
+    const chip = document.getElementById("t3-chip");
+    const dotsWrap = document.getElementById("t3-dots");
+    const revealCard = document.getElementById("t3-reveal");
+
+    function renderDots() {
+      dotsWrap.innerHTML = "";
+      for (let i = 0; i < TOTAL; i++) {
+        const s = document.createElement("span");
+        s.className = "rdot" + (i < hits ? " done" : "");
+        dotsWrap.appendChild(s);
+      }
+    }
+
+    function updateReadoutAndChip(m) {
+      const det = detM(m);
+      const area = Math.abs(det);
+      warpLab.setParallelograms([{ v1: { x: m.a, y: m.c }, v2: { x: m.b, y: m.d }, color: COLORS.blue, label: "density", alpha: 0.18 }]);
+      const rect = niceFactorPair(target);
+      readout.innerHTML = `Density = |det| = <b>${roundTo2dp(area)}</b> &nbsp;·&nbsp; target = <b>${target}</b> (dashed rectangle, ${rect.w}×${rect.h})`;
+      if (area < 0.2) {
+        chip.className = "status-chip glitch"; chip.textContent = "⚠️ GLITCH — the Construct collapsed onto a line";
+      } else if (det < 0) {
+        chip.className = "status-chip mirror"; chip.textContent = "🪞 MIRROR ANOMALY — orientation flipped";
+      } else {
+        chip.className = "status-chip stable"; chip.textContent = "🟢 Construct stable";
+      }
+      return area;
+    }
+
+    function renderT3(m) {
+      const area = updateReadoutAndChip(m);
+      const dist = Math.abs(area - target);
+      if (!awaitingNext && dist < 0.3) {
+        awaitingNext = true;
+        banner.className = "status-banner win";
+        banner.textContent = "🎉 Capsule sent — the shaded area matches the dashed rectangle!";
+        hits++;
+        renderDots();
+        if (hits >= TOTAL) {
+          setTimeout(() => { revealCard.style.display = "block"; }, 600);
+        } else {
+          setTimeout(nextTarget, 900);
+        }
+      } else if (awaitingNext) {
+        // holding the win state until nextTarget() resets it
+      } else if (dist < 1.5) {
+        banner.className = "status-banner close";
+        banner.textContent = "🌡️ Close — the shaded area is nearly the size of the dashed rectangle";
+      } else {
+        banner.className = "status-banner";
+        banner.textContent = "🎯 Drag i (red) and j (purple) to fill as much area as the dashed rectangle";
+      }
+    }
+
+    function nextTarget() {
+      target = randInt(3, 8);
+      awaitingNext = false;
+      warpLab.setTargetShape(rectShapeFor(target));
+      updateReadoutAndChip(warpLab.matrix);
+      banner.className = "status-banner"; banner.textContent = "🎯 New target rectangle — drag i, j to match its area";
+    }
+
+    renderDots();
+    renderT3(startM);
+  })();
+} catch (e) { console.error("Trial III failed to initialize:", e); }
+
+</script>
+</body>
+</html>
