@@ -2395,17 +2395,19 @@ const MATRIX_LAB_PRESETS = {
         { v: { x: g.M.a, y: g.M.c }, color: COLORS.red, label: "î" },
         { v: { x: g.M.b, y: g.M.d }, color: COLORS.purple, label: "ĵ" },
       ]);
-      // The given (x, y) is the clue this Trial, so — unlike Trial I-A's
-      // hidden-until-win target — it's shown on BOTH planes from the start:
-      // trivially on Prime (real coords), and at the same raw pixel spot on
-      // the Warp, where the player reads it against the skewed native grid.
+      // The given (x, y) is the clue this Trial — it's the answer to
+      // "where is the Jack Point really," so it's only ever plotted on
+      // Prime. The Warp is where the player has to FIND that same point by
+      // eye, reading it off Strand-i/Strand-j — plotting it there too would
+      // just hand over the answer instead of asking for it. It reappears on
+      // the Warp only once the round is won (see startCelebration).
       primeLab.setTargetPoint({ x: g.x, y: g.y, color: COLORS.orange, label: `(${g.x}, ${g.y})` });
       primeLab.setCombinationFor(null);
       warpLab.setMatrix(g.M);
       warpLab.setCombinationFor(null);
       warpLab.setCombinationColors({ i: COLORS.blue, j: COLORS.blue });
       warpLab.setShowGhostIdentity(false); // hidden again until this round is answered correctly
-      warpLab.setTargetPoint({ x: g.x, y: g.y, color: COLORS.orange, label: `(${g.x}, ${g.y})` });
+      warpLab.setTargetPoint(null);
       warpLab.setTargetPoints([]); // clears any live-guess dot left from a previous round
       jackEl.textContent = `(x, y) = (${g.x}, ${g.y})`;
       window.__wtTest.t2 = current;
@@ -2671,12 +2673,14 @@ const MATRIX_LAB_PRESETS = {
       const t = ANCHORS[stepIdx];
       const ans = applyM(M, t.m, t.n);
       current = { m: t.m, n: t.n, x: ans.x, y: ans.y };
+      // Same rule as Trial II-A: the target is the answer, so it only ever
+      // shows on Prime. The Warp stays clear of it until the round is won.
       primeLab.setTargetPoint({ x: ans.x, y: ans.y, color: COLORS.orange, label: `(${ans.x}, ${ans.y})` });
       primeLab.setCombinationFor(null);
       warpLab.setCombinationFor(null);
       warpLab.setCombinationColors({ i: COLORS.blue, j: COLORS.blue });
       warpLab.setShowGhostIdentity(false);
-      warpLab.setTargetPoint({ x: ans.x, y: ans.y, color: COLORS.orange, label: `(${ans.x}, ${ans.y})` });
+      warpLab.setTargetPoint(null);
       warpLab.setTargetPoints([]);
       resetHint(); // shows just the gray reference shape; clears any hint state from last round
       jackEl.textContent = `(x, y) = (${ans.x}, ${ans.y})`;
