@@ -410,6 +410,8 @@
           </div>
           <div class="status-banner" id="t2b-banner">🌀 Enter native coordinates</div>
           <div class="round-dots" id="t2b-dots"></div>
+          <button class="hint-toggle" id="t2b-hintBtn" type="button">💡 Need a nudge?</button>
+          <div class="hint-body" id="t2b-hintBody"></div>
           <div class="celebrate-box" id="t2b-celebrate" style="display:none">
             <div id="t2b-celebrateMsg">✅ Correct!</div>
             <div class="notation-line" id="t2b-notation"></div>
@@ -1169,11 +1171,25 @@ class MatrixLab {
     ctx.restore();
     if (p.label) {
       const area = Math.abs(p.v1.x * p.v2.y - p.v1.y * p.v2.x);
-      const midX = (o.x + a.x + b.x + c.x) / 4, midY = (o.y + a.y + b.y + c.y) / 4;
+      const midX = (o.x + a.x + b.x + c.x) / 4;
+      // labelDy nudges the text up/down from the shape's centroid. Two
+      // parallelograms that share the origin corner can land on nearly the
+      // SAME centroid when their geometry happens to be similar (e.g. an
+      // (m, n) = (1, 1) round makes every swapped shape equal the
+      // reference shape) — without this offset their labels print on top
+      // of each other and become unreadable. Callers that show more than
+      // one labeled shape at once (see Trial II-B) set distinct labelDy
+      // values so the text always stacks legibly instead of colliding.
+      const midY = (o.y + a.y + b.y + c.y) / 4 + (p.labelDy || 0);
       ctx.font = "bold 12px sans-serif";
       ctx.fillStyle = p.color || "#1d5fb8";
       ctx.textAlign = "center";
-      ctx.fillText(`${p.label} = ${area.toFixed(2)}`, midX, midY);
+      const text = `${p.label} = ${area.toFixed(2)}`;
+      const w = ctx.measureText(text).width;
+      ctx.fillStyle = "rgba(255,255,255,0.78)";
+      ctx.fillRect(midX - w / 2 - 3, midY - 11, w + 6, 15);
+      ctx.fillStyle = p.color || "#1d5fb8";
+      ctx.fillText(text, midX, midY);
       ctx.textAlign = "left";
     }
   }
@@ -2521,6 +2537,24 @@ const MATRIX_LAB_PRESETS = {
     // round after round against a fixed M, not a fresh M every time.
     const arch = genArchitectureMDynamicIIB();
     const M = arch.M;
+    // The reference shape never changes across rounds (M is fixed all Trial)
+    // — computed once. Shown from the START of every round (not gated behind
+    // a hint) as a "mental baseline": the one fixed area everything else in
+    // this Trial gets compared against.
+    // labelDy keeps refPara's label ABOVE and the swap-shape's label BELOW
+    // its own centroid, always, by a fixed amount — so even in a round like
+    // (m, n) = (1, 1), where the swapped shape is geometrically identical
+    // to the reference and the two centroids coincide exactly, the two
+    // labels still stack instead of printing on top of one another.
+    const refPara = { v1: { x: M.a, y: M.c }, v2: { x: M.b, y: M.d }, color: COLORS.gray, label: "Area(i, j)", alpha: 0.14, labelDy: -9 };
+    function mParaFor(labeled) {
+      const { x, y } = current;
+      return { v1: { x, y }, v2: { x: M.b, y: M.d }, color: COLORS.blue, alpha: 0.24, label: labeled ? "Area(target, j)" : null, labelDy: 9 };
+    }
+    function nParaFor(labeled) {
+      const { x, y } = current;
+      return { v1: { x: M.a, y: M.c }, v2: { x, y }, color: COLORS.orangeFade, alpha: 0.24, label: labeled ? "Area(i, target)" : null, labelDy: 9 };
+    }
     let stepIdx = 0; // 0..ANCHORS.length-1 = anchor rounds
     const TOTAL = ANCHORS.length;
     let locked = false;
@@ -2566,6 +2600,47 @@ const MATRIX_LAB_PRESETS = {
     const mcqCard = document.getElementById("t2b-mcq");
     const mcqOptionsEl = document.getElementById("t2b-mcqOptions");
     const mcqExplainEl = document.getElementById("t2b-mcqExplain");
+    const hintBtn = document.getElementById("t2b-hintBtn");
+    const hintBody = document.getElementById("t2b-hintBody");
+    let hintStep = 0; // 0 = not opened; 1 = shapes shown, no numbers; 2 = numbers shown, ratio left to the player
+
+    /* ---- the hint is a two-tier SCAFFOLD, not an answer key: click 1 shows
+       the two swapped shapes with no numbers at all (just "does this look
+       bigger?"); click 2 adds the raw area numbers but deliberately stops
+       short of dividing them — the player still has to compute
+       Area(target,j) ÷ Area(i,j) themselves to get m. This is what turns the
+       shape from a post-hoc confirmation into something usable WHILE stuck. ---- */
+    function resetHint() {
+      hintStep = 0;
+      hintBtn.disabled = false;
+      hintBtn.textContent = "💡 Need a nudge?";
+      hintBody.className = "hint-body";
+      hintBody.innerHTML = "";
+      warpLab.setParallelograms([refPara]);
+    }
+    hintBtn.addEventListener("click", () => {
+      if (locked) return;
+      hintStep++;
+      if (hintStep === 1) {
+        warpLab.setParallelograms([refPara, mParaFor(false), nParaFor(false)]);
+        hintBody.className = "hint-body open";
+        hintBody.innerHTML = "Look at the blue and orange shapes that just appeared, next to the gray reference — how many times bigger (or smaller) does each one look?";
+        hintBtn.textContent = "💡 Show me the numbers";
+      } else if (hintStep === 2) {
+        // Shapes stay unlabeled ON THE CANVAS deliberately: with all three
+        // parallelograms sharing the origin corner, their centroid-anchored
+        // text labels can land on top of each other and become unreadable.
+        // The numbers instead appear here, color-matched to each shape, so
+        // the reader connects "this color = this area" without canvas clutter.
+        warpLab.setParallelograms([refPara, mParaFor(false), nParaFor(false)]);
+        const refArea = Math.abs(M.a * M.d - M.b * M.c);
+        const mArea = Math.abs(M.d * current.x - M.b * current.y);
+        const nArea = Math.abs(M.a * current.y - M.c * current.x);
+        hintBody.innerHTML = `<span style="color:${COLORS.gray};font-weight:800">Area(i, j) = ${roundTo2dp(refArea)}</span> &nbsp;·&nbsp; <span style="color:${COLORS.blue};font-weight:800">Area(target, j) = ${roundTo2dp(mArea)}</span> &nbsp;·&nbsp; <span style="color:${COLORS.orangeFade};font-weight:800">Area(i, target) = ${roundTo2dp(nArea)}</span><br>Divide each blue/orange area by the gray one — that ratio is your answer.`;
+        hintBtn.textContent = "💡 Hint used";
+        hintBtn.disabled = true;
+      }
+    });
 
     function renderDots() {
       dotsWrap.innerHTML = "";
@@ -2603,7 +2678,7 @@ const MATRIX_LAB_PRESETS = {
       warpLab.setShowGhostIdentity(false);
       warpLab.setTargetPoint({ x: ans.x, y: ans.y, color: COLORS.orange, label: `(${ans.x}, ${ans.y})` });
       warpLab.setTargetPoints([]);
-      warpLab.setParallelograms([]); // clear last round's area-comparison shapes
+      resetHint(); // shows just the gray reference shape; clears any hint state from last round
       jackEl.textContent = `(x, y) = (${ans.x}, ${ans.y})`;
       window.__wtTest.t2b = current;
       mInput.value = ""; nInput.value = "";
@@ -2656,14 +2731,13 @@ const MATRIX_LAB_PRESETS = {
 
       warpLab.setShowGhostIdentity(true);
       warpLab.setTargetPoints([]);
+      hintBtn.disabled = true; // the celebration takes over the shapes now — the hint's job is done
 
-      // The area-comparison shapes this whole celebration builds up, in raw
-      // (untransformed) coordinates — same convention as vectorArrows/
-      // targetPoint, so they land at their true screen position regardless
-      // of the Warp's own matrix.
-      const refPara = { v1: { x: M.a, y: M.c }, v2: { x: M.b, y: M.d }, color: COLORS.gray, label: "Area(i, j)", alpha: 0.16 };
-      const mPara = { v1: { x, y }, v2: { x: M.b, y: M.d }, color: COLORS.blue, label: "Area(target, j)", alpha: 0.24 };
-      const nPara = { v1: { x: M.a, y: M.c }, v2: { x, y }, color: COLORS.blue, label: "Area(i, target)", alpha: 0.24 };
+      // The area-comparison shapes this whole celebration builds up — same
+      // refPara/mParaFor/nParaFor helpers the hint uses, fully labeled, so
+      // a player who used the hint sees the EXACT same shapes here, just
+      // confirmed and carried through to the algebra.
+      const mPara = mParaFor(true), nPara = nParaFor(true);
 
       // Stage 1 (immediate): the reference shape alone — the one thing
       // that stays fixed all Trial, everything else gets compared against.
