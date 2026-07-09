@@ -112,6 +112,21 @@
   }
   .facil-note b { display: block; margin-bottom: 4px; color: var(--facil); font-size: 12px; text-transform: uppercase; letter-spacing: .3px; }
 
+  /* ---- bridge card: recaps the previous Trial's conclusion and derives,
+     in symbols, why THIS Trial needs an inverse — placed before the round
+     activity so the "why" lands before the "do." ---- */
+  .bridge-card {
+    padding: 18px 20px; border-radius: var(--radius);
+    background: var(--brand-soft); border: 1px solid #c7ddf5; border-left: 4px solid var(--brand);
+  }
+  .bridge-card .tag {
+    display: block; font-size: 11.5px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .3px; color: var(--brand); margin-bottom: 8px;
+  }
+  .bridge-card p { margin: 0 0 10px; font-size: 14.5px; line-height: 1.6; }
+  .bridge-card p:last-child { margin-bottom: 0; }
+  .bridge-card .eq-line { text-align: center; margin: 12px 0; font-size: 14.5px; }
+
   table.trial-log { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
   table.trial-log th, table.trial-log td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: center; }
   table.trial-log th { color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: .3px; }
@@ -209,9 +224,9 @@
     <button data-slide="1"><span class="idx">1</span>Trial I-A — Decode</button>
     <button data-slide="2"><span class="idx">2</span>Trial I-B — Crack the Code</button>
     <button data-slide="3"><span class="idx">3</span>Trial II-A — Reverse the Signal</button>
-    <button data-slide="4"><span class="idx">4</span>Trial II-B — Crack the Inverse</button>
-    <button data-slide="5"><span class="idx">5</span>Trial III — Measure the Warp</button>
-    <button data-slide="6"><span class="idx">6</span>Debrief</button>
+    <button data-slide="5"><span class="idx">4</span>Trial II-B — Crack the Inverse</button>
+    <button data-slide="6"><span class="idx">5</span>Trial III — Measure the Warp</button>
+    <button data-slide="7"><span class="idx">6</span>Debrief</button>
   </nav>
 
   <div class="main">
@@ -352,11 +367,31 @@
         </div>
       </div>
 
-      <!-- ===== Slide 3: Trial II-A ===== -->
+      <!-- ===== Slide 2c: Trial II-A — read first, own page, before any
+           round starts. Kept as its own slide (rather than stacked above
+           the activity card) so landing on Trial II-A never means a long
+           scroll before the actual grids are even visible — see slide3's
+           "Let's find (m, n)" continue button below. ===== -->
+      <div class="slide" id="slide2c">
+        <div class="eyebrow">Trial II-A</div>
+        <h2 class="slide-title">Reverse the Signal</h2>
+        <p class="lead">Same Architecture (M), same two strands — but this time the question runs backward.</p>
+        <div class="card bridge-card">
+          <span class="tag">🔗 Carried over from Trial I-B</span>
+          <p>Trial I-B cracked this for ANY Architecture — multiply the native coordinates by M, and you land on the real position:</p>
+          <div class="eq-line" id="t2-bridgeForward"></div>
+          <p>This Trial flips the question. The real position (x, y) is what's given this time — read straight off Prime — and it's the native (m, n) you need to find. Same M, opposite direction: to undo a multiplication by M, you multiply both sides by its inverse, M⁻¹.</p>
+          <div class="eq-line" id="t2-bridgeInverse"></div>
+          <p>For now, you'll find (m, n) the fast way — by eye, tracing along Strand-i and Strand-j like Trial I-A, just reversed. Trial II-B is where you'll crack exactly what M⁻¹ looks like, in numbers.</p>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="4">Let's find (m, n) →</button></div>
+        </div>
+      </div>
+
+      <!-- ===== Slide 3: Trial II-A — the activity itself ===== -->
       <div class="slide" id="slide3">
         <div class="eyebrow">Trial II-A · Round <span id="t2-roundNum">1</span> of 3</div>
         <h2 class="slide-title">Reverse the Signal — Read It</h2>
-        <p class="lead">Now it runs backward. The Jack Point's real position is given in Prime — Strand-i (red) and Strand-j (purple) are traced on both sides. Find its native (m, n) inside the Warp by eye.</p>
+        <p class="lead">The Jack Point's real position is given in Prime — Strand-i (red) and Strand-j (purple) are traced on both sides. Find its native (m, n) inside the Warp by eye.</p>
         <div class="card" id="t2-answercard">
           <div class="dual-canvas">
             <div class="canvas-col">
@@ -383,7 +418,7 @@
         </div>
         <div class="card" id="t2-reveal" style="display:none">
           <p style="margin:0"><b>👀 Reading the picture works</b> — but it doesn't scale to numbers too big to fit on a grid. Next: the arithmetic that's been happening under the hood the whole time.</p>
-          <div class="btn-row"><button class="btn primary" data-jump-slide="4">Continue: Trial II-B →</button></div>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="5">Continue: Trial II-B →</button></div>
         </div>
       </div>
 
@@ -437,7 +472,7 @@
         </div>
         <div class="card" id="t2b-reveal" style="display:none">
           <p style="margin:0"><b>🔑 Going forward means multiplying by M. Coming back means multiplying by M⁻¹</b> — the inverse. Multiplying and un-multiplying are opposite moves, not the same move done twice — and notice that same (ad − bc) showed up again, doing the same job every round.</p>
-          <div class="btn-row"><button class="btn primary" data-jump-slide="5">Continue: Trial III →</button></div>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="6">Continue: Trial III →</button></div>
         </div>
       </div>
 
@@ -457,7 +492,7 @@
         <div class="hint-body" id="t3-hintBody">Try dragging i and j until they point almost the same direction — watch the density and the status chip. Then try dragging one past the other's line entirely.</div>
         <div class="card" id="t3-reveal" style="display:none">
           <p style="margin:0"><b>🔑 Density = |det(M)| = |ad − bc|.</b> This is also why Trial II always had an answer — reversing the signal only works when Density ≠ 0.</p>
-          <div class="btn-row"><button class="btn primary" data-jump-slide="6">Continue: Debrief →</button></div>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="7">Continue: Debrief →</button></div>
         </div>
       </div>
 
@@ -1619,6 +1654,24 @@ const MATRIX_LAB_PRESETS = {
     const backward = `← ${inverseGeneralHTML(colorI, colorJ)}`;
     return `<div>${forward}</div><div style="margin-top:6px">${backward}</div>`;
   }
+
+  /* ---- Trial II-A's bridge card: recaps Trial I-B's conclusion in compact
+     matrix form (M·(m,n) = (x,y)), symbolic, then derives — still purely
+     symbolically — why reversing the question calls for M⁻¹. This is
+     deliberately NOT the same thing as Trial II-B's payoff: it never shows
+     what M⁻¹'s entries actually look like in terms of a, b, c, d, only that
+     multiplying both sides by "whatever undoes M" cancels M on the left
+     into the identity. The concrete recipe is still Trial II-B's to reveal. ---- */
+  function bridgeForwardHTML(colorI, colorJ) {
+    return `${matrixHTML({ a: "a", b: "b", c: "c", d: "d" }, [colorI, colorJ])}&nbsp;·&nbsp;${colVectorHTML("m", "n")}&nbsp;=&nbsp;${colVectorHTML("x", "y")}`;
+  }
+  function bridgeInverseHTML(colorI, colorJ) {
+    const step1 = `M⁻¹·${matrixHTML({ a: "a", b: "b", c: "c", d: "d" }, [colorI, colorJ])}&nbsp;·&nbsp;${colVectorHTML("m", "n")}&nbsp;=&nbsp;M⁻¹·${colVectorHTML("x", "y")}`;
+    const step2 = `${matrixHTML({ a: "1", b: "0", c: "0", d: "1" })}&nbsp;·&nbsp;${colVectorHTML("m", "n")}&nbsp;=&nbsp;M⁻¹·${colVectorHTML("x", "y")}`;
+    const step2Note = `<div style="margin-top:4px;color:var(--muted);font-weight:600;font-size:12.5px">(M⁻¹M = I, the identity — undo what M did, and you're back where you started)</div>`;
+    const step3 = `${colVectorHTML("m", "n")}&nbsp;=&nbsp;M⁻¹·${colVectorHTML("x", "y")}`;
+    return `<div>${step1}</div><div style="margin-top:10px">${step2}</div>${step2Note}<div style="margin-top:10px">${step3}</div>`;
+  }
   /* ---- the actual M -> M⁻¹ construction recipe, with THIS Trial's concrete
      M plugged in: swap a and d, flip the sign of b and c, divide everything
      by (ad − bc). Left neutral (uncolored) rather than reusing the i/j
@@ -1662,7 +1715,7 @@ const MATRIX_LAB_PRESETS = {
      broken Trial should never be able to lock a player out of the rest of the
      game). ================================================================= */
   (function () {
-    const SLIDES = ["slide0", "slide1", "slide2", "slide3", "slide3b", "slide4", "slide5"];
+    const SLIDES = ["slide0", "slide1", "slide2", "slide2c", "slide3", "slide3b", "slide4", "slide5"];
     let current = 0;
     const dotsWrap = document.getElementById("dots");
     SLIDES.forEach((_, i) => {
@@ -2344,6 +2397,11 @@ const MATRIX_LAB_PRESETS = {
       timers.forEach(clearTimeout); timers.length = 0;
       if (blinkTimer) { clearInterval(blinkTimer); blinkTimer = null; }
     }
+
+    // Bridge card is static (symbolic, doesn't depend on any round's actual
+    // M) — populated once, here, before the round machinery below.
+    document.getElementById("t2-bridgeForward").innerHTML = bridgeForwardHTML(COLORS.red, COLORS.purple);
+    document.getElementById("t2-bridgeInverse").innerHTML = bridgeInverseHTML(COLORS.red, COLORS.purple);
 
     // Roles are reversed from Trial I-A: here the GIVEN clue is the real
     // position (x, y), known on Prime from the moment the round starts, and
