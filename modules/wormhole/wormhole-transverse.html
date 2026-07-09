@@ -312,17 +312,34 @@
             <!-- Panel 2: Prime Construct Emerging -->
             <g transform="translate(280,0)">
               <rect x="2" y="0" width="278" height="500" fill="#040a10"/>
-              <g stroke="#39d6c8" stroke-width="1.6" opacity="0.65">
-                <line x1="140" y1="250" x2="140" y2="60"/>
-                <line x1="140" y1="250" x2="140" y2="440"/>
-                <line x1="140" y1="250" x2="10" y2="250"/>
-                <line x1="140" y1="250" x2="270" y2="250"/>
-                <line x1="140" y1="250" x2="30" y2="120"/>
-                <line x1="140" y1="250" x2="250" y2="380"/>
-                <line x1="140" y1="250" x2="250" y2="120"/>
-                <line x1="140" y1="250" x2="30" y2="380"/>
+              <!-- the standard grid: exactly what tiling the identity matrix's
+                   own basis vectors (1,0) and (0,1) produces — an ordinary
+                   square grid, not a decorative starburst. Lines are spaced
+                   35px apart and deliberately land ON the origin row/column
+                   (140, 250) so the two axis lines below sit flush with it. -->
+              <g stroke="#1f6b66" stroke-width="1" opacity="0.5">
+                <line x1="0" y1="40" x2="280" y2="40"/>
+                <line x1="0" y1="75" x2="280" y2="75"/>
+                <line x1="0" y1="110" x2="280" y2="110"/>
+                <line x1="0" y1="145" x2="280" y2="145"/>
+                <line x1="0" y1="180" x2="280" y2="180"/>
+                <line x1="0" y1="215" x2="280" y2="215"/>
+                <line x1="0" y1="285" x2="280" y2="285"/>
+                <line x1="0" y1="320" x2="280" y2="320"/>
+                <line x1="0" y1="355" x2="280" y2="355"/>
+                <line x1="0" y1="390" x2="280" y2="390"/>
+                <line x1="0" y1="425" x2="280" y2="425"/>
+                <line x1="0" y1="460" x2="280" y2="460"/>
+                <line x1="35" y1="0" x2="35" y2="500"/>
+                <line x1="70" y1="0" x2="70" y2="500"/>
+                <line x1="105" y1="0" x2="105" y2="500"/>
+                <line x1="175" y1="0" x2="175" y2="500"/>
+                <line x1="210" y1="0" x2="210" y2="500"/>
+                <line x1="245" y1="0" x2="245" y2="500"/>
               </g>
-              <circle cx="140" cy="250" r="34" fill="none" stroke="#39d6c8" stroke-width="1.2" opacity="0.5"/>
+              <!-- the two basis vectors, (1,0) and (0,1), as the grid's axes -->
+              <line x1="0" y1="250" x2="280" y2="250" stroke="#39d6c8" stroke-width="1.6" opacity="0.85"/>
+              <line x1="140" y1="0" x2="140" y2="500" stroke="#39d6c8" stroke-width="1.6" opacity="0.85"/>
               <circle cx="140" cy="250" r="4.5" fill="#bdfbf4"/>
               <g transform="translate(140,140)" text-anchor="middle">
                 <path d="M -30 -22 L -38 -22 L -38 22 L -30 22" fill="none" stroke="#bdfbf4" stroke-width="2"/>
