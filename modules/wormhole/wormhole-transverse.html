@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Wormhole Transverse — A Matrix Game</title>
+<title id="pageTitle">Wormhole Transverse — A Matrix Game</title>
 <style>
   :root {
     --bg: #f3f6fb;
@@ -227,6 +227,13 @@
   .mcq-explain { display: none; margin-top: 4px; margin-bottom: 10px; padding: 8px 12px; border-radius: 8px; background: var(--amber-soft); font-size: 13px; line-height: 1.5; }
   .mcq-explain.open { display: block; }
 
+  .lang-toggle {
+    display: block; width: 100%; text-align: center; background: var(--brand-soft); color: var(--brand);
+    border: 1px solid #c7ddf5; border-radius: 10px; padding: 7px 10px; font-size: 12.5px; font-weight: 800;
+    cursor: pointer; margin: 0 8px 14px; font-family: inherit;
+  }
+  .lang-toggle:hover { background: #dcebfc; }
+
   @media (max-width: 820px) {
     .sidebar { display: none; }
     .sidebar.open { display: block; position: fixed; inset: 0; z-index: 35; width: 84vw; max-width: 320px; }
@@ -242,14 +249,15 @@
 
 <div class="app-shell">
   <nav class="sidebar" id="sidebar">
-    <h1>Wormhole Transverse<br>A Matrix Game</h1>
-    <button data-slide="0" class="active"><span class="idx">0</span>Enter the Construct</button>
-    <button data-slide="1"><span class="idx">1</span>Trial I-A — Decode</button>
-    <button data-slide="2"><span class="idx">2</span>Trial I-B — Crack the Code</button>
-    <button data-slide="3"><span class="idx">3</span>Trial II-A — Reverse the Signal</button>
-    <button data-slide="5"><span class="idx">4</span>Trial II-B — Crack the Inverse</button>
-    <button data-slide="6"><span class="idx">5</span>Trial III — Measure the Warp</button>
-    <button data-slide="7"><span class="idx">6</span>Debrief</button>
+    <h1 data-i18n="app_title">Wormhole Transverse<br>A Matrix Game</h1>
+    <button class="lang-toggle" id="langToggleBtn" type="button">ไทย</button>
+    <button data-slide="0" class="active"><span class="idx">0</span><span data-i18n="nav_0">Enter the Construct</span></button>
+    <button data-slide="1"><span class="idx">1</span><span data-i18n="nav_1">Trial I-A — Decode</span></button>
+    <button data-slide="2"><span class="idx">2</span><span data-i18n="nav_2">Trial I-B — Crack the Code</span></button>
+    <button data-slide="3"><span class="idx">3</span><span data-i18n="nav_3">Trial II-A — Reverse the Signal</span></button>
+    <button data-slide="5"><span class="idx">4</span><span data-i18n="nav_4">Trial II-B — Crack the Inverse</span></button>
+    <button data-slide="6"><span class="idx">5</span><span data-i18n="nav_5">Trial III — Measure the Warp</span></button>
+    <button data-slide="7"><span class="idx">6</span><span data-i18n="nav_6">Debrief</span></button>
   </nav>
 
   <div class="main">
@@ -257,11 +265,11 @@
 
       <!-- ===== Slide 0: intro ===== -->
       <div class="slide active" id="slide0">
-        <div class="eyebrow">Wormhole Transverse · a companion game for Module 5</div>
-        <h2 class="slide-title">Enter the Construct</h2>
+        <div class="eyebrow" data-i18n="s0_eyebrow">Wormhole Transverse · a companion game for Module 5</div>
+        <h2 class="slide-title" data-i18n="s0_title">Enter the Construct</h2>
 
         <div class="intro-visual">
-          <svg viewBox="0 0 1400 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Story banner: a point appears in the void, the Prime Construct's identity grid stabilizes, the Warp distorts away from it, the Bridge is calculated, systems come online.">
+          <svg viewBox="0 0 1400 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Story banner" id="storyBannerSvg">
             <defs>
               <radialGradient id="glowPoint" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stop-color="#eafff0" stop-opacity="1"/>
@@ -305,8 +313,8 @@
               <circle cx="140" cy="250" r="90" fill="url(#glowPoint)"/>
               <circle cx="140" cy="250" r="5" fill="#eafff0"/>
               <rect x="0" y="420" width="280" height="80" fill="url(#scrim)"/>
-              <text x="140" y="460" text-anchor="middle" class="panel-title">THE UNKNOWN VOID</text>
-              <text x="140" y="478" text-anchor="middle" class="panel-sub">(The Origin)</text>
+              <text x="140" y="460" text-anchor="middle" class="panel-title" data-i18n="s0_panel1_title">THE UNKNOWN VOID</text>
+              <text x="140" y="478" text-anchor="middle" class="panel-sub" data-i18n="s0_panel1_sub">(The Origin)</text>
             </g>
 
             <!-- Panel 2: Prime Construct Emerging -->
@@ -350,9 +358,9 @@
                 <text x="14" y="18" class="mono" font-size="18" font-weight="800" fill="#39d6c8">1</text>
               </g>
               <rect x="0" y="420" width="280" height="80" fill="url(#scrim)"/>
-              <text x="140" y="452" text-anchor="middle" class="panel-title">PRIME CONSTRUCT</text>
-              <text x="140" y="470" text-anchor="middle" class="panel-title">EMERGING</text>
-              <text x="140" y="486" text-anchor="middle" class="panel-sub">(The Stable Grid)</text>
+              <text x="140" y="452" text-anchor="middle" class="panel-title" data-i18n="s0_panel2_title1">PRIME CONSTRUCT</text>
+              <text x="140" y="470" text-anchor="middle" class="panel-title" data-i18n="s0_panel2_title2">EMERGING</text>
+              <text x="140" y="486" text-anchor="middle" class="panel-sub" data-i18n="s0_panel2_sub">(The Stable Grid)</text>
             </g>
 
             <!-- Panel 3: The Warp Distortion -->
@@ -387,8 +395,8 @@
               <circle cx="205" cy="215" r="5" fill="#ffb15c"/>
               <text x="150" y="70" class="mono" font-size="15" font-weight="700" fill="#ffb15c">(x, y)</text>
               <rect x="0" y="420" width="280" height="80" fill="url(#scrim)"/>
-              <text x="140" y="460" text-anchor="middle" class="panel-title">THE WARP DISTORTION</text>
-              <text x="140" y="478" text-anchor="middle" class="panel-sub">(The Shift)</text>
+              <text x="140" y="460" text-anchor="middle" class="panel-title" data-i18n="s0_panel3_title">THE WARP DISTORTION</text>
+              <text x="140" y="478" text-anchor="middle" class="panel-sub" data-i18n="s0_panel3_sub">(The Shift)</text>
             </g>
 
             <!-- Panel 4: Calculating the Bridge -->
@@ -414,9 +422,9 @@
                 <text x="215" y="370">∂</text>
               </g>
               <rect x="0" y="420" width="280" height="80" fill="url(#scrim)"/>
-              <text x="140" y="460" text-anchor="middle" class="panel-title">CALCULATING</text>
-              <text x="140" y="478" text-anchor="middle" class="panel-title">THE BRIDGE</text>
-              <text x="140" y="494" text-anchor="middle" class="panel-sub">(The Challenge)</text>
+              <text x="140" y="460" text-anchor="middle" class="panel-title" data-i18n="s0_panel4_title1">CALCULATING</text>
+              <text x="140" y="478" text-anchor="middle" class="panel-title" data-i18n="s0_panel4_title2">THE BRIDGE</text>
+              <text x="140" y="494" text-anchor="middle" class="panel-sub" data-i18n="s0_panel4_sub">(The Challenge)</text>
             </g>
 
             <!-- Panel 5: Systems Online -->
@@ -434,9 +442,9 @@
               <ellipse cx="140" cy="250" rx="52" ry="70" fill="none" stroke="#eafeff" stroke-width="2.2" opacity="0.9"/>
               <ellipse cx="140" cy="250" rx="34" ry="48" fill="none" stroke="#ffffff" stroke-width="1.4" opacity="0.7"/>
               <rect x="0" y="420" width="280" height="80" fill="url(#scrim)"/>
-              <text x="140" y="452" text-anchor="middle" class="panel-title">SYSTEMS ONLINE</text>
-              <text x="140" y="470" text-anchor="middle" class="panel-sub">Prime Construct</text>
-              <text x="140" y="486" text-anchor="middle" class="panel-sub">Restored</text>
+              <text x="140" y="452" text-anchor="middle" class="panel-title" data-i18n="s0_panel5_title">SYSTEMS ONLINE</text>
+              <text x="140" y="470" text-anchor="middle" class="panel-sub" data-i18n="s0_panel5_sub1">Prime Construct</text>
+              <text x="140" y="486" text-anchor="middle" class="panel-sub" data-i18n="s0_panel5_sub2">Restored</text>
             </g>
 
             <g stroke="#000000" stroke-width="2" opacity="0.6">
@@ -449,29 +457,29 @@
           </svg>
         </div>
 
-        <p class="lead">Every point in this space can be found — and returned to — through a Matrix. Four ideas hold the whole Construct together:</p>
+        <p class="lead" data-i18n="s0_lead">Picture a hidden treasure. You and a friend each have a map of the exact same yard — except your "steps" don't match at all. A Matrix is simply the recipe for turning your friend's steps into yours, and back again. Four ideas make up the whole game:</p>
         <div class="card">
-          <div class="concept-row"><b>The Prime Construct</b> — the intact dimension. Its reference frame is the Identity Matrix, anchored at (0, 0), traced by the Standard Basis.</div>
-          <div class="concept-row"><b>The Warp</b> — the distortion. A disturbance transforms that Matrix, bending it away from Identity.</div>
-          <div class="concept-row"><b>The Multiverse</b> — the fallout. The distortion didn't erase anything; it split off entangled sub-dimensions, each one a Verse of its own.</div>
-          <div class="concept-row"><b>The Bridge</b> — the way back. Solving the math — finding the exact ratio (m, n) a point sits at — IS building the bridge back to the Prime Construct.</div>
+          <div class="concept-row" data-i18n="s0_concept1"><b>The Prime Construct</b> — your normal map. Walk two straight steps — one this way, one that way — like an ordinary ruler, and every spot has an honest, easy address.</div>
+          <div class="concept-row" data-i18n="s0_concept2"><b>The Warp</b> — your friend's map of that same yard. Their two steps are stretched and tilted, not straight at all — but they still work, as long as you know exactly how they're bent.</div>
+          <div class="concept-row" data-i18n="s0_concept3"><b>The Multiverse</b> — every different stretch and tilt makes another "friend's map." They're not separate yards — just other ways of measuring the very same one.</div>
+          <div class="concept-row" data-i18n="s0_concept4"><b>The Bridge</b> — turning an address on one map into an address on the other. That's the real puzzle you'll be solving, every single round.</div>
         </div>
         <div class="card">
-          <p style="margin:0 0 12px">Welcome, Operator. Across four Trials you'll decode a Jack Point, reverse the signal, then measure how much the Warp bends space itself. No formulas are named up front — you'll meet each one by doing the thing it describes first.</p>
-          <div class="btn-row"><button class="btn primary" id="startBtn" type="button">Begin →</button></div>
+          <p style="margin:0 0 12px" data-i18n="s0_welcome">Welcome, Operator. Across four Trials, you'll find one exact spot two different ways, then flip the problem around, and finally measure just how stretched your friend's map really is. No formulas are handed to you up front — you'll meet each one by doing the thing it describes, first.</p>
+          <div class="btn-row"><button class="btn primary" id="startBtn" type="button" data-i18n="s0_begin">Begin →</button></div>
         </div>
-        <div class="facil-note"><b>For facilitators</b>This is a standalone companion for Module 5's matrix activities — best played after Activities 2, 3, 5 and 6, since each Trial quietly reuses one of those ideas (matching a shape, change of basis, area/determinant, inverse) without naming it up front. Works equally well as a warm-up recap or a closing consolidation game.</div>
+        <div class="facil-note"><b data-i18n="facil_label">For facilitators</b><span data-i18n="s0_facil_body">This is a standalone companion for Module 5's matrix activities — best played after Activities 2, 3, 5 and 6, since each Trial quietly reuses one of those ideas (matching a shape, change of basis, area/determinant, inverse) without naming it up front. Works equally well as a warm-up recap or a closing consolidation game.</span></div>
       </div>
 
       <!-- ===== Slide 1: Trial I-A ===== -->
       <div class="slide" id="slide1">
-        <div class="eyebrow">Trial I-A · Round <span id="ia-roundNum">1</span> of 3</div>
-        <h2 class="slide-title">Decode the Jack Point</h2>
-        <p class="lead">A Jack Point has opened inside the Warp, at native coordinates (m, n) — read against Strand-i (red) and Strand-j (purple). The same two strands are traced on Prime too — where does that combination really land?</p>
+        <div class="eyebrow"><span data-i18n="s1_eyebrow_pre">Trial I-A · Round </span><span id="ia-roundNum">1</span><span data-i18n="s1_eyebrow_post"> of 3</span></div>
+        <h2 class="slide-title" data-i18n="s1_title">Decode the Jack Point</h2>
+        <p class="lead" data-i18n="s1_lead">A Jack Point has opened inside the Warp, at native coordinates (m, n) — read against Strand-i (red) and Strand-j (purple). The same two strands are traced on Prime too — where does that combination really land?</p>
         <div class="card" id="ia-answercard">
           <div class="dual-canvas">
             <div class="canvas-col">
-              <div class="cap">Prime Construct</div>
+              <div class="cap" data-i18n="cap_prime">Prime Construct</div>
               <canvas id="ia-prime" width="300" height="300"></canvas>
               <div class="sub-answer-row">
                 <label>x = <input type="number" id="ia-x" step="1"></label>
@@ -479,40 +487,40 @@
               </div>
             </div>
             <div class="canvas-col">
-              <div class="cap">The Warp</div>
+              <div class="cap" data-i18n="cap_warp">The Warp</div>
               <canvas id="ia-warp" width="300" height="300"></canvas>
               <div class="jack-readout" id="ia-jack">(m, n) = (?, ?)</div>
             </div>
           </div>
-          <div class="status-banner" id="ia-banner">🌀 Enter your answer</div>
+          <div class="status-banner" id="ia-banner" data-i18n="banner_ready">🌀 Enter your answer</div>
           <div class="round-dots" id="ia-dots"></div>
-          <div class="btn-row"><button class="btn" id="ia-rerollBtn" type="button">🔄 New question (doesn't use up a round)</button></div>
+          <div class="btn-row"><button class="btn" id="ia-rerollBtn" type="button" data-i18n="ia_reroll_btn">🔄 New question (doesn't use up a round)</button></div>
           <div class="celebrate-box" id="ia-celebrate" style="display:none">
             <div id="ia-celebrateMsg">✅ Correct!</div>
             <div class="notation-line" id="ia-notation"></div>
-            <div class="btn-row"><button class="btn primary" id="ia-continueBtn" type="button" style="display:none">Continue →</button></div>
+            <div class="btn-row"><button class="btn primary" id="ia-continueBtn" type="button" style="display:none" data-i18n="continue_generic">Continue →</button></div>
           </div>
         </div>
         <div class="card" id="ia-mcq" style="display:none">
-          <p style="margin:0 0 10px"><b>One more thing before you move on.</b> Across all three rounds, what did you actually compute each time?</p>
+          <p style="margin:0 0 10px" data-i18n="ia_mcq_prompt"><b>One more thing before you move on.</b> Across all three rounds, what did you actually compute each time?</p>
           <div id="ia-mcqOptions"></div>
           <div class="mcq-explain" id="ia-mcqExplain"></div>
         </div>
         <div class="card" id="ia-reveal" style="display:none">
-          <p style="margin:0"><b>🔑 The Architecture behind it:</b> real position = structure matrix × native coordinates. Prime isn't "unstructured" — it's just the special case where that matrix is the identity.</p>
-          <div class="btn-row"><button class="btn primary" data-jump-slide="2">Continue: Trial I-B →</button></div>
+          <p style="margin:0" data-i18n="ia_reveal"><b>🔑 The Architecture behind it:</b> real position = structure matrix × native coordinates. Prime isn't "unstructured" — it's just the special case where that matrix is the identity.</p>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="2" data-i18n="continue_ib">Continue: Trial I-B →</button></div>
         </div>
       </div>
 
       <!-- ===== Slide 2: Trial I-B ===== -->
       <div class="slide" id="slide2">
-        <div class="eyebrow">Trial I-B</div>
-        <h2 class="slide-title">Crack the Architecture</h2>
-        <p class="lead">Same Architecture (M) the whole Trial — Strand-i (red) and Strand-j (purple) are traced on both Prime and the Warp. Three quick reads, then one you can't just look up.</p>
+        <div class="eyebrow" data-i18n="s2_eyebrow">Trial I-B</div>
+        <h2 class="slide-title" data-i18n="s2_title">Crack the Architecture</h2>
+        <p class="lead" data-i18n="s2_lead">Same Architecture (M) the whole Trial — Strand-i (red) and Strand-j (purple) are traced on both Prime and the Warp. Three quick reads, then one you can't just look up.</p>
         <div class="card" id="ib-answercard">
           <div class="dual-canvas">
             <div class="canvas-col">
-              <div class="cap">Prime Construct</div>
+              <div class="cap" data-i18n="cap_prime">Prime Construct</div>
               <canvas id="ib-prime" width="300" height="300"></canvas>
               <div class="sub-answer-row">
                 <label>x = <input type="number" id="ib-x" step="1"></label>
@@ -520,37 +528,37 @@
               </div>
             </div>
             <div class="canvas-col">
-              <div class="cap">The Warp</div>
+              <div class="cap" data-i18n="cap_warp">The Warp</div>
               <canvas id="ib-warp" width="300" height="300"></canvas>
               <div class="jack-readout" id="ib-jack">(m, n) = (?, ?)</div>
             </div>
           </div>
-          <div class="status-banner" id="ib-banner">🌀 Enter your answer</div>
+          <div class="status-banner" id="ib-banner" data-i18n="banner_ready">🌀 Enter your answer</div>
           <div class="round-dots" id="ib-dots"></div>
           <!-- reroll only ever shown during the hard (no-picture) round — the
                three anchor rounds are specific fixed points (1,0)/(0,1)/(1,1),
                not a random draw, so there's nothing to reroll about them. -->
-          <div class="btn-row"><button class="btn" id="ib-rerollBtn" type="button" style="display:none">🔄 New number (doesn't use up a round)</button></div>
-          <button class="hint-toggle" id="ib-hintBtn" type="button" style="display:none">💡 Need a nudge?</button>
-          <div class="hint-body" id="ib-hintBody">Look at the Decoded Log below — compare each row's (m, n) against its (x, y). Does x always relate to m and n the same way, row after row?</div>
+          <div class="btn-row"><button class="btn" id="ib-rerollBtn" type="button" style="display:none" data-i18n="ib_reroll_btn">🔄 New number (doesn't use up a round)</button></div>
+          <button class="hint-toggle" id="ib-hintBtn" type="button" style="display:none" data-i18n="hint_need_nudge">💡 Need a nudge?</button>
+          <div class="hint-body" id="ib-hintBody" data-i18n="ib_hint_body">Look at the Decoded Log below — compare each row's (m, n) against its (x, y). Does x always relate to m and n the same way, row after row?</div>
           <div class="celebrate-box" id="ib-celebrate" style="display:none">
             <div id="ib-celebrateMsg">✅ Correct!</div>
             <div class="notation-line" id="ib-notation"></div>
-            <div class="btn-row"><button class="btn primary" id="ib-continueBtn" type="button" style="display:none">Continue →</button></div>
+            <div class="btn-row"><button class="btn primary" id="ib-continueBtn" type="button" style="display:none" data-i18n="continue_generic">Continue →</button></div>
           </div>
         </div>
         <div class="card">
           <table class="trial-log" id="ib-log">
-            <thead><tr><th>Round</th><th>Native (m, n)</th><th>Computation</th><th>Real (x, y)</th></tr></thead>
+            <thead><tr><th data-i18n="ib_table_round">Round</th><th data-i18n="ib_table_native">Native (m, n)</th><th data-i18n="ib_table_computation">Computation</th><th data-i18n="ib_table_real">Real (x, y)</th></tr></thead>
             <tbody id="ib-logbody"></tbody>
           </table>
-          <div class="empty-log" id="ib-logempty">No rounds decoded yet.</div>
+          <div class="empty-log" id="ib-logempty" data-i18n="ib_log_empty">No rounds decoded yet.</div>
         </div>
 
         <div class="card" id="ib-formulacard" style="display:none">
-          <p style="margin:0 0 10px"><b>Crack the code.</b> The Architecture is this 2×2 grid of unknowns — one column per strand, î (red) on the left, ĵ (purple) on the right:</p>
+          <p style="margin:0 0 10px" data-i18n="ib_formula_body"><b>Crack the code.</b> The Architecture is this 2×2 grid of unknowns — one column per strand, î (red) on the left, ĵ (purple) on the right:</p>
           <p class="jack-readout" id="ib-formulaMatrixLine" style="margin:0 0 10px"></p>
-          <p style="margin:0 0 10px">Fill in which letter — a, b, c, or d — belongs in each blank:</p>
+          <p style="margin:0 0 10px" data-i18n="ib_formula_instruction">Fill in which letter — a, b, c, or d — belongs in each blank:</p>
           <div class="formula-row">
             <div>x&nbsp;=&nbsp;
               <select id="ib-sel-xm"><option value="">?</option><option>a</option><option>b</option><option>c</option><option>d</option></select>
@@ -565,24 +573,24 @@
               &nbsp;·&nbsp;n
             </div>
           </div>
-          <div class="btn-row"><button class="btn primary" id="ib-formulaCheck" type="button">Check</button></div>
-          <div class="status-banner" id="ib-formulabanner">🌀 Choose a letter for every blank</div>
+          <div class="btn-row"><button class="btn primary" id="ib-formulaCheck" type="button" data-i18n="ib_formula_check_btn">Check</button></div>
+          <div class="status-banner" id="ib-formulabanner" data-i18n="ib_formula_banner_ready">🌀 Choose a letter for every blank</div>
         </div>
 
         <div class="card" id="ib-verifycard" style="display:none">
-          <p style="margin:0 0 10px"><b>Prove it generalizes.</b> Two fresh Architectures, no picture this time — just your formula.</p>
+          <p style="margin:0 0 10px" data-i18n="ib_verify_body"><b>Prove it generalizes.</b> Two fresh Architectures, no picture this time — just your formula.</p>
           <p class="jack-readout" id="ib-verifyprompt">—</p>
           <div class="answer-row">
             <label>x = <input type="number" id="ib-vx" step="1"></label>
             <label>y = <input type="number" id="ib-vy" step="1"></label>
           </div>
-          <div class="status-banner" id="ib-verifybanner">🌀 Enter your answer</div>
+          <div class="status-banner" id="ib-verifybanner" data-i18n="banner_ready">🌀 Enter your answer</div>
           <div class="round-dots" id="ib-verifydots"></div>
         </div>
 
         <div class="card" id="ib-revealcard" style="display:none">
-          <p style="margin:0"><b>🔑 Decoded:</b> <code>x = a·m + b·n</code>, <code>y = c·m + d·n</code> — for ANY Architecture, any native point. This is matrix–vector multiplication. You just derived it by reading three grids and refusing to count a fourth.</p>
-          <div class="btn-row"><button class="btn primary" data-jump-slide="3">Continue: Trial II-A →</button></div>
+          <p style="margin:0" data-i18n="ib_reveal"><b>🔑 Decoded:</b> <code>x = a·m + b·n</code>, <code>y = c·m + d·n</code> — for ANY Architecture, any native point. This is matrix–vector multiplication. You just derived it by reading three grids and refusing to count a fourth.</p>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="3" data-i18n="continue_t2a">Continue: Trial II-A →</button></div>
         </div>
       </div>
 
@@ -592,34 +600,34 @@
            scroll before the actual grids are even visible — see slide3's
            "Let's find (m, n)" continue button below. ===== -->
       <div class="slide" id="slide2c">
-        <div class="eyebrow">Trial II-A</div>
-        <h2 class="slide-title">Reverse the Signal</h2>
-        <p class="lead">Same Architecture (M), same two strands — but this time the question runs backward.</p>
+        <div class="eyebrow" data-i18n="s2c_eyebrow">Trial II-A</div>
+        <h2 class="slide-title" data-i18n="s2c_title">Reverse the Signal</h2>
+        <p class="lead" data-i18n="s2c_lead">Same Architecture (M), same two strands — but this time the question runs backward.</p>
         <div class="card bridge-card">
-          <span class="tag">🔗 Carried over from Trial I-B</span>
-          <p>Trial I-B cracked this for ANY Architecture — multiply the native coordinates by M, and you land on the real position:</p>
+          <span class="tag" data-i18n="s2c_tag">🔗 Carried over from Trial I-B</span>
+          <p data-i18n="s2c_p1">Trial I-B cracked this for ANY Architecture — multiply the native coordinates by M, and you land on the real position:</p>
           <div class="eq-line" id="t2-bridgeForward"></div>
-          <p>This Trial flips the question. The real position (x, y) is what's given this time — read straight off Prime — and it's the native (m, n) you need to find. Same M, opposite direction: to undo a multiplication by M, you multiply both sides by its inverse, M⁻¹.</p>
+          <p data-i18n="s2c_p2">This Trial flips the question. The real position (x, y) is what's given this time — read straight off Prime — and it's the native (m, n) you need to find. Same M, opposite direction: to undo a multiplication by M, you multiply both sides by its inverse, M⁻¹.</p>
           <div class="eq-line" id="t2-bridgeInverse"></div>
-          <p>For now, you'll find (m, n) the fast way — by eye, tracing along Strand-i and Strand-j like Trial I-A, just reversed. Trial II-B is where you'll crack exactly what M⁻¹ looks like, in numbers.</p>
-          <div class="btn-row"><button class="btn primary" data-jump-slide="4">Let's find (m, n) →</button></div>
+          <p data-i18n="s2c_p3">For now, you'll find (m, n) the fast way — by eye, tracing along Strand-i and Strand-j like Trial I-A, just reversed. Trial II-B is where you'll crack exactly what M⁻¹ looks like, in numbers.</p>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="4" data-i18n="s2c_continue_btn">Let's find (m, n) →</button></div>
         </div>
       </div>
 
       <!-- ===== Slide 3: Trial II-A — the activity itself ===== -->
       <div class="slide" id="slide3">
-        <div class="eyebrow">Trial II-A · Round <span id="t2-roundNum">1</span> of 3</div>
-        <h2 class="slide-title">Reverse the Signal — Read It</h2>
-        <p class="lead">The Jack Point's real position is given in Prime — Strand-i (red) and Strand-j (purple) are traced on both sides. Find its native (m, n) inside the Warp by eye.</p>
+        <div class="eyebrow"><span data-i18n="s3_eyebrow_pre">Trial II-A · Round </span><span id="t2-roundNum">1</span><span data-i18n="s3_eyebrow_post"> of 3</span></div>
+        <h2 class="slide-title" data-i18n="s3_title">Reverse the Signal — Read It</h2>
+        <p class="lead" data-i18n="s3_lead">The Jack Point's real position is given in Prime — Strand-i (red) and Strand-j (purple) are traced on both sides. Find its native (m, n) inside the Warp by eye.</p>
         <div class="card" id="t2-answercard">
           <div class="dual-canvas">
             <div class="canvas-col">
-              <div class="cap">Prime Construct</div>
+              <div class="cap" data-i18n="cap_prime">Prime Construct</div>
               <canvas id="t2-prime" width="300" height="300"></canvas>
               <div class="jack-readout" id="t2-jack">(x, y) = (?, ?)</div>
             </div>
             <div class="canvas-col">
-              <div class="cap">The Warp</div>
+              <div class="cap" data-i18n="cap_warp">The Warp</div>
               <canvas id="t2-warp" width="300" height="300"></canvas>
               <div class="sub-answer-row">
                 <label>m = <input type="number" id="t2-m" step="1"></label>
@@ -627,34 +635,34 @@
               </div>
             </div>
           </div>
-          <div class="status-banner" id="t2-banner">🌀 Enter native coordinates</div>
+          <div class="status-banner" id="t2-banner" data-i18n="banner_ready_native">🌀 Enter native coordinates</div>
           <div class="round-dots" id="t2-dots"></div>
           <div class="celebrate-box" id="t2-celebrate" style="display:none">
             <div id="t2-celebrateMsg">✅ Correct!</div>
             <div class="notation-line" id="t2-notation"></div>
-            <div class="btn-row"><button class="btn primary" id="t2-continueBtn" type="button" style="display:none">Continue →</button></div>
+            <div class="btn-row"><button class="btn primary" id="t2-continueBtn" type="button" style="display:none" data-i18n="continue_generic">Continue →</button></div>
           </div>
         </div>
         <div class="card" id="t2-reveal" style="display:none">
-          <p style="margin:0"><b>👀 Reading the picture works</b> — but it doesn't scale to numbers too big to fit on a grid. Next: the arithmetic that's been happening under the hood the whole time.</p>
-          <div class="btn-row"><button class="btn primary" data-jump-slide="5">Continue: Trial II-B →</button></div>
+          <p style="margin:0" data-i18n="t2_reveal"><b>👀 Reading the picture works</b> — but it doesn't scale to numbers too big to fit on a grid. Next: the arithmetic that's been happening under the hood the whole time.</p>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="5" data-i18n="continue_t2b">Continue: Trial II-B →</button></div>
         </div>
       </div>
 
       <!-- ===== Slide 3b: Trial II-B ===== -->
       <div class="slide" id="slide3b">
-        <div class="eyebrow">Trial II-B · Round <span id="t2b-roundNum">1</span> of 4</div>
-        <h2 class="slide-title">Crack the Inverse</h2>
-        <p class="lead">Same Architecture (M) the whole Trial. In II-A you found (m, n) by SEEING how far along i and how far along j the target sat. Here's that same idea made exact: swap a strand for the target and compare the shaded area it makes — that ratio IS (m, n).</p>
+        <div class="eyebrow"><span data-i18n="s3b_eyebrow_pre">Trial II-B · Round </span><span id="t2b-roundNum">1</span><span data-i18n="s3b_eyebrow_post"> of 4</span></div>
+        <h2 class="slide-title" data-i18n="s3b_title">Crack the Inverse</h2>
+        <p class="lead" data-i18n="s3b_lead">Same Architecture (M) the whole Trial. In II-A you found (m, n) by SEEING how far along i and how far along j the target sat. Here's that same idea made exact: swap a strand for the target and compare the shaded area it makes — that ratio IS (m, n).</p>
         <div class="card" id="t2b-answercard">
           <div class="dual-canvas">
             <div class="canvas-col">
-              <div class="cap">Prime Construct</div>
+              <div class="cap" data-i18n="cap_prime">Prime Construct</div>
               <canvas id="t2b-prime" width="300" height="300"></canvas>
               <div class="jack-readout" id="t2b-jack">(x, y) = (?, ?)</div>
             </div>
             <div class="canvas-col">
-              <div class="cap">The Warp</div>
+              <div class="cap" data-i18n="cap_warp">The Warp</div>
               <canvas id="t2b-warp" width="300" height="300"></canvas>
               <div class="sub-answer-row">
                 <label>m = <input type="number" id="t2b-m" step="1"></label>
@@ -662,69 +670,69 @@
               </div>
             </div>
           </div>
-          <div class="status-banner" id="t2b-banner">🌀 Enter native coordinates</div>
+          <div class="status-banner" id="t2b-banner" data-i18n="banner_ready_native">🌀 Enter native coordinates</div>
           <div class="round-dots" id="t2b-dots"></div>
-          <button class="hint-toggle" id="t2b-hintBtn" type="button">💡 Need a nudge?</button>
+          <button class="hint-toggle" id="t2b-hintBtn" type="button" data-i18n="hint_need_nudge">💡 Need a nudge?</button>
           <div class="hint-body" id="t2b-hintBody"></div>
           <div class="celebrate-box" id="t2b-celebrate" style="display:none">
             <div id="t2b-celebrateMsg">✅ Correct!</div>
             <div class="notation-line" id="t2b-notation"></div>
-            <div class="btn-row"><button class="btn primary" id="t2b-continueBtn" type="button" style="display:none">Continue →</button></div>
+            <div class="btn-row"><button class="btn primary" id="t2b-continueBtn" type="button" style="display:none" data-i18n="continue_generic">Continue →</button></div>
           </div>
         </div>
         <div class="card" id="t2b-logcard">
-          <p style="margin:0 0 8px"><b>Forward / inverse log.</b> Each round's going (→) and coming-back (←) arithmetic, side by side, so the pattern is there to compare.</p>
+          <p style="margin:0 0 8px" data-i18n="t2b_log_body"><b>Forward / inverse log.</b> Each round's going (→) and coming-back (←) arithmetic, side by side, so the pattern is there to compare.</p>
           <table class="trial-log" id="t2b-log">
-            <thead><tr><th>Round</th><th>Given (x, y)</th><th>Forward (→) / Inverse (←)</th><th>Found (m, n)</th></tr></thead>
+            <thead><tr><th data-i18n="t2b_table_round">Round</th><th data-i18n="t2b_table_given">Given (x, y)</th><th data-i18n="t2b_table_forward_inverse">Forward (→) / Inverse (←)</th><th data-i18n="t2b_table_found">Found (m, n)</th></tr></thead>
             <tbody id="t2b-logbody"></tbody>
           </table>
-          <div class="empty-log" id="t2b-logempty">No rounds solved yet.</div>
+          <div class="empty-log" id="t2b-logempty" data-i18n="t2b_log_empty">No rounds solved yet.</div>
         </div>
         <div class="card" id="t2b-inversecard" style="display:none">
-          <p style="margin:0 0 8px"><b>Build M⁻¹ directly from M.</b> No rounds to solve for this — just the recipe the log above has been demonstrating every time:</p>
+          <p style="margin:0 0 8px" data-i18n="t2b_inverse_body"><b>Build M⁻¹ directly from M.</b> No rounds to solve for this — just the recipe the log above has been demonstrating every time:</p>
           <div class="jack-readout" id="t2b-inverseLine" style="line-height:2.4"></div>
         </div>
         <div class="card" id="t2b-mcq" style="display:none">
-          <p style="margin:0 0 10px"><b>One more thing before Trial III.</b> Look back at the log's inverse (←) side — solving for m only ever used one strand's numbers, and solving for n only used the other's. Which is it?</p>
+          <p style="margin:0 0 10px" data-i18n="t2b_mcq_prompt"><b>One more thing before Trial III.</b> Look back at the log's inverse (←) side — solving for m only ever used one strand's numbers, and solving for n only used the other's. Which is it?</p>
           <div id="t2b-mcqOptions"></div>
           <div class="mcq-explain" id="t2b-mcqExplain"></div>
         </div>
         <div class="card" id="t2b-reveal" style="display:none">
-          <p style="margin:0"><b>🔑 Going forward means multiplying by M. Coming back means multiplying by M⁻¹</b> — the inverse. Multiplying and un-multiplying are opposite moves, not the same move done twice — and notice that same (ad − bc) showed up again, doing the same job every round.</p>
-          <div class="btn-row"><button class="btn primary" data-jump-slide="6">Continue: Trial III →</button></div>
+          <p style="margin:0" data-i18n="t2b_reveal"><b>🔑 Going forward means multiplying by M. Coming back means multiplying by M⁻¹</b> — the inverse. Multiplying and un-multiplying are opposite moves, not the same move done twice — and notice that same (ad − bc) showed up again, doing the same job every round.</p>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="6" data-i18n="continue_t3">Continue: Trial III →</button></div>
         </div>
       </div>
 
       <!-- ===== Slide 4: Trial III ===== -->
       <div class="slide" id="slide4">
-        <div class="eyebrow">Trial III</div>
-        <h2 class="slide-title">Measure the Warp</h2>
-        <p class="lead">Every capsule sent through a Jack Point gets stretched or squeezed by the Warp's own density — its area. A dashed rectangle marks exactly how much area you're aiming for. Drag Strand-i (red) and Strand-j (purple) so the shaded parallelogram covers the same amount of space.</p>
+        <div class="eyebrow" data-i18n="s4_eyebrow">Trial III</div>
+        <h2 class="slide-title" data-i18n="s4_title">Measure the Warp</h2>
+        <p class="lead" data-i18n="s4_lead">Every capsule sent through a Jack Point gets stretched or squeezed by the Warp's own density — its area. A dashed rectangle marks exactly how much area you're aiming for. Drag Strand-i (red) and Strand-j (purple) so the shaded parallelogram covers the same amount of space.</p>
         <div class="card">
           <canvas id="t3-warp" width="340" height="340"></canvas>
           <div class="jack-readout" id="t3-readout">Density = |det| = 2.00 · target = 5 (dashed rectangle, 1×5)</div>
-          <div class="status-banner" id="t3-banner">🎯 Drag i (red) and j (purple) to fill as much area as the dashed rectangle</div>
-          <div style="text-align:center"><span class="status-chip stable" id="t3-chip">🟢 Construct stable</span></div>
+          <div class="status-banner" id="t3-banner" data-i18n="t3_banner_ready">🎯 Drag i (red) and j (purple) to fill as much area as the dashed rectangle</div>
+          <div style="text-align:center"><span class="status-chip stable" id="t3-chip" data-i18n="t3_chip_stable">🟢 Construct stable</span></div>
           <div class="round-dots" id="t3-dots"></div>
         </div>
-        <button class="hint-toggle" id="t3-hintBtn" type="button">💡 Something to try</button>
-        <div class="hint-body" id="t3-hintBody">Try dragging i and j until they point almost the same direction — watch the density and the status chip. Then try dragging one past the other's line entirely.</div>
+        <button class="hint-toggle" id="t3-hintBtn" type="button" data-i18n="t3_hint_btn">💡 Something to try</button>
+        <div class="hint-body" id="t3-hintBody" data-i18n="t3_hint_body">Try dragging i and j until they point almost the same direction — watch the density and the status chip. Then try dragging one past the other's line entirely.</div>
         <div class="card" id="t3-reveal" style="display:none">
-          <p style="margin:0"><b>🔑 Density = |det(M)| = |ad − bc|.</b> This is also why Trial II always had an answer — reversing the signal only works when Density ≠ 0.</p>
-          <div class="btn-row"><button class="btn primary" data-jump-slide="7">Continue: Debrief →</button></div>
+          <p style="margin:0" data-i18n="t3_reveal"><b>🔑 Density = |det(M)| = |ad − bc|.</b> This is also why Trial II always had an answer — reversing the signal only works when Density ≠ 0.</p>
+          <div class="btn-row"><button class="btn primary" data-jump-slide="7" data-i18n="continue_debrief">Continue: Debrief →</button></div>
         </div>
       </div>
 
       <!-- ===== Slide 5: debrief ===== -->
       <div class="slide" id="slide5">
-        <div class="eyebrow">Debrief</div>
-        <h2 class="slide-title">What you just did, named</h2>
+        <div class="eyebrow" data-i18n="s5_eyebrow">Debrief</div>
+        <h2 class="slide-title" data-i18n="s5_title">What you just did, named</h2>
         <div class="card">
-          <p style="margin:0 0 10px"><b>Trial I</b> was matrix–vector multiplication: <code>x = a·m + b·n</code>, <code>y = c·m + d·n</code>.</p>
-          <p style="margin:0 0 10px"><b>Trial II</b> was the inverse matrix M⁻¹ — undoing that same multiplication.</p>
-          <p style="margin:0"><b>Trial III</b> was the determinant, <code>ad − bc</code> — the factor by which the Warp stretches or shrinks area, and the exact number that decides whether Trial II even has an answer.</p>
+          <p style="margin:0 0 10px" data-i18n="s5_p1"><b>Trial I</b> was matrix–vector multiplication: <code>x = a·m + b·n</code>, <code>y = c·m + d·n</code>.</p>
+          <p style="margin:0 0 10px" data-i18n="s5_p2"><b>Trial II</b> was the inverse matrix M⁻¹ — undoing that same multiplication.</p>
+          <p style="margin:0" data-i18n="s5_p3"><b>Trial III</b> was the determinant, <code>ad − bc</code> — the factor by which the Warp stretches or shrinks area, and the exact number that decides whether Trial II even has an answer.</p>
         </div>
-        <div class="facil-note"><b>For facilitators</b>Consider replaying Trial III as a group and deliberately hunting for a Glitch (det ≈ 0) and a Mirror Anomaly (det &lt; 0) together — both are easy to trigger and make excellent whole-room discussion prompts about what a "structure" can and can't do.</div>
+        <div class="facil-note"><b data-i18n="facil_label">For facilitators</b><span data-i18n="s5_facil_body">Consider replaying Trial III as a group and deliberately hunting for a Glitch (det ≈ 0) and a Mirror Anomaly (det &lt; 0) together — both are easy to trigger and make excellent whole-room discussion prompts about what a "structure" can and can't do.</span></div>
       </div>
 
     </div>
@@ -1887,7 +1895,7 @@ const MATRIX_LAB_PRESETS = {
   function bridgeInverseHTML(colorI, colorJ) {
     const step1 = `M⁻¹·${matrixHTML({ a: "a", b: "b", c: "c", d: "d" }, [colorI, colorJ])}&nbsp;·&nbsp;${colVectorHTML("m", "n")}&nbsp;=&nbsp;M⁻¹·${colVectorHTML("x", "y")}`;
     const step2 = `${matrixHTML({ a: "1", b: "0", c: "0", d: "1" })}&nbsp;·&nbsp;${colVectorHTML("m", "n")}&nbsp;=&nbsp;M⁻¹·${colVectorHTML("x", "y")}`;
-    const step2Note = `<div style="margin-top:4px;color:var(--muted);font-weight:600;font-size:12.5px">(M⁻¹M = I, the identity — undo what M did, and you're back where you started)</div>`;
+    const step2Note = `<div style="margin-top:4px;color:var(--muted);font-weight:600;font-size:12.5px">${i18nT("t2c_bridge_note")}</div>`;
     const step3 = `${colVectorHTML("m", "n")}&nbsp;=&nbsp;M⁻¹·${colVectorHTML("x", "y")}`;
     return `<div>${step1}</div><div style="margin-top:10px">${step2}</div>${step2Note}<div style="margin-top:10px">${step3}</div>`;
   }
@@ -1907,7 +1915,7 @@ const MATRIX_LAB_PRESETS = {
     // — otherwise the "÷ (det)" that follows is just a number with no
     // visible source, which is exactly the gap flagged from the screenshot.
     const detLine = `(a×d) − (b×c) = (${M.a}×${M.d}) − (${M.b}×${M.c}) = <b>${roundTo2dp(det)}</b>`;
-    const buildLine = `M = ${matrixHTML(M, [COLORS.red, COLORS.purple])} &nbsp;—swap a,d · flip sign of b,c · ÷${roundTo2dp(det)}→&nbsp; ` +
+    const buildLine = `M = ${matrixHTML(M, [COLORS.red, COLORS.purple])} &nbsp;${i18nT("t2b_construction_note", { det: roundTo2dp(det) })}&nbsp; ` +
       `M⁻¹ = (1 ÷ ${roundTo2dp(det)})·${matrixHTML(cofM)} = ${matrixHTML(finalM)}`;
     return `<div>${detLine}</div><div style="margin-top:8px">${buildLine}</div>`;
   }
@@ -1926,6 +1934,390 @@ const MATRIX_LAB_PRESETS = {
     }
     return best;
   }
+
+
+  /* ================= i18n (Thai / English) =================
+     Small hand-rolled i18n layer: a LANG flag persisted in localStorage, a
+     flat dictionary keyed by section (s0_*, s1_*, ia_*, ...) with a few
+     shared keys reused across Trials (banner_ready, cap_prime, etc. — see
+     the cataloguing pass this was built from), a i18nT(key, vars) lookup with
+     {varName} substitution, and applyStaticI18n() which re-renders every
+     [data-i18n] element's innerHTML. Proper nouns coined for this game
+     (Prime Construct, The Warp, The Multiverse, The Bridge, Jack Point,
+     Strand-i/Strand-j, Architecture, GLITCH, MIRROR ANOMALY, Trial I-A/I-B/
+     II-A/II-B/III, Debrief) are deliberately kept in English in the Thai
+     column too, the same way a translated game keeps its own coined terms —
+     only the surrounding explanatory prose is translated. ---- */
+  let LANG = (function () {
+    try { return localStorage.getItem("wt_lang") || "th"; } catch (e) { return "th"; }
+  })();
+
+  const I18N = {
+    en: {
+      doc_title: `Wormhole Transverse — A Matrix Game`,
+      app_title: `Wormhole Transverse<br>A Matrix Game`,
+      nav_0: `Enter the Construct`,
+      nav_1: `Trial I-A — Decode`,
+      nav_2: `Trial I-B — Crack the Code`,
+      nav_3: `Trial II-A — Reverse the Signal`,
+      nav_4: `Trial II-B — Crack the Inverse`,
+      nav_5: `Trial III — Measure the Warp`,
+      nav_6: `Debrief`,
+
+      s0_eyebrow: `Wormhole Transverse · a companion game for Module 5`,
+      s0_title: `Enter the Construct`,
+      s0_panel1_title: `THE UNKNOWN VOID`,
+      s0_panel1_sub: `(The Origin)`,
+      s0_panel2_title1: `PRIME CONSTRUCT`,
+      s0_panel2_title2: `EMERGING`,
+      s0_panel2_sub: `(The Stable Grid)`,
+      s0_panel3_title: `THE WARP DISTORTION`,
+      s0_panel3_sub: `(The Shift)`,
+      s0_panel4_title1: `CALCULATING`,
+      s0_panel4_title2: `THE BRIDGE`,
+      s0_panel4_sub: `(The Challenge)`,
+      s0_panel5_title: `SYSTEMS ONLINE`,
+      s0_panel5_sub1: `Prime Construct`,
+      s0_panel5_sub2: `Restored`,
+      s0_lead: `Picture a hidden treasure. You and a friend each have a map of the exact same yard — except your "steps" don't match at all. A Matrix is simply the recipe for turning your friend's steps into yours, and back again. Four ideas make up the whole game:`,
+      s0_concept1: `<b>The Prime Construct</b> — your normal map. Walk two straight steps — one this way, one that way — like an ordinary ruler, and every spot has an honest, easy address.`,
+      s0_concept2: `<b>The Warp</b> — your friend's map of that same yard. Their two steps are stretched and tilted, not straight at all — but they still work, as long as you know exactly how they're bent.`,
+      s0_concept3: `<b>The Multiverse</b> — every different stretch and tilt makes another "friend's map." They're not separate yards — just other ways of measuring the very same one.`,
+      s0_concept4: `<b>The Bridge</b> — turning an address on one map into an address on the other. That's the real puzzle you'll be solving, every single round.`,
+      s0_welcome: `Welcome, Operator. Across four Trials, you'll find one exact spot two different ways, then flip the problem around, and finally measure just how stretched your friend's map really is. No formulas are handed to you up front — you'll meet each one by doing the thing it describes, first.`,
+      s0_begin: `Begin →`,
+      facil_label: `For facilitators`,
+      s0_facil_body: `This is a standalone companion for Module 5's matrix activities — best played after Activities 2, 3, 5 and 6, since each Trial quietly reuses one of those ideas (matching a shape, change of basis, area/determinant, inverse) without naming it up front. Works equally well as a warm-up recap or a closing consolidation game.`,
+
+      s1_eyebrow_pre: `Trial I-A · Round `,
+      s1_eyebrow_post: ` of 3`,
+      s1_title: `Decode the Jack Point`,
+      s1_lead: `A Jack Point has opened inside the Warp, at native coordinates (m, n) — read against Strand-i (red) and Strand-j (purple). The same two strands are traced on Prime too — where does that combination really land?`,
+      cap_prime: `Prime Construct`,
+      cap_warp: `The Warp`,
+      ia_reroll_btn: `🔄 New question (doesn't use up a round)`,
+      banner_ready: `🌀 Enter your answer`,
+      ia_banner_correct: `✅ Correct! Real position = ({x}, {y})`,
+      banner_close_arith: `🌡️ Not quite — check the arithmetic`,
+      celebrate_watch: `✅ Correct! Watch how the two Constructs connect.`,
+      your_guess: `your guess`,
+      jack_mn: `(m, n) = ({m}, {n})`,
+      jack_xy: `(x, y) = ({x}, {y})`,
+      continue_generic: `Continue →`,
+      continue_ib: `Continue: Trial I-B →`,
+      ia_mcq_prompt: `<b>One more thing before you move on.</b> Across all three rounds, what did you actually compute each time?`,
+      ia_mcq_opt0: `Real position (Prime) = Architecture (M) × native coordinates (Warp)`,
+      ia_mcq_opt1: `Native coordinates (Warp) = Architecture (M) × real position (Prime)`,
+      ia_mcq_opt1_explain: `That's actually the reverse direction — that's what Trial II (coming up) asks for, and reversing it needs M⁻¹, not M itself. Try again.`,
+      ia_mcq_opt2: `Real position (Prime) = native coordinates (Warp) × Architecture (M) — vector written first`,
+      ia_mcq_opt2_explain: `Order matters here: it's M · (m, n) — the matrix first, then the native coordinates as a column. Try again.`,
+      ia_mcq_opt3: `It doesn't matter — Prime and Warp always end up with the same numbers`,
+      ia_mcq_opt3_explain: `If that were true, none of the last three rounds would have taken any work — the two Constructs only look different because M is doing real, specific work on (m, n). Try again.`,
+      ia_mcq_correct_explain: `Exactly — every 'find the real position' round was you computing M·(m, n) by hand.`,
+      ia_reveal: `<b>🔑 The Architecture behind it:</b> real position = structure matrix × native coordinates. Prime isn't "unstructured" — it's just the special case where that matrix is the identity.`,
+
+      s2_eyebrow: `Trial I-B`,
+      s2_title: `Crack the Architecture`,
+      s2_lead: `Same Architecture (M) the whole Trial — Strand-i (red) and Strand-j (purple) are traced on both Prime and the Warp. Three quick reads, then one you can't just look up.`,
+      ib_reroll_btn: `🔄 New number (doesn't use up a round)`,
+      hint_need_nudge: `💡 Need a nudge?`,
+      ib_hint_body: `Look at the Decoded Log below — compare each row's (m, n) against its (x, y). Does x always relate to m and n the same way, row after row?`,
+      ib_table_round: `Round`,
+      ib_table_native: `Native (m, n)`,
+      ib_table_computation: `Computation`,
+      ib_table_real: `Real (x, y)`,
+      ib_log_empty: `No rounds decoded yet.`,
+      ib_formula_body: `<b>Crack the code.</b> The Architecture is this 2×2 grid of unknowns — one column per strand, î (red) on the left, ĵ (purple) on the right:`,
+      ib_formula_instruction: `Fill in which letter — a, b, c, or d — belongs in each blank:`,
+      ib_formula_check_btn: `Check`,
+      ib_formula_banner_ready: `🌀 Choose a letter for every blank`,
+      ib_formula_correct: `✅ That's the Architecture, decoded.`,
+      ib_formula_wrong: `🌡️ Not quite — check which letter multiplies which variable`,
+      ib_verify_body: `<b>Prove it generalizes.</b> Two fresh Architectures, no picture this time — just your formula.`,
+      ib_verify_prompt: `New Architecture: a={a}, b={b}, c={c}, d={d}. Native (m, n) = ({m}, {n}). Use your formula.`,
+      ib_verify_correct: `✅ Correct!`,
+      ib_verify_wrong: `🌡️ Not quite — a fresh one is on its way`,
+      ib_reveal: `<b>🔑 Decoded:</b> <code>x = a·m + b·n</code>, <code>y = c·m + d·n</code> — for ANY Architecture, any native point. This is matrix–vector multiplication. You just derived it by reading three grids and refusing to count a fourth.`,
+      ib_banner_correct: `✅ Correct! ({x}, {y})`,
+      jack_mn_hard: `No picture this time — (m, n) = ({m}, {n}). Compute it.`,
+      continue_t2a: `Continue: Trial II-A →`,
+
+      s2c_eyebrow: `Trial II-A`,
+      s2c_title: `Reverse the Signal`,
+      s2c_lead: `Same Architecture (M), same two strands — but this time the question runs backward.`,
+      s2c_tag: `🔗 Carried over from Trial I-B`,
+      s2c_p1: `Trial I-B cracked this for ANY Architecture — multiply the native coordinates by M, and you land on the real position:`,
+      s2c_p2: `This Trial flips the question. The real position (x, y) is what's given this time — read straight off Prime — and it's the native (m, n) you need to find. Same M, opposite direction: to undo a multiplication by M, you multiply both sides by its inverse, M⁻¹.`,
+      s2c_p3: `For now, you'll find (m, n) the fast way — by eye, tracing along Strand-i and Strand-j like Trial I-A, just reversed. Trial II-B is where you'll crack exactly what M⁻¹ looks like, in numbers.`,
+      s2c_continue_btn: `Let's find (m, n) →`,
+      t2c_bridge_note: `(M⁻¹M = I, the identity — undo what M did, and you're back where you started)`,
+
+      s3_eyebrow_pre: `Trial II-A · Round `,
+      s3_eyebrow_post: ` of 3`,
+      s3_title: `Reverse the Signal — Read It`,
+      s3_lead: `The Jack Point's real position is given in Prime — Strand-i (red) and Strand-j (purple) are traced on both sides. Find its native (m, n) inside the Warp by eye.`,
+      banner_ready_native: `🌀 Enter native coordinates`,
+      t2_reveal: `<b>👀 Reading the picture works</b> — but it doesn't scale to numbers too big to fit on a grid. Next: the arithmetic that's been happening under the hood the whole time.`,
+      continue_t2b: `Continue: Trial II-B →`,
+      native_correct: `✅ Correct! Native (m, n) = ({m}, {n})`,
+      banner_close_solve: `🌡️ Not quite — try solving am+bn=x, cm+dn=y`,
+
+      s3b_eyebrow_pre: `Trial II-B · Round `,
+      s3b_eyebrow_post: ` of 4`,
+      s3b_title: `Crack the Inverse`,
+      s3b_lead: `Same Architecture (M) the whole Trial. In II-A you found (m, n) by SEEING how far along i and how far along j the target sat. Here's that same idea made exact: swap a strand for the target and compare the shaded area it makes — that ratio IS (m, n).`,
+      t2b_log_body: `<b>Forward / inverse log.</b> Each round's going (→) and coming-back (←) arithmetic, side by side, so the pattern is there to compare.`,
+      t2b_table_round: `Round`,
+      t2b_table_given: `Given (x, y)`,
+      t2b_table_forward_inverse: `Forward (→) / Inverse (←)`,
+      t2b_table_found: `Found (m, n)`,
+      t2b_log_empty: `No rounds solved yet.`,
+      t2b_inverse_body: `<b>Build M⁻¹ directly from M.</b> No rounds to solve for this — just the recipe the log above has been demonstrating every time:`,
+      t2b_mcq_prompt: `<b>One more thing before Trial III.</b> Look back at the log's inverse (←) side — solving for m only ever used one strand's numbers, and solving for n only used the other's. Which is it?`,
+      t2b_reveal: `<b>🔑 Going forward means multiplying by M. Coming back means multiplying by M⁻¹</b> — the inverse. Multiplying and un-multiplying are opposite moves, not the same move done twice — and notice that same (ad − bc) showed up again, doing the same job every round.`,
+      continue_t3: `Continue: Trial III →`,
+      hint_show_numbers: `💡 Show me the numbers`,
+      hint_used: `💡 Hint used`,
+      t2b_hint_step1_body: `Look at the blue and orange shapes that just appeared, next to the gray reference — how many times bigger (or smaller) does each one look?`,
+      t2b_hint_step2_body: `<span style="color:{gray};font-weight:800">Area(i, j) = {refArea}</span> &nbsp;·&nbsp; <span style="color:{blue};font-weight:800">Area(target, j) = {mArea}</span> &nbsp;·&nbsp; <span style="color:{orangeFade};font-weight:800">Area(i, target) = {nArea}</span><br>Divide each blue/orange area by the gray one — that ratio is your answer.`,
+      t2b_celebrate_action: `✅ Correct! Here's the action that actually found it.`,
+      t2b_celebrate_swap_m: `Swap Strand-i for the target (Strand-j stays put) — compare the shaded areas: that ratio is m.`,
+      t2b_celebrate_swap_n: `Now swap Strand-j for the target instead (Strand-i stays put) — that ratio is n.`,
+      t2b_celebrate_arith: `✅ Correct! Here's the same swap, written as arithmetic.`,
+      t2b_mcq_opt0: `Solving for m only used Strand-j's numbers (b, d); solving for n only used Strand-i's (a, c) — they swap`,
+      t2b_mcq_opt1: `Solving for m and n both used all four letters (a, b, c, d) equally every time`,
+      t2b_mcq_opt1_explain: `Look at the log again — each row's m-line only ever has b and d in it, never a or c. Try again.`,
+      t2b_mcq_opt2: `It was a coincidence specific to this Architecture — a different M wouldn't show the same split`,
+      t2b_mcq_opt2_explain: `The elimination algebra doesn't depend on M's actual numbers — it's the SAME split (m uses j's numbers, n uses i's) for any Architecture with a nonzero (ad − bc). Try again.`,
+      t2b_mcq_opt3: `Solving backward needs completely different numbers than a, b, c, d`,
+      t2b_mcq_opt3_explain: `Every number in the elimination log's Computation column IS a, b, c, or d (and x, y) — no new numbers appeared. Try again.`,
+      t2b_mcq_correct_explain: `Exactly — inverting doesn't just undo the multiplication, it swaps which strand's numbers matter for which unknown.`,
+      t2b_construction_note: `—swap a,d · flip sign of b,c · ÷{det}→`,
+
+      s4_eyebrow: `Trial III`,
+      s4_title: `Measure the Warp`,
+      s4_lead: `Every capsule sent through a Jack Point gets stretched or squeezed by the Warp's own density — its area. A dashed rectangle marks exactly how much area you're aiming for. Drag Strand-i (red) and Strand-j (purple) so the shaded parallelogram covers the same amount of space.`,
+      t3_readout: `Density = |det| = <b>{area}</b> &nbsp;·&nbsp; target = <b>{target}</b> (dashed rectangle, {w}×{h})`,
+      t3_banner_ready: `🎯 Drag i (red) and j (purple) to fill as much area as the dashed rectangle`,
+      t3_chip_stable: `🟢 Construct stable`,
+      t3_hint_btn: `💡 Something to try`,
+      t3_hint_body: `Try dragging i and j until they point almost the same direction — watch the density and the status chip. Then try dragging one past the other's line entirely.`,
+      t3_reveal: `<b>🔑 Density = |det(M)| = |ad − bc|.</b> This is also why Trial II always had an answer — reversing the signal only works when Density ≠ 0.`,
+      continue_debrief: `Continue: Debrief →`,
+      t3_chip_glitch: `⚠️ GLITCH — the Construct collapsed onto a line`,
+      t3_chip_mirror: `🪞 MIRROR ANOMALY — orientation flipped`,
+      t3_banner_win: `🎉 Capsule sent — the shaded area matches the dashed rectangle!`,
+      t3_banner_close: `🌡️ Close — the shaded area is nearly the size of the dashed rectangle`,
+      t3_banner_next: `🎯 New target rectangle — drag i, j to match its area`,
+
+      s5_eyebrow: `Debrief`,
+      s5_title: `What you just did, named`,
+      s5_p1: `<b>Trial I</b> was matrix–vector multiplication: <code>x = a·m + b·n</code>, <code>y = c·m + d·n</code>.`,
+      s5_p2: `<b>Trial II</b> was the inverse matrix M⁻¹ — undoing that same multiplication.`,
+      s5_p3: `<b>Trial III</b> was the determinant, <code>ad − bc</code> — the factor by which the Warp stretches or shrinks area, and the exact number that decides whether Trial II even has an answer.`,
+      s5_facil_body: `Consider replaying Trial III as a group and deliberately hunting for a Glitch (det ≈ 0) and a Mirror Anomaly (det &lt; 0) together — both are easy to trigger and make excellent whole-room discussion prompts about what a "structure" can and can't do.`,
+    },
+    th: {
+      doc_title: `Wormhole Transverse — เกมเมทริกซ์`,
+      app_title: `Wormhole Transverse<br>เกมเมทริกซ์`,
+      nav_0: `เข้าสู่ Construct`,
+      nav_1: `Trial I-A — ถอดรหัส`,
+      nav_2: `Trial I-B — เจาะรหัส`,
+      nav_3: `Trial II-A — ย้อนสัญญาณ`,
+      nav_4: `Trial II-B — เจาะรหัสอินเวอร์ส`,
+      nav_5: `Trial III — วัดความบิดเบือน`,
+      nav_6: `สรุปบทเรียน`,
+
+      s0_eyebrow: `Wormhole Transverse · เกมประกอบ Module 5`,
+      s0_title: `เข้าสู่ Construct`,
+      s0_panel1_title: `ความว่างเปล่าที่ไม่รู้จัก`,
+      s0_panel1_sub: `(จุดกำเนิด)`,
+      s0_panel2_title1: `PRIME CONSTRUCT`,
+      s0_panel2_title2: `กำลังก่อตัว`,
+      s0_panel2_sub: `(ตารางที่มั่นคง)`,
+      s0_panel3_title: `ความบิดเบือนของ WARP`,
+      s0_panel3_sub: `(การเบี่ยงเบน)`,
+      s0_panel4_title1: `กำลังคำนวณ`,
+      s0_panel4_title2: `ทางเชื่อม (THE BRIDGE)`,
+      s0_panel4_sub: `(โจทย์ท้าทาย)`,
+      s0_panel5_title: `ระบบพร้อมใช้งาน`,
+      s0_panel5_sub1: `Prime Construct`,
+      s0_panel5_sub2: `กลับคืนสภาพแล้ว`,
+      s0_lead: `ลองนึกภาพสมบัติที่ถูกซ่อนไว้ คุณกับเพื่อนต่างมีแผนที่ของสนามหญ้าผืนเดียวกัน แต่ "ก้าว" ของแต่ละคนไม่เท่ากันเลย เมทริกซ์ (Matrix) ก็คือสูตรสำหรับแปลงก้าวของเพื่อนให้กลายเป็นก้าวของคุณ และแปลงกลับไปได้เช่นกัน เกมนี้มีแนวคิดหลัก 4 อย่าง:`,
+      s0_concept1: `<b>The Prime Construct</b> — แผนที่ปกติของคุณ เดินสองก้าวตรง ๆ ก้าวหนึ่งไปทางนี้ อีกก้าวไปทางนั้น เหมือนใช้ไม้บรรทัดธรรมดา ทุกตำแหน่งจึงมี "ที่อยู่" ที่ตรงไปตรงมาและหาง่าย`,
+      s0_concept2: `<b>The Warp</b> — แผนที่ของเพื่อนคุณสำหรับสนามหญ้าผืนเดียวกัน ก้าวทั้งสองของเขาถูกยืดและเอียง ไม่ตรงเหมือนเดิม แต่ก็ยังใช้งานได้ ตราบใดที่คุณรู้ว่ามันบิดไปแบบไหนแน่ ๆ`,
+      s0_concept3: `<b>The Multiverse</b> — การยืดและเอียงที่ต่างกันแต่ละแบบ ก็จะได้ "แผนที่ของเพื่อน" อีกแบบหนึ่ง มันไม่ใช่สนามหญ้าคนละผืน แค่เป็นวิธีวัดสนามหญ้าผืนเดิมที่ต่างกันไปเท่านั้น`,
+      s0_concept4: `<b>The Bridge</b> — การแปลง "ที่อยู่" จากแผนที่หนึ่งไปเป็นอีกแผนที่หนึ่ง นี่คือโจทย์จริงที่คุณจะได้แก้ในทุก ๆ รอบของเกม`,
+      s0_welcome: `ยินดีต้อนรับ Operator ตลอดทั้ง 4 Trial คุณจะหาตำแหน่งเดียวกันด้วยสองวิธีที่ต่างกัน จากนั้นจะพลิกโจทย์กลับด้าน และสุดท้ายจะวัดว่าแผนที่ของเพื่อนคุณถูกยืดไปมากแค่ไหน จะยังไม่มีสูตรไหนถูกป้อนให้ล่วงหน้า คุณจะได้รู้จักแต่ละสูตรด้วยการลงมือทำสิ่งที่มันอธิบายก่อนเสมอ`,
+      s0_begin: `เริ่มเลย →`,
+      facil_label: `สำหรับวิทยากร`,
+      s0_facil_body: `เกมนี้เป็นกิจกรรมเสริมแบบสแตนด์อโลนของ Module 5 เรื่องเมทริกซ์ ควรเล่นหลังจาก Activity 2, 3, 5 และ 6 เพราะแต่ละ Trial จะแอบดึงแนวคิดจากกิจกรรมเหล่านั้นมาใช้ (การจับคู่รูปร่าง การเปลี่ยนฐาน พื้นที่/ดีเทอร์มิแนนต์ อินเวอร์ส) โดยไม่บอกชื่อไว้ล่วงหน้า ใช้ได้ดีทั้งเป็นกิจกรรมอุ่นเครื่องทบทวน หรือกิจกรรมสรุปปิดท้ายบทเรียน`,
+
+      s1_eyebrow_pre: `Trial I-A · รอบที่ `,
+      s1_eyebrow_post: ` จาก 3`,
+      s1_title: `ถอดรหัส Jack Point`,
+      s1_lead: `Jack Point เปิดขึ้นภายใน Warp ที่พิกัดดั้งเดิม (m, n) — อ่านค่าเทียบกับ Strand-i (สีแดง) และ Strand-j (สีม่วง) เส้นทั้งสองเส้นเดียวกันนี้ถูกลากไว้บน Prime ด้วย — ผลรวมนั้นจะไปตกที่ตำแหน่งจริงตรงไหน?`,
+      cap_prime: `Prime Construct`,
+      cap_warp: `The Warp`,
+      ia_reroll_btn: `🔄 โจทย์ใหม่ (ไม่นับเป็นการใช้รอบ)`,
+      banner_ready: `🌀 กรอกคำตอบของคุณ`,
+      ia_banner_correct: `✅ ถูกต้อง! ตำแหน่งจริง = ({x}, {y})`,
+      banner_close_arith: `🌡️ ยังไม่ใช่ — ลองตรวจการคำนวณอีกครั้ง`,
+      celebrate_watch: `✅ ถูกต้อง! ลองดูว่าทั้งสอง Construct เชื่อมกันอย่างไร`,
+      your_guess: `คำตอบของคุณ`,
+      jack_mn: `(m, n) = ({m}, {n})`,
+      jack_xy: `(x, y) = ({x}, {y})`,
+      continue_generic: `ต่อไป →`,
+      continue_ib: `ต่อไป: Trial I-B →`,
+      ia_mcq_prompt: `<b>อีกนิดก่อนไปต่อ</b> ตลอดทั้งสามรอบที่ผ่านมา จริง ๆ แล้วคุณคำนวณอะไรอยู่ในแต่ละครั้ง?`,
+      ia_mcq_opt0: `ตำแหน่งจริง (Prime) = Architecture (M) × พิกัดดั้งเดิม (Warp)`,
+      ia_mcq_opt1: `พิกัดดั้งเดิม (Warp) = Architecture (M) × ตำแหน่งจริง (Prime)`,
+      ia_mcq_opt1_explain: `อันนี้เป็นทิศทางย้อนกลับต่างหาก — นั่นคือสิ่งที่ Trial II (ตอนต่อไป) จะถาม และการย้อนกลับต้องใช้ M⁻¹ ไม่ใช่ M เอง ลองใหม่อีกครั้ง`,
+      ia_mcq_opt2: `ตำแหน่งจริง (Prime) = พิกัดดั้งเดิม (Warp) × Architecture (M) — เขียนเวกเตอร์ไว้ก่อน`,
+      ia_mcq_opt2_explain: `ลำดับสำคัญตรงนี้ — ต้องเป็น M · (m, n) คือเมทริกซ์ก่อน แล้วตามด้วยพิกัดดั้งเดิมในรูปคอลัมน์ ลองใหม่อีกครั้ง`,
+      ia_mcq_opt3: `ไม่สำคัญหรอก — Prime กับ Warp ได้ตัวเลขเหมือนกันเสมอ`,
+      ia_mcq_opt3_explain: `ถ้าเป็นแบบนั้นจริง สามรอบที่ผ่านมาก็ไม่ต้องคำนวณอะไรเลย — ที่สอง Construct หน้าตาต่างกันก็เพราะ M กำลังทำงานกับ (m, n) จริง ๆ ลองใหม่อีกครั้ง`,
+      ia_mcq_correct_explain: `ถูกต้อง! ทุกรอบที่ให้ "หาตำแหน่งจริง" ก็คือคุณกำลังคำนวณ M·(m, n) ด้วยมืออยู่นั่นเอง`,
+      ia_reveal: `<b>🔑 Architecture ที่อยู่เบื้องหลัง:</b> ตำแหน่งจริง = เมทริกซ์โครงสร้าง × พิกัดดั้งเดิม ส่วน Prime ก็ไม่ได้ "ไม่มีโครงสร้าง" หรอก มันแค่เป็นกรณีพิเศษที่เมทริกซ์นั้นเป็นเมทริกซ์เอกลักษณ์ (identity)`,
+
+      s2_eyebrow: `Trial I-B`,
+      s2_title: `เจาะรหัส Architecture`,
+      s2_lead: `ใช้ Architecture (M) เดียวกันตลอดทั้ง Trial นี้ — Strand-i (สีแดง) และ Strand-j (สีม่วง) ถูกลากไว้ทั้งบน Prime และ Warp อ่านค่าไว ๆ สามรอบ แล้วตามด้วยอีกหนึ่งรอบที่คุณจะดูจากภาพอย่างเดียวไม่ได้`,
+      ib_reroll_btn: `🔄 ตัวเลขใหม่ (ไม่นับเป็นการใช้รอบ)`,
+      hint_need_nudge: `💡 อยากได้คำใบ้ไหม?`,
+      ib_hint_body: `ลองดู Decoded Log ด้านล่าง — เทียบ (m, n) ของแต่ละแถวกับ (x, y) ของแถวนั้น x สัมพันธ์กับ m และ n แบบเดียวกันทุกแถวหรือเปล่า?`,
+      ib_table_round: `รอบ`,
+      ib_table_native: `พิกัดดั้งเดิม (m, n)`,
+      ib_table_computation: `การคำนวณ`,
+      ib_table_real: `ค่าจริง (x, y)`,
+      ib_log_empty: `ยังไม่มีรอบที่ถอดรหัสแล้ว`,
+      ib_formula_body: `<b>เจาะรหัสสูตร</b> Architecture คือตารางตัวไม่ทราบค่าขนาด 2×2 นี้ — หนึ่งคอลัมน์ต่อหนึ่ง strand โดย î (สีแดง) อยู่ทางซ้าย และ ĵ (สีม่วง) อยู่ทางขวา:`,
+      ib_formula_instruction: `เติมตัวอักษร a, b, c หรือ d ลงในช่องว่างแต่ละช่องให้ถูกต้อง:`,
+      ib_formula_check_btn: `ตรวจคำตอบ`,
+      ib_formula_banner_ready: `🌀 เลือกตัวอักษรให้ครบทุกช่องว่าง`,
+      ib_formula_correct: `✅ นั่นคือ Architecture ที่ถอดรหัสได้แล้ว`,
+      ib_formula_wrong: `🌡️ ยังไม่ใช่ — ลองตรวจดูว่าตัวอักษรไหนคูณกับตัวแปรไหน`,
+      ib_verify_body: `<b>พิสูจน์ว่าใช้ได้ทั่วไป</b> Architecture ใหม่สองชุด รอบนี้ไม่มีภาพให้ดู — ใช้แค่สูตรของคุณเท่านั้น`,
+      ib_verify_prompt: `Architecture ใหม่: a={a}, b={b}, c={c}, d={d} พิกัดดั้งเดิม (m, n) = ({m}, {n}) ใช้สูตรของคุณคำนวณ`,
+      ib_verify_correct: `✅ ถูกต้อง!`,
+      ib_verify_wrong: `🌡️ ยังไม่ใช่ — โจทย์ใหม่กำลังจะมา`,
+      ib_reveal: `<b>🔑 ถอดรหัสได้แล้ว:</b> <code>x = a·m + b·n</code>, <code>y = c·m + d·n</code> — ใช้ได้กับ Architecture ใดก็ได้ พิกัดดั้งเดิมจุดใดก็ได้ นี่คือการคูณเมทริกซ์กับเวกเตอร์ คุณเพิ่งอนุมานมันได้เองด้วยการอ่านตารางสามชุด แล้วปฏิเสธที่จะนับชุดที่สี่`,
+      ib_banner_correct: `✅ ถูกต้อง! ({x}, {y})`,
+      jack_mn_hard: `รอบนี้ไม่มีภาพ — (m, n) = ({m}, {n}) คำนวณเอาเลย`,
+      continue_t2a: `ต่อไป: Trial II-A →`,
+
+      s2c_eyebrow: `Trial II-A`,
+      s2c_title: `ย้อนสัญญาณ`,
+      s2c_lead: `ใช้ Architecture (M) เดียวกัน strand ทั้งสองเส้นเดียวกัน — แต่คราวนี้คำถามวิ่งย้อนกลับ`,
+      s2c_tag: `🔗 ต่อยอดจาก Trial I-B`,
+      s2c_p1: `Trial I-B เจาะรหัสนี้ได้แล้วสำหรับ Architecture ใดก็ได้ — เอาพิกัดดั้งเดิมคูณด้วย M แล้วจะไปตกที่ตำแหน่งจริง:`,
+      s2c_p2: `Trial นี้พลิกคำถามกลับด้าน คราวนี้สิ่งที่โจทย์ให้มาคือตำแหน่งจริง (x, y) — อ่านค่าตรง ๆ จาก Prime ได้เลย — ส่วนพิกัดดั้งเดิม (m, n) คือสิ่งที่คุณต้องหา ใช้ M ตัวเดิม แต่ทิศทางตรงข้าม: การจะยกเลิกการคูณด้วย M ได้ ต้องคูณทั้งสองข้างด้วยอินเวอร์สของมัน คือ M⁻¹`,
+      s2c_p3: `ตอนนี้คุณจะหา (m, n) ด้วยวิธีลัดก่อน — ใช้สายตาไล่ตาม Strand-i และ Strand-j แบบเดียวกับ Trial I-A เพียงแต่กลับทิศทาง ส่วน Trial II-B คือช่วงที่คุณจะเจาะรหัสว่า M⁻¹ มีหน้าตาเป็นตัวเลขอย่างไรกันแน่`,
+      s2c_continue_btn: `ไปหา (m, n) กัน →`,
+      t2c_bridge_note: `(M⁻¹M = I เอกลักษณ์ — ย้อนสิ่งที่ M ทำไว้ แล้วคุณก็กลับมาที่จุดเริ่มต้นเหมือนเดิม)`,
+
+      s3_eyebrow_pre: `Trial II-A · รอบที่ `,
+      s3_eyebrow_post: ` จาก 3`,
+      s3_title: `ย้อนสัญญาณ — อ่านค่า`,
+      s3_lead: `ตำแหน่งจริงของ Jack Point ถูกให้ไว้บน Prime แล้ว — Strand-i (สีแดง) และ Strand-j (สีม่วง) ถูกลากไว้ทั้งสองฝั่ง หาพิกัดดั้งเดิม (m, n) ภายใน Warp ด้วยสายตา`,
+      banner_ready_native: `🌀 กรอกพิกัดดั้งเดิม`,
+      t2_reveal: `<b>👀 การอ่านจากภาพใช้ได้ผลดี</b> — แต่จะไม่รองรับตัวเลขที่ใหญ่เกินกว่าจะใส่ในตารางได้ ต่อไป: การคำนวณที่เกิดขึ้นอยู่เบื้องหลังมาตลอด`,
+      continue_t2b: `ต่อไป: Trial II-B →`,
+      native_correct: `✅ ถูกต้อง! พิกัดดั้งเดิม (m, n) = ({m}, {n})`,
+      banner_close_solve: `🌡️ ยังไม่ใช่ — ลองแก้สมการ am+bn=x, cm+dn=y ดู`,
+
+      s3b_eyebrow_pre: `Trial II-B · รอบที่ `,
+      s3b_eyebrow_post: ` จาก 4`,
+      s3b_title: `เจาะรหัสอินเวอร์ส`,
+      s3b_lead: `ใช้ Architecture (M) เดียวกันตลอดทั้ง Trial ใน II-A คุณหา (m, n) ได้ด้วยการ "มองเห็น" ว่าเป้าหมายอยู่ห่างไปตาม i และตาม j แค่ไหน ตอนนี้แนวคิดเดียวกันจะถูกทำให้แม่นยำขึ้น: สลับ strand หนึ่งเส้นเป็นเป้าหมาย แล้วเทียบพื้นที่แรเงาที่ได้ — อัตราส่วนนั้นคือ (m, n) เลย`,
+      t2b_log_body: `<b>บันทึกไปกลับ (Forward / Inverse)</b> การคำนวณขาไป (→) และขากลับ (←) ของแต่ละรอบ วางเทียบกันไว้ เพื่อให้เห็นรูปแบบได้ชัดเจน`,
+      t2b_table_round: `รอบ`,
+      t2b_table_given: `ค่าที่ให้มา (x, y)`,
+      t2b_table_forward_inverse: `ไปข้างหน้า (→) / อินเวอร์ส (←)`,
+      t2b_table_found: `หาได้ (m, n)`,
+      t2b_log_empty: `ยังไม่มีรอบที่แก้แล้ว`,
+      t2b_inverse_body: `<b>สร้าง M⁻¹ จาก M โดยตรง</b> ไม่มีรอบให้แก้สำหรับส่วนนี้ — มีแค่สูตรที่บันทึกด้านบนแสดงให้เห็นซ้ำ ๆ อยู่แล้ว:`,
+      t2b_mcq_prompt: `<b>อีกนิดก่อนไป Trial III</b> ลองย้อนดูฝั่งอินเวอร์ส (←) ของบันทึก — การหา m ใช้ตัวเลขของ strand เดียวเสมอ และการหา n ก็ใช้ตัวเลขของอีก strand หนึ่งเสมอ เป็นแบบไหนกันแน่?`,
+      t2b_reveal: `<b>🔑 การไปข้างหน้าคือการคูณด้วย M การย้อนกลับคือการคูณด้วย M⁻¹</b> หรืออินเวอร์สของมัน การคูณกับการ "ยกเลิกการคูณ" เป็นการกระทำที่ตรงข้ามกัน ไม่ใช่การกระทำเดียวกันทำซ้ำสองครั้ง และสังเกตว่า (ad − bc) ตัวเดิมโผล่มาอีกครั้ง ทำหน้าที่เดิมทุกรอบ`,
+      continue_t3: `ต่อไป: Trial III →`,
+      hint_show_numbers: `💡 ขอดูตัวเลข`,
+      hint_used: `💡 ใช้คำใบ้แล้ว`,
+      t2b_hint_step1_body: `ลองดูรูปทรงสีฟ้าและสีส้มที่เพิ่งปรากฏขึ้น เทียบกับรูปทรงสีเทาที่เป็นค่าอ้างอิง — แต่ละรูปดูใหญ่ขึ้น (หรือเล็กลง) กี่เท่า?`,
+      t2b_hint_step2_body: `<span style="color:{gray};font-weight:800">Area(i, j) = {refArea}</span> &nbsp;·&nbsp; <span style="color:{blue};font-weight:800">Area(target, j) = {mArea}</span> &nbsp;·&nbsp; <span style="color:{orangeFade};font-weight:800">Area(i, target) = {nArea}</span><br>เอาพื้นที่สีฟ้า/สีส้มแต่ละอันหารด้วยพื้นที่สีเทา — อัตราส่วนนั้นคือคำตอบของคุณ`,
+      t2b_celebrate_action: `✅ ถูกต้อง! นี่คือขั้นตอนที่ใช้หาคำตอบจริง ๆ`,
+      t2b_celebrate_swap_m: `สลับ Strand-i เป็นเป้าหมาย (Strand-j อยู่ที่เดิม) — เทียบพื้นที่แรเงาสองรูป อัตราส่วนนั้นคือ m`,
+      t2b_celebrate_swap_n: `คราวนี้สลับ Strand-j เป็นเป้าหมายแทน (Strand-i อยู่ที่เดิม) — อัตราส่วนนั้นคือ n`,
+      t2b_celebrate_arith: `✅ ถูกต้อง! นี่คือการสลับแบบเดียวกัน เขียนเป็นการคำนวณ`,
+      t2b_mcq_opt0: `การหา m ใช้ตัวเลขของ Strand-j (b, d) เท่านั้น ส่วนการหา n ใช้ตัวเลขของ Strand-i (a, c) เท่านั้น — สลับกัน`,
+      t2b_mcq_opt1: `การหา m และ n ใช้ตัวอักษรทั้งสี่ตัว (a, b, c, d) เท่า ๆ กันทุกครั้ง`,
+      t2b_mcq_opt1_explain: `ลองดูบันทึกอีกครั้ง — บรรทัด m ของแต่ละแถวมีแค่ b กับ d เท่านั้น ไม่เคยมี a หรือ c เลย ลองใหม่อีกครั้ง`,
+      t2b_mcq_opt2: `เป็นเรื่องบังเอิญเฉพาะ Architecture นี้เท่านั้น — M ตัวอื่นจะไม่แสดงรูปแบบแบบนี้`,
+      t2b_mcq_opt2_explain: `พีชคณิตการกำจัดตัวแปรไม่ได้ขึ้นกับตัวเลขจริงของ M — รูปแบบการแบ่งเหมือนเดิม (m ใช้ตัวเลขของ j, n ใช้ตัวเลขของ i) สำหรับ Architecture ใดก็ตามที่ (ad − bc) ไม่เท่ากับศูนย์ ลองใหม่อีกครั้ง`,
+      t2b_mcq_opt3: `การแก้ย้อนกลับต้องใช้ตัวเลขที่ต่างไปจาก a, b, c, d โดยสิ้นเชิง`,
+      t2b_mcq_opt3_explain: `ทุกตัวเลขในคอลัมน์การคำนวณของบันทึกก็คือ a, b, c หรือ d (และ x, y) ทั้งนั้น — ไม่มีตัวเลขใหม่โผล่มาเลย ลองใหม่อีกครั้ง`,
+      t2b_mcq_correct_explain: `ถูกต้อง! การอินเวิร์สไม่ได้แค่ยกเลิกการคูณ แต่ยังสลับด้วยว่าตัวเลขของ strand ไหนมีผลต่อตัวไม่ทราบค่าตัวไหน`,
+      t2b_construction_note: `—สลับ a,d · เปลี่ยนเครื่องหมาย b,c · ÷{det}→`,
+
+      s4_eyebrow: `Trial III`,
+      s4_title: `วัดความบิดเบือนของ Warp`,
+      s4_lead: `ทุกแคปซูลที่ส่งผ่าน Jack Point จะถูกยืดหรือบีบตามความหนาแน่นของ Warp เอง — นั่นคือพื้นที่ของมัน สี่เหลี่ยมเส้นประคือพื้นที่เป้าหมายที่คุณต้องทำให้ได้พอดี ลาก Strand-i (สีแดง) และ Strand-j (สีม่วง) ให้สี่เหลี่ยมด้านขนานที่แรเงาครอบคลุมพื้นที่เท่ากัน`,
+      t3_readout: `ความหนาแน่น = |det| = <b>{area}</b> &nbsp;·&nbsp; เป้าหมาย = <b>{target}</b> (สี่เหลี่ยมเส้นประ {w}×{h})`,
+      t3_banner_ready: `🎯 ลาก i (สีแดง) และ j (สีม่วง) ให้พื้นที่เท่ากับสี่เหลี่ยมเส้นประ`,
+      t3_chip_stable: `🟢 Construct มั่นคงดี`,
+      t3_hint_btn: `💡 ลองทำดูสิ`,
+      t3_hint_body: `ลองลาก i และ j ให้ชี้ไปทิศทางเดียวกันเกือบสนิท — สังเกตค่าความหนาแน่นและป้ายสถานะ จากนั้นลองลากอันหนึ่งข้ามเส้นของอีกอันไปเลย`,
+      t3_reveal: `<b>🔑 ความหนาแน่น = |det(M)| = |ad − bc|</b> นี่ยังเป็นเหตุผลว่าทำไม Trial II ถึงมีคำตอบเสมอ — การย้อนสัญญาณจะใช้ได้ก็ต่อเมื่อความหนาแน่น ≠ 0 เท่านั้น`,
+      continue_debrief: `ต่อไป: สรุปบทเรียน →`,
+      t3_chip_glitch: `⚠️ GLITCH — Construct ยุบตัวเหลือเป็นเส้นตรง`,
+      t3_chip_mirror: `🪞 MIRROR ANOMALY — ทิศทางกลับด้าน`,
+      t3_banner_win: `🎉 ส่งแคปซูลสำเร็จ — พื้นที่แรเงาตรงกับสี่เหลี่ยมเส้นประแล้ว!`,
+      t3_banner_close: `🌡️ ใกล้แล้ว — พื้นที่แรเงาใกล้เคียงกับสี่เหลี่ยมเส้นประมาก`,
+      t3_banner_next: `🎯 เป้าหมายใหม่ — ลาก i, j ให้พื้นที่ตรงกัน`,
+
+      s5_eyebrow: `สรุปบทเรียน`,
+      s5_title: `สิ่งที่คุณเพิ่งทำไป มีชื่อว่า...`,
+      s5_p1: `<b>Trial I</b> คือการคูณเมทริกซ์กับเวกเตอร์: <code>x = a·m + b·n</code>, <code>y = c·m + d·n</code>`,
+      s5_p2: `<b>Trial II</b> คือเมทริกซ์อินเวอร์ส M⁻¹ — การยกเลิกการคูณตัวเดิมนั้น`,
+      s5_p3: `<b>Trial III</b> คือดีเทอร์มิแนนต์ <code>ad − bc</code> — ตัวคูณที่ทำให้ Warp ยืดหรือหดพื้นที่ และเป็นตัวเลขที่ตัดสินว่า Trial II จะมีคำตอบหรือไม่`,
+      s5_facil_body: `ลองให้ทั้งห้องเล่น Trial III ร่วมกันอีกครั้ง แล้วตั้งใจไล่หา Glitch (det ≈ 0) และ Mirror Anomaly (det &lt; 0) ด้วยกัน ทั้งสองแบบกระตุ้นให้เกิดได้ไม่ยาก และเป็นประเด็นตั้งคำถามที่ดีมากสำหรับพูดคุยทั้งห้องว่า "โครงสร้าง" ทำอะไรได้และทำอะไรไม่ได้บ้าง`,
+    },
+  };
+
+  function i18nT(key, vars) {
+    let s = (I18N[LANG] && I18N[LANG][key] !== undefined) ? I18N[LANG][key]
+      : (I18N.en[key] !== undefined ? I18N.en[key] : key);
+    if (vars) {
+      Object.keys(vars).forEach((k) => { s = s.split("{" + k + "}").join(vars[k]); });
+    }
+    return s;
+  }
+
+  const LANG_REFRESH = [];
+
+  function applyStaticI18n() {
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      el.innerHTML = i18nT(el.getAttribute("data-i18n"));
+    });
+    const titleEl = document.getElementById("pageTitle");
+    if (titleEl) titleEl.textContent = i18nT("doc_title");
+    document.documentElement.lang = LANG;
+    const toggleBtn = document.getElementById("langToggleBtn");
+    if (toggleBtn) toggleBtn.textContent = LANG === "en" ? "ไทย" : "EN";
+  }
+
+  function setLang(lang) {
+    LANG = lang;
+    try { localStorage.setItem("wt_lang", LANG); } catch (e) {}
+    applyStaticI18n();
+    LANG_REFRESH.forEach((fn) => { try { fn(); } catch (e) { console.error("i18n refresh hook failed:", e); } });
+  }
+
+  applyStaticI18n();
+  const langToggleBtnEl = document.getElementById("langToggleBtn");
+  if (langToggleBtnEl) {
+    langToggleBtnEl.addEventListener("click", () => setLang(LANG === "en" ? "th" : "en"));
+  }
+
 
   /* ================= Slide navigation (moved to run FIRST) =================
      Wiring up the sidebar/prev/next/dots/menu here, before any Trial's setup
@@ -2082,10 +2474,10 @@ const MATRIX_LAB_PRESETS = {
       warpLab.setCombinationFor(null);
       warpLab.setShowGhostIdentity(false); // hidden again until this round is answered correctly
       warpLab.setTargetPoint({ x: g.x, y: g.y, color: COLORS.orange, label: `(${g.m}, ${g.n})` });
-      jackEl.textContent = `(m, n) = (${g.m}, ${g.n})`;
+      jackEl.textContent = i18nT("jack_mn", { m: g.m, n: g.n });
       window.__wtTest.ia = current;
       xInput.value = ""; yInput.value = "";
-      banner.className = "status-banner"; banner.textContent = "🌀 Enter your answer";
+      banner.className = "status-banner"; banner.textContent = i18nT("banner_ready");
       celebrateBox.style.display = "none";
       continueBtn.style.display = "none";
       locked = false;
@@ -2106,7 +2498,7 @@ const MATRIX_LAB_PRESETS = {
         return;
       }
       const x = Number(xInput.value), y = Number(yInput.value);
-      primeLab.setTargetPoint({ x, y, color: COLORS.blue, label: "your guess" });
+      primeLab.setTargetPoint({ x, y, color: COLORS.blue, label: i18nT("your_guess") });
       primeLab.setCombinationFor({ x, y });
     }
 
@@ -2119,13 +2511,13 @@ const MATRIX_LAB_PRESETS = {
         locked = true;
         rerollBtn.disabled = true;
         banner.className = "status-banner win";
-        banner.textContent = `✅ Correct! Real position = (${current.x}, ${current.y})`;
+        banner.textContent = i18nT("ia_banner_correct", { x: current.x, y: current.y });
         round++;
         renderDots();
         startCelebration();
       } else {
         banner.className = "status-banner close";
-        banner.textContent = "🌡️ Not quite — check the arithmetic";
+        banner.textContent = i18nT("banner_close_arith");
       }
     }
 
@@ -2133,7 +2525,7 @@ const MATRIX_LAB_PRESETS = {
       const mySeq = seq;
       const { M, m, n, x, y } = current;
       celebrateBox.style.display = "block";
-      celebrateMsg.textContent = "✅ Correct! Watch how the two Constructs connect.";
+      celebrateMsg.textContent = i18nT("celebrate_watch");
       notationEl.innerHTML = "";
       continueBtn.style.display = "none";
 
@@ -2213,13 +2605,10 @@ const MATRIX_LAB_PRESETS = {
        answers get a short explanation and stay answerable; the correct answer
        advances to the named reveal. ---- */
     const MCQ_OPTIONS = [
-      { text: "Real position (Prime) = Architecture (M) × native coordinates (Warp)", correct: true },
-      { text: "Native coordinates (Warp) = Architecture (M) × real position (Prime)",
-        explain: "That's actually the reverse direction — that's what Trial II (coming up) asks for, and reversing it needs M⁻¹, not M itself. Try again." },
-      { text: "Real position (Prime) = native coordinates (Warp) × Architecture (M) — vector written first",
-        explain: "Order matters here: it's M · (m, n) — the matrix first, then the native coordinates as a column. Try again." },
-      { text: "It doesn't matter — Prime and Warp always end up with the same numbers",
-        explain: "If that were true, none of the last three rounds would have taken any work — the two Constructs only look different because M is doing real, specific work on (m, n). Try again." },
+      { key: "ia_mcq_opt0", correct: true },
+      { key: "ia_mcq_opt1", explainKey: "ia_mcq_opt1_explain" },
+      { key: "ia_mcq_opt2", explainKey: "ia_mcq_opt2_explain" },
+      { key: "ia_mcq_opt3", explainKey: "ia_mcq_opt3_explain" },
     ];
     let mcqAnswered = false;
     window.__wtTest.iaMcqCorrectIndex = MCQ_OPTIONS.findIndex((o) => o.correct);
@@ -2233,7 +2622,7 @@ const MATRIX_LAB_PRESETS = {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "mcq-option";
-        btn.textContent = opt.text;
+        btn.textContent = i18nT(opt.key);
         btn.addEventListener("click", () => onMcqPick(i, btn));
         mcqOptionsEl.appendChild(btn);
       });
@@ -2247,7 +2636,7 @@ const MATRIX_LAB_PRESETS = {
         mcqAnswered = true;
         btn.classList.add("correct");
         mcqExplainEl.className = "mcq-explain open";
-        mcqExplainEl.textContent = "Exactly — every 'find the real position' round was you computing M·(m, n) by hand.";
+        mcqExplainEl.textContent = i18nT("ia_mcq_correct_explain");
         setTimeout(() => {
           mcqCard.style.display = "none";
           revealCard.style.display = "block";
@@ -2255,9 +2644,24 @@ const MATRIX_LAB_PRESETS = {
       } else {
         btn.classList.add("wrong");
         mcqExplainEl.className = "mcq-explain open";
-        mcqExplainEl.textContent = opt.explain;
+        mcqExplainEl.textContent = i18nT(opt.explainKey);
       }
     }
+
+    LANG_REFRESH.push(function () {
+      if (current) jackEl.textContent = i18nT("jack_mn", { m: current.m, n: current.n });
+      if (locked) {
+        banner.textContent = i18nT("ia_banner_correct", { x: current.x, y: current.y });
+      } else if (!banner.classList.contains("close")) {
+        banner.textContent = i18nT("banner_ready");
+      } else {
+        banner.textContent = i18nT("banner_close_arith");
+      }
+      if (celebrateBox.style.display !== "none") celebrateMsg.textContent = i18nT("celebrate_watch");
+      if (mcqCard.style.display !== "none" && !mcqAnswered) {
+        Array.from(mcqOptionsEl.children).forEach((btn, i) => { btn.textContent = i18nT(MCQ_OPTIONS[i].key); });
+      }
+    });
 
     newRound();
   })();
@@ -2274,6 +2678,7 @@ const MATRIX_LAB_PRESETS = {
     const arch = genArchitectureMDynamic();
     const M = arch.M;
     let stepIdx = 0; // 0,1,2 = anchor rounds; 3 = hard round; 4 = done with rounds
+    let lastRoundHard = false; // tracks which jack_mn_* template is currently shown, for LANG_REFRESH
     let locked = false;
     let current = null;
     let logCount = 0;
@@ -2373,7 +2778,7 @@ const MATRIX_LAB_PRESETS = {
       celebrateBox.style.display = "none";
       continueBtn.style.display = "none";
       xInput.value = ""; yInput.value = "";
-      banner.className = "status-banner"; banner.textContent = "🌀 Enter your answer";
+      banner.className = "status-banner"; banner.textContent = i18nT("banner_ready");
       locked = false;
       rerollBtn.disabled = false;
     }
@@ -2383,8 +2788,9 @@ const MATRIX_LAB_PRESETS = {
       const t = ANCHORS[stepIdx];
       const ans = applyM(M, t.m, t.n);
       current = { m: t.m, n: t.n, x: ans.x, y: ans.y };
+      lastRoundHard = false;
       warpLab.setTargetPoint({ x: ans.x, y: ans.y, color: COLORS.orange, label: `(${t.m}, ${t.n})` });
-      jackEl.textContent = `(m, n) = (${t.m}, ${t.n})`;
+      jackEl.textContent = i18nT("jack_mn", { m: t.m, n: t.n });
       window.__wtTest.ib = current;
       hintBtn.style.display = stepIdx >= 1 ? "inline-flex" : "none";
       rerollBtn.style.display = "none"; // the three anchors are fixed points, not a random draw — nothing to reroll
@@ -2396,8 +2802,9 @@ const MATRIX_LAB_PRESETS = {
       const t = randNativeHardInView(M, arch.range, arch.center);
       const ans = applyM(M, t.m, t.n);
       current = { m: t.m, n: t.n, x: ans.x, y: ans.y };
+      lastRoundHard = true;
       warpLab.setTargetPoint(null);
-      jackEl.textContent = `No picture this time — (m, n) = (${t.m}, ${t.n}). Compute it.`;
+      jackEl.textContent = i18nT("jack_mn_hard", { m: t.m, n: t.n });
       window.__wtTest.ib = current;
       rerollBtn.style.display = "inline-block"; // redesign point 7: this one round IS a random draw, so a reroll makes sense here
       renderDots();
@@ -2412,7 +2819,7 @@ const MATRIX_LAB_PRESETS = {
       if (locked) return;
       if (xInput.value === "" || yInput.value === "") { primeLab.setTargetPoint(null); return; }
       const x = Number(xInput.value), y = Number(yInput.value);
-      primeLab.setTargetPoint({ x, y, color: COLORS.blue, label: "your guess" });
+      primeLab.setTargetPoint({ x, y, color: COLORS.blue, label: i18nT("your_guess") });
     }
 
     function checkAnchorOrHard() {
@@ -2424,14 +2831,14 @@ const MATRIX_LAB_PRESETS = {
         locked = true;
         rerollBtn.disabled = true;
         banner.className = "status-banner win";
-        banner.textContent = `✅ Correct! (${current.x}, ${current.y})`;
+        banner.textContent = i18nT("ib_banner_correct", { x: current.x, y: current.y });
         appendLog(current.m, current.n, current.x, current.y);
         stepIdx++;
         renderDots();
         startCelebration();
       } else {
         banner.className = "status-banner close";
-        banner.textContent = "🌡️ Not quite — check the arithmetic";
+        banner.textContent = i18nT("banner_close_arith");
       }
     }
     xInput.addEventListener("input", () => { updateLiveReference(); checkAnchorOrHard(); });
@@ -2446,7 +2853,7 @@ const MATRIX_LAB_PRESETS = {
       const mySeq = seq;
       const { m, n, x, y } = current;
       celebrateBox.style.display = "block";
-      celebrateMsg.textContent = "✅ Correct! Watch how the two Constructs connect.";
+      celebrateMsg.textContent = i18nT("celebrate_watch");
       notationEl.innerHTML = "";
       continueBtn.style.display = "none";
 
@@ -2519,6 +2926,10 @@ const MATRIX_LAB_PRESETS = {
     // seen defined, not four unexplained letters.
     document.getElementById("ib-formulaMatrixLine").innerHTML =
       "M = " + matrixHTML({ a: "a", b: "b", c: "c", d: "d" }, [COLORS.red, COLORS.purple]);
+    LANG_REFRESH.push(function () {
+      document.getElementById("ib-formulaMatrixLine").innerHTML =
+        "M = " + matrixHTML({ a: "a", b: "b", c: "c", d: "d" }, [COLORS.red, COLORS.purple]);
+    });
     const selXM = document.getElementById("ib-sel-xm"), selXN = document.getElementById("ib-sel-xn");
     const selYM = document.getElementById("ib-sel-ym"), selYN = document.getElementById("ib-sel-yn");
     const formulaBanner = document.getElementById("ib-formulabanner");
@@ -2526,7 +2937,7 @@ const MATRIX_LAB_PRESETS = {
       const ok = selXM.value === "a" && selXN.value === "b" && selYM.value === "c" && selYN.value === "d";
       if (ok) {
         formulaBanner.className = "status-banner win";
-        formulaBanner.textContent = "✅ That's the Architecture, decoded.";
+        formulaBanner.textContent = i18nT("ib_formula_correct");
         setTimeout(() => {
           formulaCard.style.display = "none";
           verifyCard.style.display = "block";
@@ -2534,7 +2945,7 @@ const MATRIX_LAB_PRESETS = {
         }, 900);
       } else {
         formulaBanner.className = "status-banner close";
-        formulaBanner.textContent = "🌡️ Not quite — check which letter multiplies which variable";
+        formulaBanner.textContent = i18nT("ib_formula_wrong");
       }
     });
 
@@ -2560,12 +2971,11 @@ const MATRIX_LAB_PRESETS = {
       const vM = randSmallM();
       const t = randNativeHard();
       const ans = applyM(vM, t.m, t.n);
-      verifyCurrent = { m: t.m, n: t.n, x: ans.x, y: ans.y };
+      verifyCurrent = { m: t.m, n: t.n, x: ans.x, y: ans.y, vM: vM };
       window.__wtTest.ibVerify = verifyCurrent;
-      verifyPrompt.textContent =
-        `New Architecture: a=${vM.a}, b=${vM.b}, c=${vM.c}, d=${vM.d}. Native (m, n) = (${t.m}, ${t.n}). Use your formula.`;
+      verifyPrompt.textContent = i18nT("ib_verify_prompt", { a: vM.a, b: vM.b, c: vM.c, d: vM.d, m: t.m, n: t.n });
       vx.value = ""; vy.value = "";
-      verifyBanner.className = "status-banner"; verifyBanner.textContent = "🌀 Enter your answer";
+      verifyBanner.className = "status-banner"; verifyBanner.textContent = i18nT("banner_ready");
       verifyLocked = false;
       renderVerifyDots();
     }
@@ -2578,7 +2988,7 @@ const MATRIX_LAB_PRESETS = {
       if (correct) {
         verifyLocked = true;
         verifyBanner.className = "status-banner win";
-        verifyBanner.textContent = "✅ Correct!";
+        verifyBanner.textContent = i18nT("ib_verify_correct");
         verifyIdx++;
         renderVerifyDots();
         setTimeout(() => {
@@ -2587,7 +2997,7 @@ const MATRIX_LAB_PRESETS = {
         }, 900);
       } else {
         verifyBanner.className = "status-banner close";
-        verifyBanner.textContent = "🌡️ Not quite — a fresh one is on its way";
+        verifyBanner.textContent = i18nT("ib_verify_wrong");
         verifyLocked = true;
         setTimeout(startVerifyRound, 1200);
       }
@@ -2597,6 +3007,35 @@ const MATRIX_LAB_PRESETS = {
 
     /* hint toggle */
     hintBtn.addEventListener("click", () => hintBody.classList.toggle("open"));
+
+    LANG_REFRESH.push(function () {
+      if (!current) return;
+      if (lastRoundHard) {
+        jackEl.textContent = i18nT("jack_mn_hard", { m: current.m, n: current.n });
+      } else {
+        jackEl.textContent = i18nT("jack_mn", { m: current.m, n: current.n });
+      }
+      if (locked) {
+        banner.textContent = i18nT("ib_banner_correct", { x: current.x, y: current.y });
+      } else if (banner.classList.contains("close")) {
+        banner.textContent = i18nT("banner_close_arith");
+      } else {
+        banner.textContent = i18nT("banner_ready");
+      }
+      if (celebrateBox.style.display !== "none") celebrateMsg.textContent = i18nT("celebrate_watch");
+      if (formulaCard.style.display !== "none") {
+        formulaBanner.textContent = formulaBanner.classList.contains("win") ? i18nT("ib_formula_correct")
+          : formulaBanner.classList.contains("close") ? i18nT("ib_formula_wrong") : i18nT("ib_formula_banner_ready");
+      }
+      if (verifyCard.style.display !== "none" && verifyCurrent && verifyCurrent.vM) {
+        verifyPrompt.textContent = i18nT("ib_verify_prompt", {
+          a: verifyCurrent.vM.a, b: verifyCurrent.vM.b, c: verifyCurrent.vM.c, d: verifyCurrent.vM.d,
+          m: verifyCurrent.m, n: verifyCurrent.n,
+        });
+        verifyBanner.textContent = verifyBanner.classList.contains("win") ? i18nT("ib_verify_correct")
+          : verifyBanner.classList.contains("close") ? i18nT("ib_verify_wrong") : i18nT("banner_ready");
+      }
+    });
 
     newAnchorRound();
   })();
@@ -2686,10 +3125,10 @@ const MATRIX_LAB_PRESETS = {
       warpLab.setShowGhostIdentity(false); // hidden again until this round is answered correctly
       warpLab.setTargetPoint(null);
       warpLab.setTargetPoints([]); // clears any live-guess dot left from a previous round
-      jackEl.textContent = `(x, y) = (${g.x}, ${g.y})`;
+      jackEl.textContent = i18nT("jack_xy", { x: g.x, y: g.y });
       window.__wtTest.t2 = current;
       mInput.value = ""; nInput.value = "";
-      banner.className = "status-banner"; banner.textContent = "🌀 Enter native coordinates";
+      banner.className = "status-banner"; banner.textContent = i18nT("banner_ready_native");
       celebrateBox.style.display = "none";
       continueBtn.style.display = "none";
       locked = false;
@@ -2712,7 +3151,7 @@ const MATRIX_LAB_PRESETS = {
       }
       const m = Number(mInput.value), n = Number(nInput.value);
       const guess = applyM(current.M, m, n);
-      warpLab.setTargetPoints([{ x: guess.x, y: guess.y, color: COLORS.blue, label: "your guess" }]);
+      warpLab.setTargetPoints([{ x: guess.x, y: guess.y, color: COLORS.blue, label: i18nT("your_guess") }]);
       warpLab.setCombinationFor({ x: m, y: n });
     }
 
@@ -2724,13 +3163,13 @@ const MATRIX_LAB_PRESETS = {
       if (correct) {
         locked = true;
         banner.className = "status-banner win";
-        banner.textContent = `✅ Correct! Native (m, n) = (${current.m}, ${current.n})`;
+        banner.textContent = i18nT("native_correct", { m: current.m, n: current.n });
         round++;
         renderDots();
         startCelebration();
       } else {
         banner.className = "status-banner close";
-        banner.textContent = "🌡️ Not quite — try solving am+bn=x, cm+dn=y";
+        banner.textContent = i18nT("banner_close_solve");
       }
     }
 
@@ -2738,7 +3177,7 @@ const MATRIX_LAB_PRESETS = {
       const mySeq = seq;
       const { M, m, n, x, y } = current;
       celebrateBox.style.display = "block";
-      celebrateMsg.textContent = "✅ Correct! Watch how the two Constructs connect.";
+      celebrateMsg.textContent = i18nT("celebrate_watch");
       notationEl.innerHTML = "";
       continueBtn.style.display = "none";
 
@@ -2803,6 +3242,20 @@ const MATRIX_LAB_PRESETS = {
 
     mInput.addEventListener("input", () => { updateLiveReference(); checkAnswer(); });
     nInput.addEventListener("input", () => { updateLiveReference(); checkAnswer(); });
+
+    LANG_REFRESH.push(function () {
+      if (!current) return;
+      jackEl.textContent = i18nT("jack_xy", { x: current.x, y: current.y });
+      if (locked) {
+        banner.textContent = i18nT("native_correct", { m: current.m, n: current.n });
+      } else if (banner.classList.contains("close")) {
+        banner.textContent = i18nT("banner_close_solve");
+      } else {
+        banner.textContent = i18nT("banner_ready_native");
+      }
+      if (celebrateBox.style.display !== "none") celebrateMsg.textContent = i18nT("celebrate_watch");
+    });
+
     newRound();
   })();
 } catch (e) { console.error("Trial II failed to initialize:", e); }
@@ -2892,7 +3345,7 @@ const MATRIX_LAB_PRESETS = {
     function resetHint() {
       hintStep = 0;
       hintBtn.disabled = false;
-      hintBtn.textContent = "💡 Need a nudge?";
+      hintBtn.textContent = i18nT("hint_need_nudge");
       hintBody.className = "hint-body";
       hintBody.innerHTML = "";
       warpLab.setParallelograms([refPara]);
@@ -2903,8 +3356,8 @@ const MATRIX_LAB_PRESETS = {
       if (hintStep === 1) {
         warpLab.setParallelograms([refPara, mParaFor(false), nParaFor(false)]);
         hintBody.className = "hint-body open";
-        hintBody.innerHTML = "Look at the blue and orange shapes that just appeared, next to the gray reference — how many times bigger (or smaller) does each one look?";
-        hintBtn.textContent = "💡 Show me the numbers";
+        hintBody.innerHTML = i18nT("t2b_hint_step1_body");
+        hintBtn.textContent = i18nT("hint_show_numbers");
       } else if (hintStep === 2) {
         // Shapes stay unlabeled ON THE CANVAS deliberately: with all three
         // parallelograms sharing the origin corner, their centroid-anchored
@@ -2915,8 +3368,11 @@ const MATRIX_LAB_PRESETS = {
         const refArea = Math.abs(M.a * M.d - M.b * M.c);
         const mArea = Math.abs(M.d * current.x - M.b * current.y);
         const nArea = Math.abs(M.a * current.y - M.c * current.x);
-        hintBody.innerHTML = `<span style="color:${COLORS.gray};font-weight:800">Area(i, j) = ${roundTo2dp(refArea)}</span> &nbsp;·&nbsp; <span style="color:${COLORS.blue};font-weight:800">Area(target, j) = ${roundTo2dp(mArea)}</span> &nbsp;·&nbsp; <span style="color:${COLORS.orangeFade};font-weight:800">Area(i, target) = ${roundTo2dp(nArea)}</span><br>Divide each blue/orange area by the gray one — that ratio is your answer.`;
-        hintBtn.textContent = "💡 Hint used";
+        hintBody.innerHTML = i18nT("t2b_hint_step2_body", {
+          gray: COLORS.gray, blue: COLORS.blue, orangeFade: COLORS.orangeFade,
+          refArea: roundTo2dp(refArea), mArea: roundTo2dp(mArea), nArea: roundTo2dp(nArea),
+        });
+        hintBtn.textContent = i18nT("hint_used");
         hintBtn.disabled = true;
       }
     });
@@ -2960,10 +3416,10 @@ const MATRIX_LAB_PRESETS = {
       warpLab.setTargetPoint(null);
       warpLab.setTargetPoints([]);
       resetHint(); // shows just the gray reference shape; clears any hint state from last round
-      jackEl.textContent = `(x, y) = (${ans.x}, ${ans.y})`;
+      jackEl.textContent = i18nT("jack_xy", { x: ans.x, y: ans.y });
       window.__wtTest.t2b = current;
       mInput.value = ""; nInput.value = "";
-      banner.className = "status-banner"; banner.textContent = "🌀 Enter native coordinates";
+      banner.className = "status-banner"; banner.textContent = i18nT("banner_ready_native");
       celebrateBox.style.display = "none";
       continueBtn.style.display = "none";
       locked = false;
@@ -2979,7 +3435,7 @@ const MATRIX_LAB_PRESETS = {
       }
       const m = Number(mInput.value), n = Number(nInput.value);
       const guess = applyM(M, m, n);
-      warpLab.setTargetPoints([{ x: guess.x, y: guess.y, color: COLORS.blue, label: "your guess" }]);
+      warpLab.setTargetPoints([{ x: guess.x, y: guess.y, color: COLORS.blue, label: i18nT("your_guess") }]);
       warpLab.setCombinationFor({ x: m, y: n });
     }
 
@@ -2991,14 +3447,14 @@ const MATRIX_LAB_PRESETS = {
       if (correct) {
         locked = true;
         banner.className = "status-banner win";
-        banner.textContent = `✅ Correct! Native (m, n) = (${current.m}, ${current.n})`;
+        banner.textContent = i18nT("native_correct", { m: current.m, n: current.n });
         appendLog(current.x, current.y, current.m, current.n);
         stepIdx++;
         renderDots();
         startCelebration();
       } else {
         banner.className = "status-banner close";
-        banner.textContent = "🌡️ Not quite — try solving am+bn=x, cm+dn=y";
+        banner.textContent = i18nT("banner_close_solve");
       }
     }
 
@@ -3006,7 +3462,7 @@ const MATRIX_LAB_PRESETS = {
       const mySeq = seq;
       const { m, n, x, y } = current;
       celebrateBox.style.display = "block";
-      celebrateMsg.textContent = "✅ Correct! Here's the action that actually found it.";
+      celebrateMsg.textContent = i18nT("t2b_celebrate_action");
       notationEl.innerHTML = "";
       continueBtn.style.display = "none";
 
@@ -3031,7 +3487,7 @@ const MATRIX_LAB_PRESETS = {
       // its area) change.
       timers.push(setTimeout(() => {
         if (seq !== mySeq) return;
-        celebrateMsg.textContent = "Swap Strand-i for the target (Strand-j stays put) — compare the shaded areas: that ratio is m.";
+        celebrateMsg.textContent = i18nT("t2b_celebrate_swap_m");
         warpLab.setParallelograms([refPara, mPara]);
         primeLab.setCombinationColors({ i: COLORS.red, j: COLORS.purple });
         primeLab.setCombinationFor({ x: m, y: n, matrixOverride: M });
@@ -3045,7 +3501,7 @@ const MATRIX_LAB_PRESETS = {
       // for n.
       timers.push(setTimeout(() => {
         if (seq !== mySeq) return;
-        celebrateMsg.textContent = "Now swap Strand-j for the target instead (Strand-i stays put) — that ratio is n.";
+        celebrateMsg.textContent = i18nT("t2b_celebrate_swap_n");
         warpLab.setParallelograms([refPara, nPara]);
       }, 2000));
 
@@ -3072,7 +3528,7 @@ const MATRIX_LAB_PRESETS = {
       // is a record of the action, not a separate, unexplained formula.
       timers.push(setTimeout(() => {
         if (seq !== mySeq) return;
-        celebrateMsg.textContent = "✅ Correct! Here's the same swap, written as arithmetic.";
+        celebrateMsg.textContent = i18nT("t2b_celebrate_arith");
         notationEl.innerHTML = forwardBackwardHTML(M, m, n, x, y, COLORS.red, COLORS.purple);
         continueBtn.style.display = "inline-block";
       }, 4400));
@@ -3101,13 +3557,10 @@ const MATRIX_LAB_PRESETS = {
        m's elimination line only ever used ĵ's numbers (b, d); n's only used
        î's (a, c). Naming that out loud is the synthesis step before Trial III. ---- */
     const MCQ_OPTIONS = [
-      { text: "Solving for m only used Strand-j's numbers (b, d); solving for n only used Strand-i's (a, c) — they swap", correct: true },
-      { text: "Solving for m and n both used all four letters (a, b, c, d) equally every time",
-        explain: "Look at the log again — each row's m-line only ever has b and d in it, never a or c. Try again." },
-      { text: "It was a coincidence specific to this Architecture — a different M wouldn't show the same split",
-        explain: "The elimination algebra doesn't depend on M's actual numbers — it's the SAME split (m uses j's numbers, n uses i's) for any Architecture with a nonzero (ad − bc). Try again." },
-      { text: "Solving backward needs completely different numbers than a, b, c, d",
-        explain: "Every number in the elimination log's Computation column IS a, b, c, or d (and x, y) — no new numbers appeared. Try again." },
+      { key: "t2b_mcq_opt0", correct: true },
+      { key: "t2b_mcq_opt1", explainKey: "t2b_mcq_opt1_explain" },
+      { key: "t2b_mcq_opt2", explainKey: "t2b_mcq_opt2_explain" },
+      { key: "t2b_mcq_opt3", explainKey: "t2b_mcq_opt3_explain" },
     ];
     let mcqAnswered = false;
 
@@ -3120,7 +3573,7 @@ const MATRIX_LAB_PRESETS = {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "mcq-option";
-        btn.textContent = opt.text;
+        btn.textContent = i18nT(opt.key);
         btn.addEventListener("click", () => onMcqPick(i, btn));
         mcqOptionsEl.appendChild(btn);
       });
@@ -3135,7 +3588,7 @@ const MATRIX_LAB_PRESETS = {
         mcqAnswered = true;
         btn.classList.add("correct");
         mcqExplainEl.className = "mcq-explain open";
-        mcqExplainEl.textContent = "Exactly — inverting doesn't just undo the multiplication, it swaps which strand's numbers matter for which unknown.";
+        mcqExplainEl.textContent = i18nT("t2b_mcq_correct_explain");
         setTimeout(() => {
           mcqCard.style.display = "none";
           revealCard.style.display = "block";
@@ -3143,9 +3596,39 @@ const MATRIX_LAB_PRESETS = {
       } else {
         btn.classList.add("wrong");
         mcqExplainEl.className = "mcq-explain open";
-        mcqExplainEl.textContent = opt.explain;
+        mcqExplainEl.textContent = i18nT(opt.explainKey);
       }
     }
+
+    LANG_REFRESH.push(function () {
+      if (!current) return;
+      jackEl.textContent = i18nT("jack_xy", { x: current.x, y: current.y });
+      if (locked) {
+        banner.textContent = i18nT("native_correct", { m: current.m, n: current.n });
+      } else if (banner.classList.contains("close")) {
+        banner.textContent = i18nT("banner_close_solve");
+      } else {
+        banner.textContent = i18nT("banner_ready_native");
+      }
+      if (hintStep === 0) hintBtn.textContent = i18nT("hint_need_nudge");
+      else if (hintStep === 1) { hintBtn.textContent = i18nT("hint_show_numbers"); hintBody.innerHTML = i18nT("t2b_hint_step1_body"); }
+      else if (hintStep === 2) {
+        hintBtn.textContent = i18nT("hint_used");
+        const refArea = Math.abs(M.a * M.d - M.b * M.c);
+        const mArea = Math.abs(M.d * current.x - M.b * current.y);
+        const nArea = Math.abs(M.a * current.y - M.c * current.x);
+        hintBody.innerHTML = i18nT("t2b_hint_step2_body", {
+          gray: COLORS.gray, blue: COLORS.blue, orangeFade: COLORS.orangeFade,
+          refArea: roundTo2dp(refArea), mArea: roundTo2dp(mArea), nArea: roundTo2dp(nArea),
+        });
+      }
+      if (document.getElementById("t2b-inversecard").style.display !== "none") {
+        document.getElementById("t2b-inverseLine").innerHTML = inverseConstructionHTML(M);
+      }
+      if (mcqCard.style.display !== "none" && !mcqAnswered) {
+        Array.from(mcqOptionsEl.children).forEach((btn, i) => { btn.textContent = i18nT(MCQ_OPTIONS[i].key); });
+      }
+    });
 
     newRound();
   })();
@@ -3214,13 +3697,13 @@ const MATRIX_LAB_PRESETS = {
       const area = Math.abs(det);
       warpLab.setParallelograms([{ v1: { x: m.a, y: m.c }, v2: { x: m.b, y: m.d }, color: COLORS.blue, label: "density", alpha: 0.18 }]);
       const rect = niceFactorPair(target);
-      readout.innerHTML = `Density = |det| = <b>${roundTo2dp(area)}</b> &nbsp;·&nbsp; target = <b>${target}</b> (dashed rectangle, ${rect.w}×${rect.h})`;
+      readout.innerHTML = i18nT("t3_readout", { area: roundTo2dp(area), target: target, w: rect.w, h: rect.h });
       if (area < 0.2) {
-        chip.className = "status-chip glitch"; chip.textContent = "⚠️ GLITCH — the Construct collapsed onto a line";
+        chip.className = "status-chip glitch"; chip.textContent = i18nT("t3_chip_glitch");
       } else if (det < 0) {
-        chip.className = "status-chip mirror"; chip.textContent = "🪞 MIRROR ANOMALY — orientation flipped";
+        chip.className = "status-chip mirror"; chip.textContent = i18nT("t3_chip_mirror");
       } else {
-        chip.className = "status-chip stable"; chip.textContent = "🟢 Construct stable";
+        chip.className = "status-chip stable"; chip.textContent = i18nT("t3_chip_stable");
       }
       return area;
     }
@@ -3231,7 +3714,7 @@ const MATRIX_LAB_PRESETS = {
       if (!awaitingNext && dist < 0.3) {
         awaitingNext = true;
         banner.className = "status-banner win";
-        banner.textContent = "🎉 Capsule sent — the shaded area matches the dashed rectangle!";
+        banner.textContent = i18nT("t3_banner_win");
         hits++;
         renderDots();
         if (hits >= TOTAL) {
@@ -3243,10 +3726,10 @@ const MATRIX_LAB_PRESETS = {
         // holding the win state until nextTarget() resets it
       } else if (dist < 1.5) {
         banner.className = "status-banner close";
-        banner.textContent = "🌡️ Close — the shaded area is nearly the size of the dashed rectangle";
+        banner.textContent = i18nT("t3_banner_close");
       } else {
         banner.className = "status-banner";
-        banner.textContent = "🎯 Drag i (red) and j (purple) to fill as much area as the dashed rectangle";
+        banner.textContent = i18nT("t3_banner_ready");
       }
     }
 
@@ -3255,8 +3738,10 @@ const MATRIX_LAB_PRESETS = {
       awaitingNext = false;
       warpLab.setTargetShape(rectShapeFor(target));
       updateReadoutAndChip(warpLab.matrix);
-      banner.className = "status-banner"; banner.textContent = "🎯 New target rectangle — drag i, j to match its area";
+      banner.className = "status-banner"; banner.textContent = i18nT("t3_banner_next");
     }
+
+    LANG_REFRESH.push(function () { renderT3(warpLab.matrix); });
 
     renderDots();
     renderT3(startM);
