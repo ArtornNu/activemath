@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Linear System Journey (Complete 8 Levels)</title>
+  <title>Linear System Journey (Complete 9 Levels)</title>
   <style>
     :root {
       --bg: #f8f9fa;
@@ -74,9 +74,13 @@
       grid-template-columns: 320px 1fr !important;
     }
 
+    main.summary-mode {
+      grid-template-columns: 380px 1fr !important;
+    }
+
     @media (max-width: 900px) {
       html, body { overflow: auto; }
-      main, main.single-view { grid-template-columns: 1fr !important; }
+      main, main.single-view, main.summary-mode { grid-template-columns: 1fr !important; }
       .canvas-container { height: 320px; }
     }
 
@@ -131,7 +135,6 @@
     }
     .cramer-row { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
 
-    /* Interactive Inverse Activity Styles (Level 7) */
     .stepper { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px; }
     .step-btn {
       background: var(--bg); border: 1px solid var(--border-dark); color: var(--text-muted);
@@ -177,6 +180,39 @@
     .lab-table th, .lab-table td { border: 1px solid #f0abfc; padding: 4px; vertical-align: middle; }
     .lab-table th { background: #fae8ff; color: #86198f; font-weight: bold; }
 
+    .summary-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 11px;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+    .summary-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    .summary-card.active-summary {
+      border-left-width: 6px;
+      box-shadow: 0 0 0 2px #0969da, 0 4px 12px rgba(9, 105, 218, 0.15);
+      background: #ffffff !important;
+    }
+    .summary-card h4 {
+      font-size: 12px;
+      color: #0969da;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
     .canvas-container { 
       background: var(--card); border: 1px solid var(--border); border-radius: 8px; 
       display: flex; flex-direction: column; align-items: center; padding: 6px; position: relative;
@@ -220,7 +256,6 @@
 
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
 
-    /* Modal Overlay */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
@@ -273,20 +308,18 @@
     }
     #equationBox b { font-size: 13px; }
 
-    /* Pattern Synthesis Dialogue Specifics */
     .pattern-card {
       background: #fcf5ff; border: 1px solid #f0abfc; border-radius: 10px; padding: 12px;
       margin-top: 6px; display: flex; flex-direction: column; gap: 10px; text-align: center;
     }
     .formula-row {
-      display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: bold;
+      display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: bold; flex-wrap: wrap;
     }
     .formula-select {
       background: #ffffff; border: 2px solid #a855f7; border-radius: 6px;
       padding: 4px 6px; font-weight: bold; color: #7e22ce; font-size: 13px; cursor: pointer; outline: none;
     }
 
-    /* Option Radio Cards for Det Quiz */
     .option-card {
       display: flex; align-items: center; gap: 8px; background: #ffffff;
       border: 2px solid #e2e8f0; border-radius: 8px; padding: 8px 12px;
@@ -340,14 +373,14 @@
 
     <!-- Conscious Dynamic Box -->
     <div id="consciousBox" class="conscious-dialog" style="display:none;">
-      <b id="consciousTitle">💡 ข้อสังเกตประจำด่าน</b>
+      <b id="consciousTitle">💡 คำแนะนำภารกิจ</b>
       <span id="consciousText">...</span>
     </div>
     
     <!-- Matrix Section -->
     <div id="matrixSection" class="matrix-section" style="display:none;">
       <div class="matrix-container">
-        <div style="display:flex; justify-between; align-items:center; margin-bottom: 4px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
           <label style="font-weight: 600; font-size: 11px; color: var(--text);">เมทริกซ์การแปลงพิกัด A:</label>
           <button class="btn-toggle-record" onclick="openPatternModalDirectly()">👁️ บันทึก Pattern</button>
         </div>
@@ -403,6 +436,48 @@
       <div class="controls-box" id="controlBox"></div>
     </div>
 
+    <!-- Level 8: Interactive Summary Content Box (Left Side) -->
+    <div id="summarySection" style="display:none; flex-direction:column; gap:8px;">
+      <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 2px;">
+        👇 <b>แตะที่กล่องสรุป</b> ด้านล่างเพื่อรับชม Animation แบบเจาะลึก
+      </div>
+
+      <div class="summary-card active-summary" id="sumCard0" onclick="selectSummaryConcept(0)" style="border-left-color: #2563eb; background: #f0f7ff;">
+        <h4 style="color: #1d4ed8;">
+          <span>📍 1. การแปลงเชิงเส้น (Linear Transformation)</span>
+          <span style="font-size:10px; font-weight:normal; color:#2563eb;">[คลิกเพื่อเล่น]</span>
+        </h4>
+        <span>สมการ <b>Ax = b</b> คือการแปลงพิกัดใน <b>Input Space</b> ไปสู่ตำแหน่งเป้าหมายใน <b>Output Space</b> ผ่านการขยาย บิด หรือยืดแกนด้วยเมทริกซ์ A</span>
+      </div>
+
+      <div class="summary-card" id="sumCard1" onclick="selectSummaryConcept(1)" style="border-left-color: #d97706; background: #fffbe0;">
+        <h4 style="color: #b45309;">
+          <span>📐 2. Determinant (det) อัตราส่วนพื้นที่</span>
+          <span style="font-size:10px; font-weight:normal; color:#b45309;">[คลิกเพื่อเล่น]</span>
+        </h4>
+        <span><b>det(A)</b> บอก<b>อัตราส่วนขยายพื้นที่</b>ของตารางพิกัด หาก det(A) = 0 พื้นที่จะถูกย่นบีบกลายเป็นเส้นตรงหรือจุด ทำให้ไม่สามารถหา Inverse Matrix ย้อนกลับได้</span>
+      </div>
+
+      <div class="summary-card" id="sumCard2" onclick="selectSummaryConcept(2)" style="border-left-color: #059669; background: #f0fdf4;">
+        <h4 style="color: #047857;">
+          <span>🗝️ 3. Cramer's Rule อัตราส่วนพื้นที่แก้สมการ</span>
+          <span style="font-size:10px; font-weight:normal; color:#047857;">[คลิกเพื่อเล่น]</span>
+        </h4>
+        <span>สามารถคำนวณหาค่า x และ y ได้โดยตรงจากอัตราส่วนขยายพื้นที่:
+        <br><b>x = det(A_x) / det(A)</b> และ <b>y = det(A_y) / det(A)</b></span>
+      </div>
+
+      <div class="summary-card" id="sumCard3" onclick="selectSummaryConcept(3)" style="border-left-color: #7e22ce; background: #faf5ff;">
+        <h4 style="color: #6b21a8;">
+          <span>🔄 4. Inverse Matrix (A⁻¹) ย้อนกระบวนการ</span>
+          <span style="font-size:10px; font-weight:normal; color:#6b21a8;">[คลิกเพื่อเล่น]</span>
+        </h4>
+        <span><b>A⁻¹ = (1 / det(A)) × Adj(A)</b><br>
+        • <b>Adj(A)</b> ทำหน้าที่<b>ดึงแกนบิดเอียงให้กลับมาตั้งฉาก</b><br>
+        • <b>1 / det(A)</b> ทำหน้าที่<b>ย่อ/ยืดพื้นที่กลับสู่ 1 ยูนิตมาตรฐานเดิม</b></span>
+      </div>
+    </div>
+
     <!-- Target Equations -->
     <div id="equationBox">
       <b style="display:block; margin-bottom:4px; color:#1f2328;">สมการเป้าหมาย:</b>
@@ -411,10 +486,10 @@
     </div>
   </div>
 
-  <!-- Input Space -->
+  <!-- Input Space / Single Concept Canvas Container -->
   <div class="canvas-container" id="containerIn">
     <div class="canvas-label in-label" id="canvasInTitle">โลกอินพุต (Input Space)</div>
-    <label class="canvas-overlay-toggle">
+    <label class="canvas-overlay-toggle" id="snapToggleLabel">
       <span>🧲 Hard Snap</span>
       <input type="checkbox" id="snapToggle" checked onchange="render()">
     </label>
@@ -462,13 +537,13 @@
 <div id="obsModal" class="modal-overlay">
   <div class="modal-card">
     <div class="modal-header">
-      <span style="font-size: 20px;" id="modalIcon">🔍</span>
-      <h4 id="modalTitle">จุดที่น่าสังเกตในการเปลี่ยนด่าน</h4>
+      <span style="font-size: 20px;" id="modalIcon">🟢</span>
+      <h4 id="modalTitle">แนะนำภารกิจแรก</h4>
     </div>
     <div id="modalBodyText" class="modal-body">...</div>
     <div class="modal-actions" id="modalActions">
       <button id="btnHint" class="btn-hint" onclick="toggleHint()">💡 คำใบ้ (Hint)</button>
-      <button id="btnPrimaryModal" class="btn-primary" onclick="closeModal()">ลุยต่อ 🚀</button>
+      <button id="btnPrimaryModal" class="btn-primary" onclick="closeModal()">เริ่มทำภารกิจ 🚀</button>
     </div>
   </div>
 </div>
@@ -520,12 +595,12 @@ const COLOR = {
 const levelsData = [
   { 
     level: 0, title: "Level 0: จุดตัดของเส้นตรง (ม.ต้น)", 
-    desc: "ลากจุด P(x,y) ไปที่จุดตัดของเส้นตรงทั้งสองเส้นบนระนาบพิกัดฉาก",
+    desc: "<b>ภารกิจ:</b> ให้ลากจุดสีเขียว P(x,y) ไปวางตรงตำแหน่งจุดตัดสีแดงของเส้นตรงทั้งสองเส้นบนระนาบพิกัดเพื่อทำภารกิจให้สำเร็จ",
     type: "LINE_INTERSECTION", lines: [{m: 2, c: -1}, {m: -1, c: 5}], target: { x: 2, y: 3 },
     eq1: "L1: y = 2x - 1", eq2: "L2: y = -x + 5",
     showMatrix: false, showCramer: false, hideOutputGrid: false,
-    consciousTitle: "🎯 ทบทวนความรู้ ม.ต้น",
-    consciousText: "คำตอบของระบบสมการเชิงเส้น คือจุด P(2, 3) ที่สอดคล้องกับทั้งสองเส้นตรงพร้อมกัน"
+    consciousTitle: "🟢 แนะนำภารกิจแรก",
+    consciousText: "👋 ให้ลาก<b>จุดสีเขียว P</b> บนระนาบพิกัด ไปยัง<b>จุดตัดเป้าหมาย (วงกลมสีแดง)</b> ของเส้นตรงทั้งสองเส้นเพื่อทำภารกิจให้สำเร็จ!"
   },
   { 
     level: 1, title: "Level 1: Vector Identity (แกนมาตรฐาน)", 
@@ -589,6 +664,15 @@ const levelsData = [
     showMatrix: false, showCramer: false, hideOutputGrid: false,
     consciousTitle: "📐 มโนทัศน์ Inverse Matrix",
     consciousText: "Inverse Matrix ไม่ใช่แค่สูตรพีชคณิต แต่คือกระบวนการล้างมุมเอียง (Adj) และย่อพื้นที่กลับ (1/det)"
+  },
+  {
+    level: 8, title: "Level 8: สรุปภาพรวมมโนทัศน์ 🎓",
+    desc: "<b>หน้าสรุปแบบโต้ตอบ:</b> คลิกเลือกกล่องสรุปทางซ้ายมือ เพื่อรับชมAnimation อธิบายแต่ละ Concept บน Canvas",
+    type: "SUMMARY",
+    eq1: "Ax = b ⇔ x = A⁻¹b", eq2: "Geometry ⇔ Algebra Synthesis",
+    showMatrix: false, showCramer: false, hideOutputGrid: false,
+    consciousTitle: "🎓 บทสรุปการเดินทาง",
+    consciousText: "แตะที่กล่องสรุปเพื่อดู Animation แสดงแต่ละมโนทัศน์ย่อยได้เลยครับ!"
   }
 ];
 
@@ -602,8 +686,8 @@ window.__GAME_STATE__ = {
   hasShownL1Dialogue: false,
   labRecords: [],
   inverseStep: 1,
+  selectedSummaryIndex: 0,
   
-  // State สำหรับ Step 4 Interactive Lab
   step4_matrixA: [2, 1, 1, 3], 
   step4_vecI: { x: 1, y: 0 }, 
   step4_vecJ: { x: 0, y: 1 }, 
@@ -846,6 +930,10 @@ function render() {
   ctxIn.clearRect(0, 0, cvsIn.width, cvsIn.height);
   ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
 
+  if (lvl.type === "SUMMARY") {
+    return;
+  }
+
   drawGrid(ctxIn, cvsIn, true, "x", "y");
 
   if (lvl.type === "LINE_INTERSECTION") {
@@ -936,10 +1024,8 @@ function render() {
       const A = st.step4_matrixA;
       const OutM = multiplyMatrices(A, G);
 
-      // 1. Draw Canvas Input: Show Drag Handles and Dashed Hint Lines
       drawStep4InputCanvas(ctxIn, cvsIn, st.step4_vecI, st.step4_vecJ);
 
-      // 2. Draw Canvas Output: Transformation of A x G
       drawGrid(ctxOut, cvsOut, true, "x", "y");
       drawTransformationGrid(ctxOut, cvsOut, OutM);
       drawUnitAreaHighlight(ctxOut, cvsOut, OutM);
@@ -986,14 +1072,155 @@ function render() {
   }
 }
 
-// -------------------------------------------------------------
-// STEP 4 INPUT CANVAS WITH DASHED HINT LINES FOR ADJUGATE VECTORS
-// -------------------------------------------------------------
+let summaryAnimFrame = null;
+let summaryAnimTime = 0;
+
+function selectSummaryConcept(idx) {
+  window.__GAME_STATE__.selectedSummaryIndex = idx;
+  for (let i = 0; i < 4; i++) {
+    const card = document.getElementById(`sumCard${i}`);
+    if (card) {
+      if (i === idx) card.classList.add('active-summary');
+      else card.classList.remove('active-summary');
+    }
+  }
+}
+
+function startSummaryAnimation() {
+  stopSummaryAnimation();
+  function loop() {
+    if (window.__GAME_STATE__.currentLevelIndex !== 8) return;
+    summaryAnimTime += 0.015;
+    drawSummaryCanvasAnimation(summaryAnimTime);
+    summaryAnimFrame = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function stopSummaryAnimation() {
+  if (summaryAnimFrame) {
+    cancelAnimationFrame(summaryAnimFrame);
+    summaryAnimFrame = null;
+  }
+}
+
+function drawSummaryCanvasAnimation(t) {
+  ctxIn.clearRect(0, 0, cvsIn.width, cvsIn.height);
+  const conceptIdx = window.__GAME_STATE__.selectedSummaryIndex;
+
+  let m = [1, 0, 0, 1];
+  let phaseTitle = "";
+  let detailText = "";
+
+  if (conceptIdx === 0) {
+    let p = (Math.sin(t * 1.5) + 1) / 2; 
+    m = [1 + p * 1.0, p * 0.8, p * 0.5, 1 + p * 0.5];
+    phaseTitle = "📍 1. การแปลงเชิงเส้น (Linear Transformation)";
+    detailText = `เมทริกซ์ A เปลี่ยนแปลงแกนพิกัด: จุด Input (x,y) ถูกแปลงไปสู่ Ax = b`;
+
+    drawGrid(ctxIn, cvsIn, true, "x", "y");
+    drawTransformationGrid(ctxIn, cvsIn, m);
+    drawUnitAreaHighlight(ctxIn, cvsIn, m);
+
+    let px = 1.5, py = 2.0;
+    let pIn = toScreen(cvsIn, px, py);
+    let outX = m[0]*px + m[1]*py;
+    let outY = m[2]*px + m[3]*py;
+    let pOut = toScreen(cvsIn, outX, outY);
+    let pOrig = toScreen(cvsIn, 0, 0);
+
+    ctxIn.save();
+    ctxIn.setLineDash([4, 4]);
+    ctxIn.strokeStyle = '#94a3b8';
+    ctxIn.beginPath(); ctxIn.moveTo(pOrig.x, pOrig.y); ctxIn.lineTo(pIn.x, pIn.y); ctxIn.stroke();
+
+    ctxIn.setLineDash([]);
+    ctxIn.strokeStyle = '#0284c7'; ctxIn.lineWidth = 3;
+    ctxIn.beginPath(); ctxIn.moveTo(pOrig.x, pOrig.y); ctxIn.lineTo(pOut.x, pOut.y); ctxIn.stroke();
+    drawArrowhead(ctxIn, pOrig.x, pOrig.y, pOut.x, pOut.y, '#0284c7');
+
+    ctxIn.fillStyle = '#0284c7'; ctxIn.font = 'bold 12px system-ui';
+    ctxIn.fillText(`b = A·x (${outX.toFixed(1)}, ${outY.toFixed(1)})`, pOut.x + 8, pOut.y - 6);
+    ctxIn.restore();
+
+  } else if (conceptIdx === 1) {
+    let p = (Math.sin(t * 1.5) + 1) / 2;
+    m = [1 + p * 1.5, 0.5, 0.2, 1 + p * 0.8];
+    let det = getDet(m);
+    phaseTitle = "📐 2. Determinant (det) อัตราส่วนการขยายพื้นที่";
+    detailText = `อัตราส่วนพื้นที่ = ${det.toFixed(2)} เท่า | ถ้า det = 0 พื้นที่จะยุบลงเหลือเพียงเส้นเดียว`;
+
+    drawGrid(ctxIn, cvsIn, true, "x", "y");
+    drawTransformationGrid(ctxIn, cvsIn, m);
+    drawUnitAreaHighlight(ctxIn, cvsIn, m);
+
+  } else if (conceptIdx === 2) {
+    m = [2, 1, 1, 2];
+    let det = getDet(m); 
+    let target = { x: 4, y: 5 };
+    let solveX = 1, solveY = 2;
+    
+    phaseTitle = "🗝️ 3. Cramer's Rule (อัตราส่วนพื้นที่สี่เหลี่ยม)";
+    detailText = `x = det(A_x) / det(A) = ${solveX} | y = det(A_y) / det(A) = ${solveY}`;
+
+    drawGrid(ctxIn, cvsIn, true, "x", "y");
+    drawTransformationGrid(ctxIn, cvsIn, m);
+
+    let p0 = toScreen(cvsIn, 0, 0);
+    let pBx = toScreen(cvsIn, target.x, target.y);
+    let pJ = toScreen(cvsIn, m[1], m[3]);
+    let pAx = toScreen(cvsIn, target.x + m[1], target.y + m[3]);
+
+    ctxIn.save();
+    ctxIn.beginPath();
+    ctxIn.moveTo(p0.x, p0.y); ctxIn.lineTo(pBx.x, pBx.y);
+    ctxIn.lineTo(pAx.x, pAx.y); ctxIn.lineTo(pJ.x, pJ.y);
+    ctxIn.closePath();
+    ctxIn.fillStyle = 'rgba(22, 163, 74, 0.25)';
+    ctxIn.fill();
+    ctxIn.strokeStyle = '#16a34a'; ctxIn.lineWidth = 2;
+    ctxIn.stroke();
+    ctxIn.restore();
+
+  } else if (conceptIdx === 3) {
+    let cycle = (t * 0.8) % 4;
+    if (cycle < 2) {
+      let p = cycle / 2;
+      m = [1 + p * 1.0, p * 0.5, p * 0.5, 1 + p * 1.0];
+      detailText = `กระบวนการแปลงไปข้างหน้าด้วยเมทริกซ์ A (แกนยืดและบิดเอียง)`;
+    } else {
+      let p = 1 - (cycle - 2) / 2;
+      m = [1 + p * 1.0, p * 0.5, p * 0.5, 1 + p * 1.0];
+      detailText = `กระบวนการย้อนกลับด้วย A⁻¹ (ดึงแกนเอียงกลับและย่อพื้นที่เท่าเดิม)`;
+    }
+    phaseTitle = "🔄 4. Inverse Matrix (A⁻¹) ย้อนกระบวนการ";
+
+    drawGrid(ctxIn, cvsIn, true, "x", "y");
+    drawTransformationGrid(ctxIn, cvsIn, m);
+    drawUnitAreaHighlight(ctxIn, cvsIn, m);
+  }
+
+  ctxIn.save();
+  ctxIn.fillStyle = 'rgba(15, 23, 42, 0.9)';
+  ctxIn.fillRect(10, 10, cvsIn.width - 20, 46);
+  ctxIn.strokeStyle = '#0284c7';
+  ctxIn.lineWidth = 1;
+  ctxIn.strokeRect(10, 10, cvsIn.width - 20, 46);
+
+  ctxIn.fillStyle = '#38bdf8';
+  ctxIn.font = 'bold 12px system-ui';
+  ctxIn.fillText(phaseTitle, 20, 28);
+
+  ctxIn.fillStyle = '#e2e8f0';
+  ctxIn.font = '11px system-ui';
+  ctxIn.fillText(detailText, 20, 45);
+  ctxIn.restore();
+}
+
 function drawStep4InputCanvas(ctx, cvs, vecI, vecJ) {
   const st = window.__GAME_STATE__;
   const A = st.step4_matrixA;
 
-  // Target vectors for Adjugate: i_target = (d, -c), j_target = (-b, a)
   const targetI = { x: A[3], y: -A[2] };
   const targetJ = { x: -A[1], y: A[0] };
 
@@ -1005,11 +1232,9 @@ function drawStep4InputCanvas(ctx, cvs, vecI, vecJ) {
 
   ctx.save();
 
-  // --- DRAW DASHED HINT LINES & TARGET CIRCLES ---
   ctx.setLineDash([4, 4]);
   ctx.lineWidth = 2;
 
-  // Target i hint
   ctx.strokeStyle = 'rgba(236, 72, 153, 0.6)';
   ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pTargetI.x, pTargetI.y); ctx.stroke();
   ctx.fillStyle = 'rgba(236, 72, 153, 0.15)';
@@ -1017,7 +1242,6 @@ function drawStep4InputCanvas(ctx, cvs, vecI, vecJ) {
   ctx.strokeStyle = '#ec4899';
   ctx.beginPath(); ctx.arc(pTargetI.x, pTargetI.y, 11, 0, Math.PI * 2); ctx.stroke();
 
-  // Target j hint
   ctx.strokeStyle = 'rgba(2, 132, 199, 0.6)';
   ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pTargetJ.x, pTargetJ.y); ctx.stroke();
   ctx.fillStyle = 'rgba(2, 132, 199, 0.15)';
@@ -1025,10 +1249,8 @@ function drawStep4InputCanvas(ctx, cvs, vecI, vecJ) {
   ctx.strokeStyle = '#0284c7';
   ctx.beginPath(); ctx.arc(pTargetJ.x, pTargetJ.y, 11, 0, Math.PI * 2); ctx.stroke();
 
-  ctx.setLineDash([]); // Reset line dash
+  ctx.setLineDash([]);
 
-  // --- DRAW ACTIVE DRAGGABLE VECTORS ---
-  // Vector i handle
   ctx.strokeStyle = COLOR.invI;
   ctx.lineWidth = 3.5;
   ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pI.x, pI.y); ctx.stroke();
@@ -1040,7 +1262,6 @@ function drawStep4InputCanvas(ctx, cvs, vecI, vecJ) {
   ctx.fillStyle = COLOR.invI; ctx.font = 'bold 11px system-ui';
   ctx.fillText(`î_G (${vecI.x}, ${vecI.y})`, pI.x + 10, pI.y - 6);
 
-  // Vector j handle
   ctx.strokeStyle = COLOR.invJ;
   ctx.lineWidth = 3.5;
   ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pJ.x, pJ.y); ctx.stroke();
@@ -1137,6 +1358,8 @@ cvsIn.addEventListener('mousedown', (e) => {
   const st = window.__GAME_STATE__;
   const lvl = levelsData[st.currentLevelIndex];
 
+  if (lvl.type === "SUMMARY") return;
+
   if (lvl.type === "INVERSE_FLOW" && st.inverseStep === 4) {
     const rect = cvsIn.getBoundingClientRect();
     const mx = e.clientX - rect.left;
@@ -1174,6 +1397,8 @@ cvsIn.addEventListener('mousemove', (e) => {
 function handlePointer(e) {
   const st = window.__GAME_STATE__;
   const lvl = levelsData[st.currentLevelIndex];
+
+  if (lvl.type === "SUMMARY") return;
 
   if (lvl.type === "INVERSE_FLOW") {
     if (st.inverseStep === 4 && st.step4_draggedHandle) {
@@ -1314,9 +1539,9 @@ function renderStep4UI() {
   }
 
   text.innerHTML = `
-    <b>🎯 ภารกิจ:</b> ลากปลายเวกเตอร์ <b style="color:${COLOR.invI}">î_G (สีชมพู)</b> และ <b style="color:${COLOR.invJ}">ĵ_G (สีฟ้า)</b> ฝั่ง Input ไปที่ <b>"วงกลมเส้นประ Hint"</b> เพื่อปรับเมทริกซ์ $G$ จนกระทั่งรูปฝั่ง Output <b>"ตั้งฉากกันสมบูรณ์"</b><br><br>
+    <b>🎯 ภารกิจ:</b> ลากปลายเวกเตอร์ <b style="color:${COLOR.invI}">î_G (สีชมพู)</b> และ <b style="color:${COLOR.invJ}">ĵ_G (สีฟ้า)</b> ฝั่ง Input ไปที่ <b>"วงกลมเส้นประ Hint"</b> เพื่อปรับเมทริกซ์ G จนกระทั่งรูปฝั่ง Output <b>"ตั้งฉากกันสมบูรณ์"</b><br><br>
     <div class="lab-box">
-      <div style="display:flex; justify-space-between; align-items:center;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
         <b style="color:#86198f;">📋 บันทึก Log อัตโนมัติ:</b>
         <span style="font-size:10px; font-weight:bold; color:#7e22ce;">สะสม: ${st.step4_history.length} / 3 กรณี</span>
       </div>
@@ -1405,7 +1630,6 @@ function autoSolveStep4() {
   render();
 }
 
-// Modal พิเศษสำหรับปุ่ม "สร้างกรณีทั่วไปของ Adj"
 function openGeneralAdjModal() {
   const st = window.__GAME_STATE__;
   const modalTitle = document.getElementById('modalTitle');
@@ -1453,12 +1677,14 @@ function openGeneralAdjModal() {
         <div class="math-matrix-bracket">
           <div class="matrix-input-grid" style="grid-template-columns: 1fr 1fr; width: 140px; gap:4px;">
             <select id="genAdj00" class="formula-select">
+              <option value="" disabled selected>?</option>
               <option value="a">a</option>
               <option value="d">d</option>
               <option value="-a">-a</option>
               <option value="-d">-d</option>
             </select>
             <select id="genAdj01" class="formula-select">
+              <option value="" disabled selected>?</option>
               <option value="a">a</option>
               <option value="-b">-b</option>
               <option value="b">b</option>
@@ -1466,6 +1692,7 @@ function openGeneralAdjModal() {
               <option value="-c">-c</option>
             </select>
             <select id="genAdj10" class="formula-select">
+              <option value="" disabled selected>?</option>
               <option value="a">a</option>
               <option value="-c">-c</option>
               <option value="c">c</option>
@@ -1473,6 +1700,7 @@ function openGeneralAdjModal() {
               <option value="-b">-b</option>
             </select>
             <select id="genAdj11" class="formula-select">
+              <option value="" disabled selected>?</option>
               <option value="d">d</option>
               <option value="a">a</option>
               <option value="-a">-a</option>
@@ -1555,7 +1783,6 @@ function verifyCustomAdjInput() {
   if (adj00 === a11 && adj01 === -a01 && adj10 === -a10 && adj11 === a00) {
     alert("🎉 ยอดเยี่ยมมาก! เมทริกซ์ Adj(A) ที่คุณสร้างขึ้นถูกต้องตามกฎการเปลี่ยนรูปแน่นอน!");
     
-    // Auto save custom matrix to history
     const st = window.__GAME_STATE__;
     const customA = [a00, a01, a10, a11];
     const customAdj = [adj00, adj01, adj10, adj11];
@@ -1563,7 +1790,7 @@ function verifyCustomAdjInput() {
     if (!st.step4_history.some(h => h.A[0]===customA[0] && h.A[1]===customA[1] && h.A[2]===customA[2] && h.A[3]===customA[3])) {
       st.step4_history.push({ A: customA, Adj: customAdj });
     }
-    openGeneralAdjModal(); // Refresh modal view
+    openGeneralAdjModal();
   } else {
     alert(`❌ ค่า Adj(A) ยังไม่ถูกต้อง!\nคำแนะนำ: สำหรับ A = [${a00}, ${a01}; ${a10}, ${a11}]\nAdjugate ควรเป็น [${a11}, ${-a01}; ${-a10}, ${a00}]`);
   }
@@ -1589,6 +1816,29 @@ function recordCurrentLabData(lvlIdx) {
       });
     }
   }
+}
+
+function showStartDialogue() {
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBodyText = document.getElementById('modalBodyText');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalActions = document.getElementById('modalActions');
+
+  modalIcon.innerText = "🟢";
+  modalTitle.innerText = "คำแนะนำการเริ่มทำภารกิจแรก";
+
+  modalBodyText.innerHTML = `
+    <div style="font-size: 14px; line-height: 1.6; color: #334155; text-align: center; padding: 10px 0;">
+      <p style="font-size: 16px; font-weight: bold; color: #16a34a; margin-bottom: 8px;">👋 ยินดีต้อนรับสู่ Linear System Journey!</p>
+      <p><b>คำแนะนำภารกิจแรก:</b> ให้ลาก<b>จุดสีเขียว P</b> บนระนาบพิกัด ไปวางตรงตำแหน่งจุดตัดสีแดงของเส้นตรงทั้งสองเส้น เพื่อทำภารกิจให้สำเร็จ!</p>
+    </div>
+  `;
+
+  modalActions.innerHTML = `
+    <button class="btn-primary" style="background:#16a34a;" onclick="closeModal()">ลุยกันเลย! 🚀</button>
+  `;
+
+  document.getElementById('obsModal').classList.add('active');
 }
 
 function showLevel1SuccessModal() {
@@ -1637,6 +1887,12 @@ function checkWinCondition() {
   const lvl = levelsData[st.currentLevelIndex];
   let isClearedNow = false;
 
+  if (lvl.type === "SUMMARY") {
+    st.isLevelCleared = true;
+    document.getElementById('clearBadge').style.display = 'block';
+    return;
+  }
+
   if (lvl.type === "TRANSFORMATION") {
     let outX = st.matrix[0]*st.inputPos.x + st.matrix[1]*st.inputPos.y;
     let outY = st.matrix[2]*st.inputPos.x + st.matrix[3]*st.inputPos.y;
@@ -1668,6 +1924,7 @@ function checkWinCondition() {
 }
 
 function loadLevel(idx) {
+  stopSummaryAnimation();
   const level = levelsData[idx];
   window.__GAME_STATE__.currentLevelIndex = idx;
   window.__GAME_STATE__.inputPos = { x: 0, y: 0 };
@@ -1681,6 +1938,29 @@ function loadLevel(idx) {
   
   document.getElementById('eq1').innerHTML = buildFormattedEquationHTML(level.eq1);
   document.getElementById('eq2').innerHTML = buildFormattedEquationHTML(level.eq2);
+
+  const mainElem = document.getElementById('mainContainer');
+  const summarySec = document.getElementById('summarySection');
+  const containerOut = document.getElementById('containerOut');
+  const snapToggleLabel = document.getElementById('snapToggleLabel');
+
+  if (level.type === "SUMMARY") {
+    mainElem.className = 'summary-mode';
+    summarySec.style.display = 'flex';
+    containerOut.style.display = 'none';
+    snapToggleLabel.style.display = 'none';
+    document.getElementById('equationBox').style.display = 'none';
+    document.getElementById('canvasInTitle').innerText = '🎨 Animation แสดง Concept แบบโต้ตอบ';
+    selectSummaryConcept(0);
+    startSummaryAnimation();
+  } else {
+    mainElem.className = '';
+    summarySec.style.display = 'none';
+    containerOut.style.display = 'flex';
+    snapToggleLabel.style.display = 'flex';
+    document.getElementById('equationBox').style.display = 'block';
+    document.getElementById('canvasInTitle').innerText = 'โลกอินพุต (Input Space)';
+  }
 
   document.getElementById('matrixSection').style.display = level.showMatrix ? 'flex' : 'none';
   document.getElementById('cramerSection').style.display = level.showCramer ? 'flex' : 'none';
@@ -1713,6 +1993,7 @@ function loadLevel(idx) {
   }
 
   checkWinCondition();
+  resizeCanvases();
   render();
 }
 
@@ -1740,6 +2021,7 @@ function nextLevel() {
 function autoSolve() {
   const currentIdx = window.__GAME_STATE__.currentLevelIndex;
   const level = levelsData[currentIdx];
+  if (level.type === "SUMMARY") return;
   if (level.type === "INVERSE_FLOW") {
     setStep(4);
     autoSolveStep4();
@@ -1753,6 +2035,61 @@ function autoSolve() {
 
 let pendingLevelToLoad = null;
 
+function closeModal() {
+  document.getElementById('obsModal').classList.remove('active');
+}
+
+function closeModalAndLoadPending() {
+  closeModal();
+  if (pendingLevelToLoad !== null) {
+    let lvlToLoad = pendingLevelToLoad;
+    pendingLevelToLoad = null;
+    loadLevel(lvlToLoad);
+  }
+}
+
+function toggleHint() {
+  const hint = document.getElementById('hintContent');
+  if (hint) {
+    hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
+  }
+}
+
+function openPatternModalDirectly() {
+  showObservationModal(4);
+}
+
+// Verification for Level 4 Modal
+function verifyMatrixPatternSecret() {
+  const d1 = document.getElementById('patDrop1') ? document.getElementById('patDrop1').value : '';
+  const d2 = document.getElementById('patDrop2') ? document.getElementById('patDrop2').value : '';
+  const d3 = document.getElementById('patDrop3') ? document.getElementById('patDrop3').value : '';
+  const d4 = document.getElementById('patDrop4') ? document.getElementById('patDrop4').value : '';
+
+  if (d1 === 'a' && d2 === 'b' && d3 === 'c' && d4 === 'd') {
+    alert("🎉 OK! ถูกต้องแล้ว! คุณได้ค้นพบรูปแบบการคูณเมทริกซ์ (Matrix Multiplication Pattern) สำเร็จ!");
+    closeModalAndLoadPending();
+  } else {
+    alert("❌ รูปแบบยังไม่ถูกต้อง! ลองสังเกตการคูณแถวของเมทริกซ์ A กับหลักของ Vector Input อีกครั้งนะครับ (คำใบ้: ผลลัพธ์ตัวบนใช้ แถวที่ 1 (a, b) และผลลัพธ์ตัวล่างใช้ แถวที่ 2 (c, d))");
+  }
+}
+
+// Verification for Level 5 Modal
+function verifyDetPatternSecret() {
+  const selected = document.querySelector('input[name="detPatternOpt"]:checked');
+  if (!selected) {
+    alert("โปรดเลือกตัวเลือกสูตรคำนวณพื้นที่ก่อนนะครับ!");
+    return;
+  }
+
+  if (selected.value === 'radio2') {
+    alert("🎉 OK! ถูกต้องแล้ว! สูตรพื้นที่ det(A) คือ (a × d) - (b × c)");
+    closeModalAndLoadPending();
+  } else {
+    alert("❌ ยังไม่ถูกต้องครับ! ลองดูการเปรียบเทียบในตารางย้อนหลังอีกครั้ง (คำใบ้: เอาแนวเฉียงลง (a×d) ลบด้วย แนวเฉียงขึ้น (b×c) ครับ)");
+  }
+}
+
 function showObservationModal(targetLevel = 1) {
   pendingLevelToLoad = targetLevel;
   const modalTitle = document.getElementById('modalTitle');
@@ -1762,11 +2099,12 @@ function showObservationModal(targetLevel = 1) {
 
   modalActions.innerHTML = `
     <button id="btnHint" class="btn-hint" onclick="toggleHint()">💡 คำใบ้ (Hint)</button>
-    <button id="btnPrimaryModal" class="btn-primary" onclick="closeModal()">ลุยต่อ 🚀</button>
+    <button id="btnPrimaryModal" class="btn-primary" onclick="closeModalAndLoadPending()">ลุยต่อ 🚀</button>
   `;
   modalIcon.innerText = "🔍";
 
   if (targetLevel === 1) {
+    modalIcon.innerText = "🔍";
     modalTitle.innerText = "🔍 ก้าวสู่มิติใหม่: ยินดีต้อนรับสู่ระบบ 2 Spaces!";
     modalBodyText.innerHTML = `
       <p style="font-size: 13px; color: #334155;">
@@ -1779,301 +2117,214 @@ function showObservationModal(targetLevel = 1) {
           คือ <b>Space พิกัด (x, y) ปกติ</b> ที่นักเรียนเคยเรียนมาเลย! จุดที่เราลากเปลี่ยนตำแหน่งจะเริ่มต้นจากฝั่งนี้เสมอ
         </div>
         <div class="space-card space-card-right">
-          <b style="font-size: 13px; display: block; margin-bottom: 4px;">🔄 ฝั่งขวา: Output Space</b>
-          คือ <b>Space ที่เกิดจากการแปลง</b> ด้วยตัวแปลงทางคณิตศาสตร์ (เมทริกซ์ A) ซึ่งจะยืดหรือปรับพิกัดตามกฎเกณฑ์!
+          <b style="font-size: 13px; display: block; margin-bottom: 4px;">🎯 ฝั่งขวา: Output Space</b>
+          คือ <b>Space ผลลัพธ์</b> ที่เกิดจากการแปลงด้วยเมทริกซ์ A จุดเป้าหมายสีส้มจะอยู่ที่ฝั่งนี้!
         </div>
       </div>
-      <div id="hintContent" class="hint-box">
-        💡 <b>คำใบ้ (Hint):</b><br>
-        ใน Level 1 เมทริกซ์การแปลงคือ Identity Matrix I ซึ่งยังไม่เปลี่ยนรูปทรงของ Space
-      </div>
-    `;
-  } else if (targetLevel === 2) {
-    modalTitle.innerText = "🤔 ชวนคิดก่อนเข้า Level 2: ถ้าแกนยืดออก?";
-    modalBodyText.innerHTML = `
-      <p style="font-size: 14px; font-weight: bold; color: #0969da;">"ถ้าแกนอ้างอิง Output กลายเป็น 2x พิกัดจุดจะเปลี่ยนไปอย่างไร?"</p>
-      <p style="margin-top: 8px;">
-        เมื่อแกน Output ขยายเป็น 2 เท่า ความยาวเท่าเดิมจะใช้ช่องบนแกน Input น้อยลง เราต้องขยับจุด P เพิ่มขึ้นหรือลดลงกันแน่?
+      <p style="margin-top: 10px; font-size: 12px; color: #475569;">
+        💡 <b>เป้าหมายของคุณ:</b> ลากจุดสีเขียว P ในฝั่ง Input เพื่อส่งจุดสีส้มในฝั่ง Output ไปให้ตรงกับจุดเป้าหมาย!
       </p>
-      <div id="hintContent" class="hint-box">
-        💡 <b>คำใบ้ (Hint):</b><br>
-        เมื่อแกน x ยืดเป็น 2 เท่า แต่ละก้าวบน Input จะส่งจุดไปไกลขึ้น 2 เท่า จึงใช้ค่า x แค่ครึ่งเดียว!
-      </div>
     `;
-  } else if (targetLevel === 3) {
-    modalTitle.innerText = "📐 ชวนคิดก่อนเข้า Level 3: เมื่อแกนเป็นผลลัพธ์ของการรวมกันของ x และ y";
+    modalActions.innerHTML = `
+      <button class="btn-primary" onclick="closeModalAndLoadPending()">ลุยเลย! 🚀</button>
+    `;
+  }
+  else if (targetLevel === 2) {
+    modalIcon.innerText = "📐";
+    modalTitle.innerText = "📐 Level 2: สังเกตพื้นที่การขยาย";
     modalBodyText.innerHTML = `
-      <p style="font-size: 14px; font-weight: bold; color: #0969da;">"ถ้าแต่ละแกนเป็นผลลัพธ์ของ การรวมกันของ x และ y จะเกิดอะไรขึ้น?"</p>
-      <p style="margin-top: 8px;">
-        เมื่อพิกัดใหม่ในแต่ละแกนเกิดจากการนำองค์ประกอบของ x และ y มาผสมรวมกัน ตาราง Grid จะเกิดการเปลี่ยนรูปแบบและทิศทาง เกิดเป็นแกนอ้างอิงชุดใหม่ในการนำทาง
+      <p style="font-size: 13px; color: #334155;">
+        ในด่านนี้ เมทริกซ์ A ถูกเปลี่ยนเป็น ${formatMathMatrixHTML(2, 0, 0, 1)}
       </p>
-      <div id="hintContent" class="hint-box">
-        💡 <b>คำใบ้ (Hint):</b><br>
-        เวกเตอร์ฐาน î และ ĵ จะพาจุด Output ไปตามผลรวมเชิงเส้น (Linear Combination) ของ x และ y
-      </div>
+      <p style="margin-top: 8px; font-size: 12px; color: #475569;">
+        สังเกตว่าตาราง Grid ใน Output Space ขยายพื้นที่ขึ้นเป็น <b>2 เท่า</b> ในแนวแกน X!<br>
+        ลองสังเกตผลกระทบต่อตำแหน่งของจุด P ดูนะครับ
+      </p>
     `;
-  } else if (targetLevel === 4) {
+    modalActions.innerHTML = `
+      <button class="btn-primary" onclick="closeModalAndLoadPending()">เริ่มทำ Level 2 🚀</button>
+    `;
+  }
+  else if (targetLevel === 3) {
+    modalIcon.innerText = "📐";
+    modalTitle.innerText = "📐 Level 3: Shear Transformation (แกนบิดเอียง)";
+    modalBodyText.innerHTML = `
+      <p style="font-size: 13px; color: #334155;">
+        เมทริกซ์ A ในด่านนี้คือ ${formatMathMatrixHTML(1, 1, 1, -1)}
+      </p>
+      <p style="margin-top: 8px; font-size: 12px; color: #475569;">
+        แกนพิกัดฝั่ง Output ไม่เพียงแค่ขยาย แต่ยัง<b>บิดเอียงและสะท้อน</b>อีกด้วย!<br>
+        พิกัด X และ Y ทำงานร่วมกันเพื่อนำจุดไปสู่เป้าหมาย
+      </p>
+    `;
+    modalActions.innerHTML = `
+      <button class="btn-primary" onclick="closeModalAndLoadPending()">เริ่มทำ Level 3 🚀</button>
+    `;
+  }
+  else if (targetLevel === 4) {
     modalIcon.innerText = "🕵️‍♂️";
     modalTitle.innerText = "ภารกิจถอดรหัส: ถอดแบบรูปการคูณเมทริกซ์!";
 
-    const records = window.__GAME_STATE__.labRecords;
-    let tableRowsHTML = "";
-    if (records.length === 0) {
-      tableRowsHTML = `<tr><td colspan="4" style="color:#656d76;">ยังไม่มีการบันทึก (ลองเล่นด่าน 1-3 ให้ผ่าน)</td></tr>`;
-    } else {
-      records.forEach(r => {
-        tableRowsHTML += `
-          <tr>
-            <td><b>ด่าน ${r.level}</b></td>
-            <td>${r.matrixHTML}</td>
-            <td>${r.inputHTML}</td>
-            <td>${r.outputHTML}</td>
-          </tr>
-        `;
-      });
-    }
+    const st = window.__GAME_STATE__;
+    
+    // Sample rows fallback if labRecords is not populated yet
+    const defaultData = [
+      { level: 1, matrixHTML: formatMathMatrixHTML(1,0,0,1), inputHTML: formatMathColumnVectorHTML(2,2,"text-x"), outputHTML: formatMathColumnVectorHTML(2,2,"text-y") },
+      { level: 2, matrixHTML: formatMathMatrixHTML(2,0,0,1), inputHTML: formatMathColumnVectorHTML(2,2,"text-x"), outputHTML: formatMathColumnVectorHTML(4,2,"text-y") },
+      { level: 3, matrixHTML: formatMathMatrixHTML(1,1,1,-1), inputHTML: formatMathColumnVectorHTML(3,2,"text-x"), outputHTML: formatMathColumnVectorHTML(5,1,"text-y") }
+    ];
+
+    const recordsToDisplay = (st.labRecords && st.labRecords.length >= 3) ? st.labRecords : defaultData;
+
+    const rowsHTML = recordsToDisplay.map(r => `
+      <tr>
+        <td><b>ด่าน ${r.level}</b></td>
+        <td>${r.matrixHTML}</td>
+        <td>${r.inputHTML}</td>
+        <td><b>${r.outputHTML}</b></td>
+      </tr>
+    `).join('');
 
     modalBodyText.innerHTML = `
-      <p style="font-weight: bold; color: #6b21a8;">จากข้อมูลที่บันทึกได้ในด่าน 1-3 น้อง ๆ สังเกตเห็น "แบบรูป" หรือ "ความสัมพันธ์" อะไรซ่อนอยู่ไหม?</p>
-      
-      <div style="background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 8px; padding: 8px; margin-top: 6px;">
-        <b style="color: #86198f; font-size: 11px;">📋 ข้อมูลที่บันทึกไว้ใน Lab:</b>
-        <table class="lab-table" style="margin-top: 4px;">
+      <p style="font-size: 13px; color: #334155; margin-bottom: 8px;">
+        จากข้อมูลที่บันทึกได้ในด่าน 1-3 น้อง ๆ สังเกตเห็น "แบบรูป" หรือ "ความสัมพันธ์" อะไรซ่อนอยู่ไหม?
+      </p>
+
+      <div style="background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 8px; padding: 8px; margin-bottom: 12px;">
+        <b style="color: #86198f; font-size: 11px; display: block; margin-bottom: 4px; text-align: center;">📋 ตารางข้อมูลที่บันทึกไว้ใน Lab:</b>
+        <table class="lab-table" style="background: white;">
           <thead>
             <tr>
               <th>ด่าน</th>
               <th>เมทริกซ์ A</th>
-              <th>ตัวตั้ง / ค่าตั้งต้น</th>
-              <th>ผลลัพธ์ที่ได้</th>
+              <th>ตัวตั้ง/ค่าตั้งต้น</th>
+              <th>ผลลัพธ์</th>
             </tr>
           </thead>
           <tbody>
-            ${tableRowsHTML}
+            ${rowsHTML}
           </tbody>
         </table>
       </div>
 
-      <div style="background: #ffffff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 10px; margin-top: 10px; text-align: center;">
-        <div style="font-size: 11px; color: #6b21a8; font-weight: bold; margin-bottom: 4px;">📌 รูปการคูณเมทริกซ์ (ประโยคสัญลักษณ์)</div>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; font-weight: bold;">
-          <span>เมทริกซ์ A</span>
-          ${formatMathMatrixHTML('a', 'b', 'c', 'd')}
-          <span>×</span>
-          <span>ค่าตั้งต้น</span>
-          ${formatMathColumnVectorHTML('x', 'y')}
+      <div class="pattern-card" style="text-align: center; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px;">
+        <b style="color: #0969da; font-size: 13px; display: block; margin-bottom: 8px;">📌 รูปการคูณเมทริกซ์ (ประโยคสัญลักษณ์)</b>
+        
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0; font-size: 14px; font-weight: bold;">
+          <span class="math-matrix-bracket"><span style="display:inline-flex; gap:4px;"><span class="math-col"><span>a</span><span>c</span></span><span class="math-col"><span>b</span><span>d</span></span></span></span>
+          <span>·</span>
+          <span class="math-matrix-bracket"><span class="math-col"><span class="text-x">x</span><span class="text-y">y</span></span></span>
           <span>=</span>
-          <span class="math-matrix-bracket">
-            <span class="math-col">
-              <span style="font-size: 11px; color: #2563eb;">(a×x) + (b×y)</span>
-              <span style="font-size: 11px; color: #d97706;">(c×x) + (d×y)</span>
-            </span>
-          </span>
-        </div>
-      </div>
-
-      <div class="pattern-card">
-        <b style="color: #7e22ce;">ลองมาช่วยกันสร้าง "สูตรหาผลลัพธ์" กันเลย:</b>
-        
-        <div class="formula-row">
-          <span>ผลลัพธ์ตัวบน (X) = (</span>
-          <select id="selXa" class="formula-select">
-            <option value="a" selected>a</option>
-            <option value="b">b</option>
-            <option value="c">c</option>
-            <option value="d">d</option>
-          </select>
-          <span class="text-x"> × x</span>
-          <span>) + (</span>
-          <select id="selXb" class="formula-select">
-            <option value="a" selected>a</option>
-            <option value="b">b</option>
-            <option value="c">c</option>
-            <option value="d">d</option>
-          </select>
-          <span class="text-y"> × y</span>
-          <span>)</span>
+          <span class="math-matrix-bracket"><span class="math-col"><span style="color:#0969da; font-size:11px;">ผลลัพธ์ตัวบน (X)</span><span style="color:#d97706; font-size:11px;">ผลลัพธ์ตัวล่าง (Y)</span></span></span>
         </div>
 
-        <div class="formula-row">
-          <span>ผลลัพธ์ตัวล่าง (Y) = (</span>
-          <select id="selYa" class="formula-select">
-            <option value="a" selected>a</option>
-            <option value="b">b</option>
-            <option value="c">c</option>
-            <option value="d">d</option>
-          </select>
-          <span class="text-x"> × x</span>
-          <span>) + (</span>
-          <select id="selYb" class="formula-select">
-            <option value="a" selected>a</option>
-            <option value="b">b</option>
-            <option value="c">c</option>
-            <option value="d">d</option>
-          </select>
-          <span class="text-y"> × y</span>
-          <span>)</span>
+        <p style="font-size: 12px; color: #475569; margin-top: 8px; margin-bottom: 10px;">
+          ลองมาช่วยกันสร้าง "สูตรหาผลลัพธ์" กันเลย:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center; font-size: 13px; font-weight: bold;">
+          <div class="formula-row">
+            <span>ผลลัพธ์ตัวบน (X) =</span>
+            <select id="patDrop1" class="formula-select">
+              <option value="" disabled selected>?</option>
+              <option value="a">a</option>
+              <option value="b">b</option>
+              <option value="c">c</option>
+              <option value="d">d</option>
+            </select>
+            <span>x  +</span>
+            <select id="patDrop2" class="formula-select">
+              <option value="" disabled selected>?</option>
+              <option value="a">a</option>
+              <option value="b">b</option>
+              <option value="c">c</option>
+              <option value="d">d</option>
+            </select>
+            <span>y</span>
+          </div>
+
+          <div class="formula-row">
+            <span>ผลลัพธ์ตัวล่าง (Y) =</span>
+            <select id="patDrop3" class="formula-select">
+              <option value="" disabled selected>?</option>
+              <option value="a">a</option>
+              <option value="b">b</option>
+              <option value="c">c</option>
+              <option value="d">d</option>
+            </select>
+            <span>x  +</span>
+            <select id="patDrop4" class="formula-select">
+              <option value="" disabled selected>?</option>
+              <option value="a">a</option>
+              <option value="b">b</option>
+              <option value="c">c</option>
+              <option value="d">d</option>
+            </select>
+            <span>y</span>
+          </div>
         </div>
       </div>
     `;
 
     modalActions.innerHTML = `
-      <button class="btn-purple" onclick="verifyMatrixPatternSecret()">ตรวจคำตอบ 🔑</button>
+      <button class="btn-purple" style="width: 100%;" onclick="verifyMatrixPatternSecret()">ตรวจคำตอบ 🔑</button>
     `;
-
-  } else if (targetLevel === 5) {
+  }
+  else if (targetLevel === 5) {
+    modalIcon.innerText = "🗝️";
+    modalTitle.innerText = "🗝️ Level 5: Cramer's Rule Discovery";
+    modalBodyText.innerHTML = `
+      <p style="font-size: 13px; color: #334155;">
+        ยินดีต้อนรับสู่การค้นพบกฎของคราเมอร์ (Cramer's Rule)!
+      </p>
+      <p style="margin-top: 8px; font-size: 12px; color: #475569;">
+        เราสามารถหาค่า x และ y ได้โดยตรงจากอัตราส่วนพื้นที่ det(A_x)/det(A) และ det(A_y)/det(A)<br>
+        โดยไม่ต้องแก้สมการทีละขั้นตอน!
+      </p>
+    `;
+    modalActions.innerHTML = `
+      <button class="btn-primary" onclick="closeModalAndLoadPending()">เริ่มทำ Level 5 🚀</button>
+    `;
+  }
+  else if (targetLevel === 6) {
+    modalIcon.innerText = "🙈";
+    modalTitle.innerText = "🙈 Level 6: Blind Test (Cramer's Mastery)";
+    modalBodyText.innerHTML = `
+      <p style="font-size: 13px; color: #334155;">
+        <b>คำท้าทาย:</b> ในด่านนี้ Grid ฝั่ง Output จะถูกซ่อนไว้!
+      </p>
+      <p style="margin-top: 8px; font-size: 12px; color: #475569;">
+        คำนวณตำแหน่ง x และ y ด้วย Cramer's Rule จากตัวเลขฝั่งซ้ายมือ แล้ววางจุด P ให้ถูกต้อง
+      </p>
+    `;
+    modalActions.innerHTML = `
+      <button class="btn-primary" onclick="closeModalAndLoadPending()">ท้าทาย Level 6 🚀</button>
+    `;
+  }
+  else if (targetLevel === 7) {
     modalIcon.innerText = "📐";
-    modalTitle.innerText = "สรุปรูปทั่วไป: การคำนวณพื้นที่ตาราง (Determinant / det)";
-
-    const records = window.__GAME_STATE__.labRecords;
-    let tableRowsHTML = "";
-    if (records.length === 0) {
-      tableRowsHTML = `<tr><td colspan="3" style="color:#656d76;">ยังไม่มีการบันทึก</td></tr>`;
-    } else {
-      records.forEach(r => {
-        tableRowsHTML += `
-          <tr>
-            <td><b>ด่าน ${r.level}</b></td>
-            <td>${r.matrixHTML}</td>
-            <td><b style="color:#d97706;">${r.det ? r.det.toFixed(2) : '1.00'} เท่า</b></td>
-          </tr>
-        `;
-      });
-    }
-
+    modalTitle.innerText = "📐 Level 7: Inverse Matrix Exploration";
     modalBodyText.innerHTML = `
       <p style="font-size: 13px; color: #334155;">
-        ในด่านก่อนหน้า ตาราง Grid ฝั่ง Output มีการยืดขยายพื้นที่ขึ้น! สังเกตพื้นที่ตาราง 1 ช่องย่อย จากเมทริกซ์ A = ${formatMathMatrixHTML('a', 'b', 'c', 'd')}
+        เรียนรู้มโนทัศน์ทางเรขาคณิตของ Inverse Matrix
       </p>
-
-      <div style="background: #fff7ed; border: 1px solid #ffedd5; border-radius: 8px; padding: 8px; margin-top: 6px;">
-        <b style="color: #c2410c; font-size: 11px;">📋 การขยายพื้นที่ในด่านก่อนหน้า:</b>
-        <table class="lab-table" style="margin-top: 4px;">
-          <thead>
-            <tr>
-              <th>ด่าน</th>
-              <th>เมทริกซ์ A</th>
-              <th>ขนาดพื้นที่ที่ขยาย (det)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRowsHTML}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="pattern-card" style="text-align: left; background: #faf5ff;">
-        <b style="color: #7e22ce; font-size: 13px; display: block; text-align: center;">🎯 ตัวเลือกไหน คือสูตรคำนวณพื้นที่ (det) ที่ถูกต้อง?</b>
-        
-        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
-          <label class="option-card">
-            <input type="radio" name="detOption" value="wrong1">
-            <span>(a × d) + (b × c)</span>
-          </label>
-          <label class="option-card">
-            <input type="radio" name="detOption" value="correct">
-            <span>(a × d) - (b × c)</span>
-          </label>
-          <label class="option-card">
-            <input type="radio" name="detOption" value="wrong2">
-            <span>(a × c) - (b × d)</span>
-          </label>
-        </div>
-      </div>
-
-      <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 8px 10px; border-radius: 4px; font-size: 12px; color: #14532d; line-height: 1.4;">
-        💡 <b>ประโยชน์ของ det (สำหรับ ม.ต้น):</b><br>
-        1. รู้ว่าพื้นที่ตารางถูกขยายกี่เท่า<br>
-        2. <b>เช็กว่าแก้สมการได้ไหม:</b> ถ้า det = 0 (พื้นที่ = 0) แปลว่าเส้นตรงขนานกันหรือซ้อนทับกัน หาจุดตัดเดี่ยวไม่ได้!
-      </div>
+      <p style="margin-top: 8px; font-size: 12px; color: #475569;">
+        สำรวจกระบวนการสเกลขนาดพื้นที่ (1/det) และการปรับแกนให้ตั้งฉาก (Adjugate Matrix)
+      </p>
     `;
-
     modalActions.innerHTML = `
-      <button class="btn-purple" onclick="verifyDetPatternSecret()">ตรวจคำตอบ 🔑</button>
-    `;
-
-  } else if (targetLevel === 6) {
-    modalTitle.innerText = "🙈 ด่านทดสอบความเข้าใจ (Blind Test)";
-    modalBodyText.innerHTML = `
-      <p style="font-weight: bold; color: #cf222e;">⚠️ Grid ฝั่ง Output ถูกซ่อนแล้ว!</p>
-      <p style="margin-top: 8px;">ใช้คำตอบจากแผง <b>Cramer's Discovery</b> ด้านซ้าย:</p>
-      <ul style="margin-top: 4px; padding-left: 20px; color: #1e293b; line-height: 1.5;">
-        <li><b class="text-x">x</b> = det(A_x) / det(A)</li>
-        <li><b class="text-y">y</b> = det(A_y) / det(A)</li>
-      </ul>
-      <p style="margin-top: 8px;">นำพิกัด (x, y) ที่ได้ ไปวางจุด P บนฝั่ง Input เพื่อเข้าชนเป้าหมาย เมื่อวางถูก Grid ทั้งหมดจะปรากฏขึ้น!</p>
-      <div id="hintContent" class="hint-box">
-        💡 <b>คำใบ้ (Hint):</b><br>
-        คำนวณค่า x และ y จากแผงสีเขียวซ้ายมือ แล้วลากจุด P ไปวางที่พิกัดนั้นได้เลย
-      </div>
-    `;
-  } else if (targetLevel === 7) {
-    modalTitle.innerText = "📐 ทำความเข้าใจ Inverse Matrix เรขาคณิต";
-    modalBodyText.innerHTML = `
-      <p style="font-size: 13px; color: #334155;">
-        ใน Level 7 นี้ เราจะมาทำความเข้าใจว่าทำไม Inverse Matrix ถึงสเกลขนาดและดึงแกนพิกัดกลับมาตั้งฉากกันผ่าน <b>4 ขั้นตอนสเกลเรขาคณิต</b>!
-      </p>
-      <div id="hintContent" class="hint-box">
-        💡 <b>คำใบ้ (Hint):</b><br>
-        คลิกปุ่มขั้นตอนสเต็ป 1 ถึง 4 บนศูนย์ควบคุม โดยเฉพาะใน Step 4 น้องๆ สามารถลากเวกเตอร์เพื่อค้นหา Adjugate Matrix ได้ด้วยตนเอง!
-      </div>
+      <button class="btn-primary" onclick="closeModalAndLoadPending()">เริ่มทำ Level 7 🚀</button>
     `;
   }
 
   document.getElementById('obsModal').classList.add('active');
 }
 
-function verifyMatrixPatternSecret() {
-  const xa = document.getElementById('selXa').value;
-  const xb = document.getElementById('selXb').value;
-  const ya = document.getElementById('selYa').value;
-  const yb = document.getElementById('selYb').value;
-
-  if (xa === 'a' && xb === 'b' && ya === 'c' && yb === 'd') {
-    alert("🎉 OK! ถูกต้องแล้ว! คุณได้ค้นพบรูปแบบการคูณเมทริกซ์ (Matrix Multiplication Pattern) สำเร็จ!");
-    closeModal();
-  } else {
-    alert("❌ รูปแบบยังไม่ถูกต้อง! ลองสังเกตการคูณแถวของเมทริกซ์ A กับหลักของ Vector Input อีกครั้งนะครับ\n\nคำใบ้: ผลลัพธ์ตัวบนใช้ แถวที่ 1 (a, b) และผลลัพธ์ตัวล่างใช้ แถวที่ 2 (c, d)");
-  }
-}
-
-function verifyDetPatternSecret() {
-  const selectedOpt = document.querySelector('input[name="detOption"]:checked');
-  if (!selectedOpt) {
-    alert("โปรดเลือกตัวเลือกสูตรคำนวณพื้นที่ก่อนนะครับ!");
-    return;
-  }
-
-  if (selectedOpt.value === 'correct') {
-    alert("🎉 OK! ถูกต้องแล้ว! สูตรพื้นที่ det(A) คือ (a × d) - (b × c)");
-    closeModal();
-  } else {
-    alert("❌ ยังไม่ถูกต้องครับ! ลองดูการเปรียบเทียบในตารางย้อนหลังอีกครั้ง\n\nคำใบ้: เอาแนวเฉียงลง (a×d) ลบด้วย แนวเฉียงขึ้น (b×c) ครับ");
-  }
-}
-
-function openPatternModalDirectly() {
-  showObservationModal(4);
-}
-
-function toggleHint() {
-  const hint = document.getElementById('hintContent');
-  if (hint) {
-    hint.style.display = (hint.style.display === 'none' || hint.style.display === '') ? 'block' : 'none';
-  }
-}
-
-function closeModal() {
-  document.getElementById('obsModal').classList.remove('active');
-  if (pendingLevelToLoad !== null) {
-    loadLevel(pendingLevelToLoad);
-    pendingLevelToLoad = null;
-  }
-}
-
-window.onload = () => {
-  resizeCanvases();
+window.addEventListener('load', () => {
   loadLevel(0);
-};
+  showStartDialogue();
+});
 </script>
+
 </body>
 </html>
