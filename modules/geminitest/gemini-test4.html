@@ -492,6 +492,16 @@
         • <b>1 / det(A)</b> ทำหน้าที่<b>ย่อ/ยืดพื้นที่กลับสู่ 1 ยูนิตมาตรฐานเดิม</b></span>
       </div>
 
+      <!-- Zooms out before the reflection question: motivates the whole
+           geometric lens by naming its concrete payoffs. -->
+      <div class="instruction-card" id="whyThisViewBox" style="margin-top: 2px;">
+        <b style="display:block; margin-bottom:4px; color:#334155; font-size:12px;">🌟 ทำไมต้องมองแบบนี้?</b>
+        <span style="font-size:11px; color:#475569; line-height:1.5;">
+          มุมมองนี้ทำให้เรา <b>เร็วขึ้น</b> (หาคำตอบได้เลยไม่ต้องแก้สมการทีละขั้น), <b>เห็นภาพชัดขึ้น</b> (รู้ทันทีว่าทำไมบางระบบไม่มีคำตอบ เมื่อ det = 0),
+          และ <b>ต่อยอดได้ไกลขึ้น</b> — แนวคิดเดียวกันนี้ใช้ได้แม้สมการจะมีมากกว่า 2 ตัวแปร และเป็นพื้นฐานของกราฟิกคอมพิวเตอร์กับ AI ด้วย!
+        </span>
+      </div>
+
       <!-- Closing reflection: asks for synthesis in the learner's own words,
            not recall of a fact already shown on screen. -->
       <div class="reflection-box" id="reflectionBox">
@@ -638,8 +648,8 @@ const levelsData = [
     type: "LINE_INTERSECTION", lines: [{m: 2, c: -1}, {m: -1, c: 5}], target: { x: 2, y: 3 },
     eq1: "L1: y = 2x - 1", eq2: "L2: y = -x + 5",
     showMatrix: false, showCramer: false, hideOutputGrid: false,
-    consciousTitle: "🟢 แนะนำภารกิจแรก",
-    consciousText: "👋 ให้ลาก<b>จุดสีเขียว P</b> ไปยัง<b>พิกัดที่เป็นคำตอบ(วงกลมสีแดง)</b> ของระบบสมการเชิงเส้น!"
+    consciousTitle: "🟢 เริ่มจากสิ่งที่คุ้นเคย",
+    consciousText: "👋 ลาก<b>จุดสีเขียว P</b> ไปที่<b>จุดตัดของเส้นตรง</b> (วงกลมแดง) — นั่นคือคำตอบ!"
   },
   { 
     level: 1, title: "Level 1: Vector Identity (แกนมาตรฐาน)", 
@@ -648,8 +658,8 @@ const levelsData = [
     eq1: "x = 2", eq2: "y = 2",
     showMatrix: true, showCramer: false, hideOutputGrid: false,
     introModal: true, recordsLabData: true,
-    consciousTitle: "💡 Vector Identity สภาพตั้งต้น",
-    consciousText: `เมทริกซ์เอกลักษณ์ ${formatMathMatrixHTML(1,0,0,1)} รักษาระบบพิกัดเดิมไว้สมบูรณ์ (det = 1.00) พื้นที่ Grid ไม่เปลี่ยนรูป`
+    consciousTitle: "💡 รู้จักเครื่องมือใหม่: เมทริกซ์",
+    consciousText: `นี่คือ <b>เมทริกซ์ (Matrix)</b> เครื่องมือใหม่แทนแกน x, y ${formatMathMatrixHTML(1,0,0,1)} ตอนนี้ยังไม่เปลี่ยนอะไรเลย (เหมือนคูณด้วย 1)`
   },
   { 
     level: 2, title: "Level 2: Area Consciousness (ยืดแกน X)", 
@@ -658,8 +668,8 @@ const levelsData = [
     eq1: "2x = 4", eq2: "y = 2",
     showMatrix: true, showCramer: false, hideOutputGrid: false,
     introModal: true, recordsLabData: true,
-    consciousTitle: "💡 Conscious #1: พื้นที่ยืดขยาย 2 เท่า",
-    consciousText: "det = 2.00 แปลว่าพื้นที่ขยาย 2 เท่าในแนวแกน x ดังนั้นจุด P(x, y) จึงใช้ค่า x แค่ครึ่งเดียว!"
+    consciousTitle: "💡 แกนนอนกลายเป็น 2x แล้ว!",
+    consciousText: "det = 2.00 พื้นที่จึงขยาย 2 เท่า เพราะแกนนอนไม่ใช่ x ธรรมดา แต่เป็น 2x — ค่า x ของจุด P จึงใช้แค่ครึ่งเดียว!"
   },
   { 
     level: 3, title: "Level 3: Shear Transformation 📐", 
@@ -668,8 +678,8 @@ const levelsData = [
     eq1: "x + y = 5", eq2: "x - y = 1",
     showMatrix: true, showCramer: false, hideOutputGrid: false,
     introModal: true, recordsLabData: true,
-    consciousTitle: "🔍 การผสานของพิกัด",
-    consciousText: "เวกเตอร์ i และ j เอียงและสะท้อน การตัดกันขององค์ประกอบเวกเตอร์จะนำจุดไปสู่ Target"
+    consciousTitle: "🔍 เมื่อแกนไม่ตั้งฉากกันอีกต่อไป",
+    consciousText: "แกนใหม่ (เรียกว่า <b>เวกเตอร์</b>) เอียงและสะท้อนแล้ว! ค่า x กับ y ต้องช่วยกันพาจุด P ไปเป้าหมาย"
   },
   { 
     level: 4, title: "Level 4: Determinant & Area Expansion", 
@@ -678,8 +688,8 @@ const levelsData = [
     eq1: "2x + y = 4", eq2: "x + 2y = 5",
     showMatrix: true, showCramer: false, hideOutputGrid: false,
     introModal: true, recordsLabData: true,
-    consciousTitle: "💡 det หลัก = 3.00",
-    consciousText: "พื้นที่ตารางขยายเป็น 3 เท่า! สังเกตช่องตาราง Grid สีส้มขยายพื้นที่ขึ้นอย่างเห็นได้ชัด"
+    consciousTitle: "💡 รู้จักดีเทอร์มิแนนต์ (Determinant)",
+    consciousText: "<b>det (Determinant)</b> บอกว่าพื้นที่ขยายกี่เท่า ตอนนี้ det = 3.00 พื้นที่จึงขยายเป็น 3 เท่า!"
   },
   { 
     level: 5, title: "Level 5: Cramer's Rule Discovery 🗝️", 
@@ -688,8 +698,8 @@ const levelsData = [
     eq1: "2x + y = 5", eq2: "x + 3y = 10",
     showMatrix: true, showCramer: true, hideOutputGrid: false,
     introModal: true, recordsLabData: false,
-    consciousTitle: "🗝️ อัตราส่วนพื้นที่ของคราเมอร์",
-    consciousText: "ค่า x และ y สามารถหาได้ตรงๆ จาก det(A_x)/det(A) และ det(A_y)/det(A) โดยไม่ต้องแก้สมการทีละขั้นตอน!"
+    consciousTitle: "🗝️ รู้จักกฎของคราเมอร์ (Cramer's Rule)",
+    consciousText: "หา x, y ได้ทันทีจากอัตราส่วนพื้นที่ ไม่ต้องแก้สมการทีละขั้น! x = det(A_x)/det(A), y = det(A_y)/det(A)"
   },
   { 
     level: 6, title: "Level 6: Blind Test (Cramer's Mastery) 🙈", 
@@ -698,8 +708,8 @@ const levelsData = [
     eq1: "3x + y = 7", eq2: "x + 2y = 9",
     showMatrix: true, showCramer: true, hideOutputGrid: true,
     introModal: true, recordsLabData: false,
-    consciousTitle: "🙈 ความท้าทายแบบไร้ Grid",
-    consciousText: "ใช้ค่า x = det(A_x)/det(A) และ y = det(A_y)/det(A) จากแผงซ้ายมือเพื่อวางจุดลงบนโลก Input!"
+    consciousTitle: "🙈 ใช้กฎของคราเมอร์แทนสายตา",
+    consciousText: "กริดถูกซ่อนแล้ว! ใช้ x = det(A_x)/det(A), y = det(A_y)/det(A) จากแผงซ้าย คำนวณแล้ววางจุด P เลย"
   },
   { 
     level: 7, title: "Level 7: Inverse Matrix Exploration 📐", 
@@ -708,8 +718,8 @@ const levelsData = [
     eq1: "A⁻¹ = (1 / det A) × Adj(A)", eq2: "Undo Transformation Flow",
     showMatrix: false, showCramer: false, hideOutputGrid: false,
     introModal: true, recordsLabData: false,
-    consciousTitle: "📐 มโนทัศน์ Inverse Matrix",
-    consciousText: "Inverse Matrix ไม่ใช่แค่สูตรพีชคณิต แต่คือกระบวนการล้างมุมเอียง (Adj) และย่อพื้นที่กลับ (1/det)"
+    consciousTitle: "📐 เมทริกซ์ผกผันทำอะไรบ้าง",
+    consciousText: "<b>เมทริกซ์ผกผัน</b> ย้อนกลับ 2 ขั้น: ดึงแกนเอียงให้ตั้งฉาก (Adj) แล้วย่อพื้นที่คืน (1/det)"
   },
   {
     level: 8, title: "Level 8: สรุปภาพรวมมโนทัศน์ 🎓",
@@ -717,8 +727,8 @@ const levelsData = [
     type: "SUMMARY",
     eq1: "Ax = b ⇔ x = A⁻¹b", eq2: "Geometry ⇔ Algebra Synthesis",
     showMatrix: false, showCramer: false, hideOutputGrid: false,
-    consciousTitle: "🎓 บทสรุปการเดินทาง",
-    consciousText: "แตะที่กล่องสรุปเพื่อดู Animation แสดงแต่ละมโนทัศน์ย่อยได้เลยครับ!"
+    consciousTitle: "🎓 กลับมาที่คำถามแรก",
+    consciousText: "จำได้ไหม แกนเป็น 2x หรือ x+y แล้วเกิดอะไรขึ้น? ตอนนี้รู้คำตอบครบแล้ว! แตะกล่องสรุปด้านล่างทบทวนได้เลย"
   }
 ];
 
@@ -1917,12 +1927,12 @@ function showStartDialogue() {
   const modalActions = document.getElementById('modalActions');
 
   modalIcon.innerText = "🟢";
-  modalTitle.innerText = "คำแนะนำการเริ่มทำภารกิจแรก";
+  modalTitle.innerText = "เริ่มการผจญภัย: ตามหาคำตอบของสมการ";
 
   modalBodyText.innerHTML = `
     <div style="font-size: 14px; line-height: 1.6; color: #334155; text-align: center; padding: 10px 0;">
       <p style="font-size: 16px; font-weight: bold; color: #16a34a; margin-bottom: 8px;">👋 ยินดีต้อนรับสู่ Linear System Journey!</p>
-      <p><b>คำแนะนำภารกิจแรก:</b> ให้ลาก<b>จุดสีเขียว P</b> ไปยังพิกัดที่เป็นคำตอบของระบบสมการเชิงเส้น เพื่อทำภารกิจให้สำเร็จ!</p>
+      <p><b>ภารกิจแรก:</b> ลาก<b>จุดสีเขียว P</b> ไปยังจุดตัดของเส้นตรง — คำตอบของระบบสมการที่เราคุ้นเคยกันดี!</p>
     </div>
   `;
 
@@ -1941,20 +1951,16 @@ function showLevel1SuccessModal() {
   const modalActions = document.getElementById('modalActions');
 
   modalIcon.innerText = "💡";
-  modalTitle.innerText = "ทำไมจุดบนทั้งสองกราฟถึงอยู่ที่เดียวกัน?";
+  modalTitle.innerText = "ทำไมจุดในสองโลกถึงอยู่ที่เดียวกัน?";
 
   const st = window.__GAME_STATE__;
   const px = st.inputPos.x.toFixed(1);
   const py = st.inputPos.y.toFixed(1);
 
   modalBodyText.innerHTML = `
-    <p>การที่จุดบน <b>"กราฟฝั่งตั้งต้น"</b> และ <b>"กราฟฝั่งผลลัพธ์"</b> อยู่ตำแหน่งเดียวกันเป๊ะ</p>
+    <p>จุดใน <b>โลกอินพุต</b> กับ <b>โลกเอาต์พุต</b> อยู่ตำแหน่งเดียวกัน เพราะเมทริกซ์ที่ใช้คือ <b>เมทริกซ์เอกลักษณ์</b> ${formatMathMatrixHTML(1, 0, 0, 1)}</p>
     <p style="margin-top:8px;">
-      เป็นเพราะทั้งสองกราฟเชื่อมโยงกันด้วย <b>เมทริกซ์เอกลักษณ์ (Identity Matrix)</b>
-      ${formatMathMatrixHTML(1, 0, 0, 1)}
-    </p>
-    <p style="margin-top:8px;">
-      ซึ่งทำหน้าที่เหมือน <b>"ตัวคูณ 1"</b> ในคณิตศาสตร์ — ไม่ว่าจะนำไปคูณกับจุดไหน ก็จะได้ตำแหน่งเดิมเสมอ!
+      มันทำหน้าที่เหมือน <b>"ตัวคูณ 1"</b> — คูณกับจุดไหนก็ได้ตำแหน่งเดิมเสมอ!
     </p>
     
     <div class="math-expr-box">
@@ -2044,7 +2050,10 @@ function loadLevel(idx) {
     containerOut.style.display = 'none';
     snapToggleLabel.style.display = 'none';
     document.getElementById('equationBox').style.display = 'none';
-    document.getElementById('canvasInTitle').innerText = '🎨 Animation แสดง Concept แบบโต้ตอบ';
+    // Hide the static label instead of relabeling it -- the canvas already
+    // draws its own dynamic caption banner (title + detail) in this exact
+    // top-left spot, so the two used to overlap and become unreadable.
+    document.getElementById('canvasInTitle').style.display = 'none';
     selectSummaryConcept(0);
     startSummaryAnimation();
   } else {
@@ -2053,6 +2062,7 @@ function loadLevel(idx) {
     containerOut.style.display = 'flex';
     snapToggleLabel.style.display = 'flex';
     document.getElementById('equationBox').style.display = 'block';
+    document.getElementById('canvasInTitle').style.display = 'block';
     document.getElementById('canvasInTitle').innerText = 'โลกอินพุต (Input Space)';
   }
 
@@ -2240,24 +2250,27 @@ function showObservationModal(targetLevel = 1) {
 
   if (targetLevel === 1) {
     modalIcon.innerText = "🔍";
-    modalTitle.innerText = "🔍 ก้าวสู่มิติใหม่: ยินดีต้อนรับสู่ระบบ 2 Spaces!";
+    modalTitle.innerText = "🔍 ถ้าแกนไม่ใช่ x, y ล่ะ?";
     modalBodyText.innerHTML = `
       <p style="font-size: 13px; color: #334155;">
-        ต่อจากนี้ไป หน้าจอจะแบ่งออกเป็น <b>2 Space (2 มิติการทำงาน)</b> เพื่อให้น้อง ๆ เห็นภาพการแปลงทางคณิตศาสตร์อย่างชัดเจน:
+        เมื่อกี้เราใช้แกน x, y ธรรมดา ลองคิดเล่น ๆ ดูสิ... <b>ถ้าแกนนอนเป็น 2x ล่ะ?</b> หรือ <b>ถ้าแกนนอนคือ x + y ล่ะ?</b> คำตอบของสมการจะเปลี่ยนไปแค่ไหน?
       </p>
-      
+      <p style="margin-top: 8px; font-size: 12px; color: #475569;">
+        ต่อไปนี้จอจะแบ่งเป็น 2 ฝั่ง เพื่อพาไปหาคำตอบทีละขั้น:
+      </p>
+
       <div class="space-intro-box">
         <div class="space-card space-card-left">
-          <b style="font-size: 13px; display: block; margin-bottom: 4px;">📍 ฝั่งซ้าย: Input Space</b>
-          คือ <b>Space พิกัด (x, y) ปกติ</b> ที่นักเรียนเคยเรียนมาเลย! จุดที่เราลากเปลี่ยนตำแหน่งจะเริ่มต้นจากฝั่งนี้เสมอ
+          <b style="font-size: 13px; display: block; margin-bottom: 4px;">📍 โลกอินพุต</b>
+          พิกัด x, y แบบปกติ — จุด P เริ่มลากจากฝั่งนี้เสมอ
         </div>
         <div class="space-card space-card-right">
-          <b style="font-size: 13px; display: block; margin-bottom: 4px;">🎯 ฝั่งขวา: Output Space</b>
-          คือ <b>Space ผลลัพธ์</b> ที่เกิดจากการแปลงด้วยเมทริกซ์ A จุดเป้าหมายสีส้มจะอยู่ที่ฝั่งนี้!
+          <b style="font-size: 13px; display: block; margin-bottom: 4px;">🎯 โลกเอาต์พุต</b>
+          โลกที่แกนถูกเปลี่ยนไปแล้ว (คำตอบของคำถามด้านบน!)
         </div>
       </div>
       <p style="margin-top: 10px; font-size: 12px; color: #475569;">
-        💡 <b>เป้าหมายของคุณ:</b> ลากจุดสีเขียว P ในฝั่ง Input เพื่อส่งจุดสีส้มในฝั่ง Output ไปให้ตรงกับจุดเป้าหมาย!
+        💡 ลากจุดสีเขียว P ในโลกอินพุต ให้จุดสีส้มในโลกเอาต์พุตไปตรงเป้าหมาย!
       </p>
     `;
     modalActions.innerHTML = `
@@ -2266,14 +2279,13 @@ function showObservationModal(targetLevel = 1) {
   }
   else if (targetLevel === 2) {
     modalIcon.innerText = "📐";
-    modalTitle.innerText = "📐 Level 2: สังเกตพื้นที่การขยาย";
+    modalTitle.innerText = "📐 คำตอบของคำถามแรก: แกนกลายเป็น 2x!";
     modalBodyText.innerHTML = `
       <p style="font-size: 13px; color: #334155;">
-        ในด่านนี้ เมทริกซ์ A ถูกเปลี่ยนเป็น ${formatMathMatrixHTML(2, 0, 0, 1)}
+        จำได้ไหม — <b>"ถ้าแกนนอนเป็น 2x ล่ะ?"</b> ด่านนี้คือคำตอบ! เมทริกซ์ A = ${formatMathMatrixHTML(2, 0, 0, 1)} เปลี่ยนแกนนอนของโลกเอาต์พุตให้เป็น <b>2x</b>
       </p>
       <p style="margin-top: 8px; font-size: 12px; color: #475569;">
-        สังเกตว่าตาราง Grid ใน Output Space ขยายพื้นที่ขึ้นเป็น <b>2 เท่า</b> ในแนวแกน X!<br>
-        ลองสังเกตผลกระทบต่อตำแหน่งของจุด P ดูนะครับ
+        Grid ในโลกเอาต์พุตจึงกว้างขึ้น <b>2 เท่า</b> — ลองดูว่าต้องลาก P ไปตรงไหน
       </p>
     `;
     modalActions.innerHTML = `
@@ -2282,14 +2294,13 @@ function showObservationModal(targetLevel = 1) {
   }
   else if (targetLevel === 3) {
     modalIcon.innerText = "📐";
-    modalTitle.innerText = "📐 Level 3: Shear Transformation (แกนบิดเอียง)";
+    modalTitle.innerText = "📐 คำตอบของคำถามที่สอง: แกนผสมกัน!";
     modalBodyText.innerHTML = `
       <p style="font-size: 13px; color: #334155;">
-        เมทริกซ์ A ในด่านนี้คือ ${formatMathMatrixHTML(1, 1, 1, -1)}
+        อีกคำถาม — <b>"ถ้าแกนเป็นการรวมกันของ x กับ y ล่ะ?"</b> เมทริกซ์ A = ${formatMathMatrixHTML(1, 1, 1, -1)} เปลี่ยนแกนโลกเอาต์พุตเป็น <b>x+y</b> และ <b>x-y</b>
       </p>
       <p style="margin-top: 8px; font-size: 12px; color: #475569;">
-        แกนพิกัดฝั่ง Output ไม่เพียงแค่ขยาย แต่ยัง<b>บิดเอียงและสะท้อน</b>อีกด้วย!<br>
-        พิกัด X และ Y ทำงานร่วมกันเพื่อนำจุดไปสู่เป้าหมาย
+        แกนไม่ได้แค่ขยาย แต่ยัง<b>เอียงและสะท้อน</b>ด้วย! x กับ y ต้องช่วยกันพาจุดไปเป้าหมาย
       </p>
     `;
     modalActions.innerHTML = `
@@ -2298,7 +2309,7 @@ function showObservationModal(targetLevel = 1) {
   }
   else if (targetLevel === 4) {
     modalIcon.innerText = "🧪";
-    modalTitle.innerText = "🧪 ค้นพบแบบรูป Matrix Multiplication";
+    modalTitle.innerText = "🧪 มาหาสูตรคำนวณกันเถอะ";
 
     let labTableHTML = "";
     const st = window.__GAME_STATE__;
@@ -2326,10 +2337,13 @@ function showObservationModal(targetLevel = 1) {
     }
 
     modalBodyText.innerHTML = `
+      <p style="font-size: 13px; color: #334155; margin-bottom: 8px;">
+        ทุกครั้งที่ลากจุด P เมทริกซ์ A จะคำนวณเป็นจุดใหม่เสมอ — อยากรู้ไหมว่าคำนวณยังไง?
+      </p>
       ${labTableHTML}
       <div class="pattern-card">
-        <b style="font-size:12px; color:#7e22ce;">ให้ A = [a, b; c, d] และ Vector Input = [x; y]</b>
-        <p style="font-size:11px; color:#475569; margin-top:2px;">จงเลือกตัวแปรเพื่อสร้างสมการการคูณเมทริกซ์ที่ถูกต้อง:</p>
+        <b style="font-size:12px; color:#7e22ce;">ให้ A = [a, b; c, d] และจุดที่ลาก คือ (x, y)</b>
+        <p style="font-size:11px; color:#475569; margin-top:2px;">เลือกตัวอักษรให้ถูกต้อง:</p>
         <div style="margin-top:8px; font-size:13px;">
           Output<sub>x</sub> = 
           <select id="patDrop1" class="formula-select">
@@ -2350,24 +2364,21 @@ function showObservationModal(targetLevel = 1) {
         </div>
       </div>
       <div id="hintContent" class="hint-box">
-        💡 <b>คำใบ้:</b> แถวที่ 1 ของเมทริกซ์ A คือ (a, b) จะส่งผลต่อค่า Output<sub>x</sub> และ แถวที่ 2 (c, d) จะส่งผลต่อ Output<sub>y</sub>
+        💡 <b>คำใบ้:</b> แถวบนของเมทริกซ์ A คือ (a, b) ใช้คำนวณค่า Output<sub>x</sub> ส่วนแถวล่าง (c, d) ใช้คำนวณค่า Output<sub>y</sub>
       </div>
     `;
 
     modalActions.innerHTML = `
       <button class="btn-hint" onclick="toggleHint()">💡 คำใบ้</button>
-      <button class="btn-primary" onclick="verifyMatrixPatternSecret()">ตรวจสอบแบบรูป 🔑</button>
+      <button class="btn-primary" onclick="verifyMatrixPatternSecret()">ตรวจคำตอบ 🔑</button>
     `;
   }
   else if (targetLevel === 5) {
     modalIcon.innerText = "📐";
-    modalTitle.innerText = "📐 ค้นพบความลับของ Determinant (det)";
+    modalTitle.innerText = "📐 ค้นหาสูตรของดีเทอร์มิแนนต์";
     modalBodyText.innerHTML = `
       <p style="font-size:13px; color:#334155;">
-        Determinant คือ<b>อัตราส่วนขยายพื้นที่</b>ของตาราง Grid ใน Output Space!
-      </p>
-      <p style="margin-top:6px; font-size:12px; color:#475569;">
-        สำหรับเมทริกซ์ A = ${formatMathMatrixHTML('a', 'b', 'c', 'd')} จงเลือกสูตรคำนวณ det(A) ที่ถูกต้อง:
+        <b>det (Determinant)</b> บอกว่าพื้นที่ Grid ในโลกเอาต์พุตขยายกี่เท่า! สำหรับ A = ${formatMathMatrixHTML('a', 'b', 'c', 'd')} เลือกสูตร det(A) ที่ถูกต้อง:
       </p>
       <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
         <label class="option-card">
@@ -2384,7 +2395,7 @@ function showObservationModal(targetLevel = 1) {
         </label>
       </div>
       <div id="hintContent" class="hint-box">
-        💡 <b>คำใบ้:</b> เอาผลคูณแนวเฉียงลง (a × d) ลบด้วย ผลคูณแนวเฉียงขึ้น (b × c)
+        💡 <b>คำใบ้:</b> ลองคูณตัวเลขในแนวทแยงลง (a คูณ d) แล้วลบด้วยผลคูณแนวทแยงขึ้น (b คูณ c) ดูสิ
       </div>
     `;
     modalActions.innerHTML = `
@@ -2394,16 +2405,13 @@ function showObservationModal(targetLevel = 1) {
   }
   else if (targetLevel === 6) {
     modalIcon.innerText = "🙈";
-    modalTitle.innerText = "🙈 Level 6: Blind Test (Cramer's Rule Mastery)";
+    modalTitle.innerText = "🙈 ท้าทาย: ไม่มีตาราง Grid ให้ดูแล้ว!";
     modalBodyText.innerHTML = `
       <p style="font-size: 13px; color: #334155;">
-        <b>ความท้าทายไร้ Grid!</b> ในด่านนี้ ตาราง Grid ในฝั่ง Output ถูกซ่อนแล้ว!
+        Grid ในโลกเอาต์พุตถูกซ่อนไว้! ใช้ <b>กฎของคราเมอร์</b> ในแผงซ้ายคำนวณเอง:
       </p>
       <p style="margin-top: 8px; font-size: 12px; color: #475569;">
-        ใช้อัตราส่วนพื้นที่จาก Cramer's Rule ในแผงซ้ายมือ:<br>
-        • <b>x = det(A_x) / det(A)</b><br>
-        • <b>y = det(A_y) / det(A)</b><br>
-        คำนวณและวางจุด P ลงบนฝั่ง Input ได้เลย!
+        <b>x = det(A_x)/det(A)</b>, <b>y = det(A_y)/det(A)</b> — คำนวณแล้วลากจุด P ไปวางให้ตรงเลย!
       </p>
     `;
     modalActions.innerHTML = `
@@ -2412,19 +2420,18 @@ function showObservationModal(targetLevel = 1) {
   }
   else if (targetLevel === 7) {
     modalIcon.innerText = "🔄";
-    modalTitle.innerText = "🔄 Level 7: สำรวจมโนทัศน์ Inverse Matrix";
+    modalTitle.innerText = "🔄 ย้อนกลับ: รู้จักเมทริกซ์ผกผัน";
     modalBodyText.innerHTML = `
       <p style="font-size: 13px; color: #334155;">
-        ยินดีต้อนรับสู่ด่านสำรวจมโนทัศน์ทางเรขาคณิตของ <b>Inverse Matrix (A⁻¹)</b>!
+        A พาจุดจากโลกอินพุตไปเอาต์พุต แล้วถ้าจะย้อนกลับล่ะ? คำตอบคือ <b>เมทริกซ์ผกผัน (A⁻¹)</b> ทำ 2 อย่าง:
       </p>
       <p style="margin-top: 8px; font-size: 12px; color: #475569;">
-        คุณจะได้เรียนรู้ว่า Inverse Matrix ทำหน้าที่ 2 อย่างคือ:<br>
-        1. <b>Adjugate Matrix:</b> ปรับแกนตารางที่บิดเอียงให้กลับมาตั้งฉาก<br>
-        2. <b>1 / det(A):</b> ย่อ/ขยายพื้นที่ตารางให้กลับคืนสู่ 1 ยูนิตมาตรฐาน
+        1. ดึงแกนเอียงให้ตั้งฉาก (<b>Adjugate Matrix</b>)<br>
+        2. ย่อพื้นที่กลับขนาดเดิม (คูณด้วย <b>1/det(A)</b>)
       </p>
     `;
     modalActions.innerHTML = `
-      <button class="btn-primary" onclick="closeModalAndLoadPending()">เริ่มสำรวจ Inverse Matrix 🚀</button>
+      <button class="btn-primary" onclick="closeModalAndLoadPending()">เริ่มสำรวจเมทริกซ์ผกผัน 🚀</button>
     `;
   }
 
