@@ -278,6 +278,12 @@
       border-radius: 4px; margin-top: 8px; font-size: 12px; color: #1e293b; display: none;
     }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+    .feedback-banner {
+      border-radius: 6px; padding: 10px 12px; font-size: 12px; line-height: 1.5;
+      margin-top: 4px; display: none;
+    }
+    .feedback-banner.feedback-correct { background: #f0fdf4; border-left: 4px solid #16a34a; color: #14532d; }
+    .feedback-banner.feedback-incorrect { background: #fef2f2; border-left: 4px solid #dc2626; color: #7f1d1d; }
     .btn-hint {
       background: #fff8c5; border: 1px solid #d4a72c; color: #7d4e00;
       padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px;
@@ -347,6 +353,15 @@
     .space-card { padding: 10px; border-radius: 8px; font-size: 12px; line-height: 1.4; }
     .space-card-left { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; }
     .space-card-right { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+    .reflection-box {
+      background: #f8fafc; border: 1px solid var(--border); border-left: 4px solid #334155;
+      border-radius: 8px; padding: 10px 12px; margin-top: 4px;
+    }
+    .reflection-box textarea {
+      width: 100%; border: 1px solid var(--border-dark); border-radius: 6px;
+      padding: 6px; font-size: 11px; font-family: inherit; resize: vertical;
+    }
   </style>
 </head>
 <body>
@@ -476,6 +491,18 @@
         • <b>Adj(A)</b> ทำหน้าที่<b>ดึงแกนบิดเอียงให้กลับมาตั้งฉาก</b><br>
         • <b>1 / det(A)</b> ทำหน้าที่<b>ย่อ/ยืดพื้นที่กลับสู่ 1 ยูนิตมาตรฐานเดิม</b></span>
       </div>
+
+      <!-- Closing reflection: asks for synthesis in the learner's own words,
+           not recall of a fact already shown on screen. -->
+      <div class="reflection-box" id="reflectionBox">
+        <b style="display:block; margin-bottom:6px; color:#334155; font-size:12px;">✍️ คำถามชวนคิด (สรุปด้วยคำพูดของคุณเอง):</b>
+        <p style="font-size:11px; color:#475569; margin-bottom:6px; line-height:1.4;">
+          det(A) และ Cramer's Rule ให้คำตอบของระบบสมการได้โดยไม่ต้องแก้สมการทีละขั้นตอนได้อย่างไร?
+          และ Inverse Matrix เกี่ยวข้องกับ "การย้อนกลับ" การแปลงเชิงเส้นในแบบที่คุณเข้าใจอย่างไร?
+          ลองอธิบายด้วยคำพูดของตัวเอง เหมือนกำลังสอนเพื่อนที่ยังไม่เคยทำกิจกรรมนี้
+        </p>
+        <textarea id="reflectionAnswer" rows="3" placeholder="พิมพ์คำอธิบายของคุณที่นี่..."></textarea>
+      </div>
     </div>
 
     <!-- Target Equations -->
@@ -541,6 +568,7 @@
       <h4 id="modalTitle">แนะนำภารกิจแรก</h4>
     </div>
     <div id="modalBodyText" class="modal-body">...</div>
+    <div id="modalFeedbackBanner" class="feedback-banner"></div>
     <div class="modal-actions" id="modalActions">
       <button id="btnHint" class="btn-hint" onclick="toggleHint()">💡 คำใบ้ (Hint)</button>
       <button id="btnPrimaryModal" class="btn-primary" onclick="closeModal()">เริ่มทำภารกิจ 🚀</button>
@@ -587,10 +615,21 @@ function buildFormattedEquationHTML(eqStr) {
     });
 }
 
+// Single source of truth for every color that means something in a canvas
+// drawing (never re-type a hex code at a call site -- reference COLOR.xxx so
+// the "this color = this math object" mapping can't drift between drawings).
 const COLOR = {
   vectorI: '#dc2626', vectorJ: '#9333ea', invI: '#ec4899', invJ: '#0284c7',
-  line1: '#2563eb', line2: '#d97706', pointP: '#16a34a', target: '#ea580c'
+  line1: '#2563eb', line2: '#d97706', pointP: '#16a34a', target: '#ea580c',
+  accent: '#0969da', accentLight: '#38bdf8', danger: '#dc2626',
+  targetDark: '#c2410c', grid: '#e2e8f0', axis: '#94a3b8', muted: '#475569'
 };
+
+// The only place matrix x vector should be computed -- call sites that used
+// to inline m[0]*x + m[1]*y are now routed through this single helper.
+function applyMatrix(m, p) {
+  return { x: m[0] * p.x + m[1] * p.y, y: m[2] * p.x + m[3] * p.y };
+}
 
 const levelsData = [
   { 
@@ -608,6 +647,7 @@ const levelsData = [
     type: "TRANSFORMATION", matrix: [1, 0, 0, 1], target: { x: 2, y: 2 }, solve: { x: 2, y: 2 }, 
     eq1: "x = 2", eq2: "y = 2",
     showMatrix: true, showCramer: false, hideOutputGrid: false,
+    introModal: true, recordsLabData: true,
     consciousTitle: "💡 Vector Identity สภาพตั้งต้น",
     consciousText: `เมทริกซ์เอกลักษณ์ ${formatMathMatrixHTML(1,0,0,1)} รักษาระบบพิกัดเดิมไว้สมบูรณ์ (det = 1.00) พื้นที่ Grid ไม่เปลี่ยนรูป`
   },
@@ -617,6 +657,7 @@ const levelsData = [
     type: "TRANSFORMATION", matrix: [2, 0, 0, 1], target: { x: 4, y: 2 }, solve: { x: 2, y: 2 }, 
     eq1: "2x = 4", eq2: "y = 2",
     showMatrix: true, showCramer: false, hideOutputGrid: false,
+    introModal: true, recordsLabData: true,
     consciousTitle: "💡 Conscious #1: พื้นที่ยืดขยาย 2 เท่า",
     consciousText: "det = 2.00 แปลว่าพื้นที่ขยาย 2 เท่าในแนวแกน x ดังนั้นจุด P(x, y) จึงใช้ค่า x แค่ครึ่งเดียว!"
   },
@@ -626,6 +667,7 @@ const levelsData = [
     type: "TRANSFORMATION", matrix: [1, 1, 1, -1], target: { x: 5, y: 1 }, solve: { x: 3, y: 2 }, 
     eq1: "x + y = 5", eq2: "x - y = 1",
     showMatrix: true, showCramer: false, hideOutputGrid: false,
+    introModal: true, recordsLabData: true,
     consciousTitle: "🔍 การผสานของพิกัด",
     consciousText: "เวกเตอร์ i และ j เอียงและสะท้อน การตัดกันขององค์ประกอบเวกเตอร์จะนำจุดไปสู่ Target"
   },
@@ -635,6 +677,7 @@ const levelsData = [
     type: "TRANSFORMATION", matrix: [2, 1, 1, 2], target: { x: 4, y: 5 }, solve: { x: 1, y: 2 }, 
     eq1: "2x + y = 4", eq2: "x + 2y = 5",
     showMatrix: true, showCramer: false, hideOutputGrid: false,
+    introModal: true, recordsLabData: true,
     consciousTitle: "💡 det หลัก = 3.00",
     consciousText: "พื้นที่ตารางขยายเป็น 3 เท่า! สังเกตช่องตาราง Grid สีส้มขยายพื้นที่ขึ้นอย่างเห็นได้ชัด"
   },
@@ -644,6 +687,7 @@ const levelsData = [
     type: "TRANSFORMATION", matrix: [2, 1, 1, 3], target: { x: 5, y: 10 }, solve: { x: 1, y: 3 }, 
     eq1: "2x + y = 5", eq2: "x + 3y = 10",
     showMatrix: true, showCramer: true, hideOutputGrid: false,
+    introModal: true, recordsLabData: false,
     consciousTitle: "🗝️ อัตราส่วนพื้นที่ของคราเมอร์",
     consciousText: "ค่า x และ y สามารถหาได้ตรงๆ จาก det(A_x)/det(A) และ det(A_y)/det(A) โดยไม่ต้องแก้สมการทีละขั้นตอน!"
   },
@@ -653,6 +697,7 @@ const levelsData = [
     type: "TRANSFORMATION", matrix: [3, 1, 1, 2], target: { x: 7, y: 9 }, solve: { x: 1, y: 4 }, 
     eq1: "3x + y = 7", eq2: "x + 2y = 9",
     showMatrix: true, showCramer: true, hideOutputGrid: true,
+    introModal: true, recordsLabData: false,
     consciousTitle: "🙈 ความท้าทายแบบไร้ Grid",
     consciousText: "ใช้ค่า x = det(A_x)/det(A) และ y = det(A_y)/det(A) จากแผงซ้ายมือเพื่อวางจุดลงบนโลก Input!"
   },
@@ -662,6 +707,7 @@ const levelsData = [
     type: "INVERSE_FLOW",
     eq1: "A⁻¹ = (1 / det A) × Adj(A)", eq2: "Undo Transformation Flow",
     showMatrix: false, showCramer: false, hideOutputGrid: false,
+    introModal: true, recordsLabData: false,
     consciousTitle: "📐 มโนทัศน์ Inverse Matrix",
     consciousText: "Inverse Matrix ไม่ใช่แค่สูตรพีชคณิต แต่คือกระบวนการล้างมุมเอียง (Adj) และย่อพื้นที่กลับ (1/det)"
   },
@@ -783,7 +829,7 @@ function drawInputUnitAreaHighlight(ctx, cvs) {
 
   ctx.fillStyle = 'rgba(9, 105, 218, 0.2)';
   ctx.fill();
-  ctx.strokeStyle = '#0969da';
+  ctx.strokeStyle = COLOR.accent;
   ctx.lineWidth = 2;
   ctx.stroke();
 
@@ -796,7 +842,7 @@ function drawInputUnitAreaHighlight(ctx, cvs) {
   let ry = 38;
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-  ctx.strokeStyle = '#0969da';
+  ctx.strokeStyle = COLOR.accent;
   ctx.lineWidth = 1;
 
   if (ctx.roundRect) {
@@ -809,7 +855,7 @@ function drawInputUnitAreaHighlight(ctx, cvs) {
     ctx.strokeRect(rx, ry, badgeW, badgeH);
   }
 
-  ctx.fillStyle = '#0969da';
+  ctx.fillStyle = COLOR.accent;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(text, rx + badgeW / 2, ry + badgeH / 2);
@@ -834,21 +880,21 @@ function drawUnitAreaHighlight(ctx, cvs, m) {
   ctx.closePath();
 
   let text = "";
-  let strokeColor = "#ea580c";
-  let textColor = "#c2410c";
+  let strokeColor = COLOR.target;
+  let textColor = COLOR.targetDark;
 
   if (det === 0) {
-    ctx.strokeStyle = '#dc2626';
+    ctx.strokeStyle = COLOR.danger;
     ctx.lineWidth = 3;
     ctx.stroke();
 
     text = `พื้นที่ = 0 (ยุบเป็นเส้นตรง)`;
-    strokeColor = '#dc2626';
-    textColor = '#dc2626';
+    strokeColor = COLOR.danger;
+    textColor = COLOR.danger;
   } else {
     ctx.fillStyle = 'rgba(234, 88, 12, 0.25)';
     ctx.fill();
-    ctx.strokeStyle = '#ea580c';
+    ctx.strokeStyle = COLOR.target;
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -937,7 +983,7 @@ function render() {
   drawGrid(ctxIn, cvsIn, true, "x", "y");
 
   if (lvl.type === "LINE_INTERSECTION") {
-    const lineColors = ['#2563eb', '#d97706'];
+    const lineColors = [COLOR.line1, COLOR.line2];
     lvl.lines.forEach((line, i) => {
       ctxIn.strokeStyle = lineColors[i]; ctxIn.lineWidth = 2.5;
       let p1 = toScreen(cvsIn, -15, line.m * -15 + line.c);
@@ -946,13 +992,17 @@ function render() {
     });
 
     let pT = toScreen(cvsIn, lvl.target.x, lvl.target.y);
-    ctxIn.strokeStyle = '#dc2626'; ctxIn.lineWidth = 2;
+    // Target ring now uses COLOR.target (orange), matching the TRANSFORMATION
+    // level type below -- it used to be red here, which visually clashed with
+    // COLOR.vectorI (also red, meaning "x") and meant "the answer" was drawn
+    // in two different colors depending on which level type you were on.
+    ctxIn.strokeStyle = COLOR.target; ctxIn.lineWidth = 2;
     ctxIn.beginPath(); ctxIn.arc(pT.x, pT.y, 8, 0, Math.PI*2); ctxIn.stroke();
 
     let pP = toScreen(cvsIn, st.inputPos.x, st.inputPos.y);
-    ctxIn.fillStyle = '#16a34a'; ctxIn.beginPath(); ctxIn.arc(pP.x, pP.y, 7, 0, Math.PI*2); ctxIn.fill();
+    ctxIn.fillStyle = COLOR.pointP; ctxIn.beginPath(); ctxIn.arc(pP.x, pP.y, 7, 0, Math.PI*2); ctxIn.fill();
     ctxIn.strokeStyle = '#fff'; ctxIn.lineWidth = 2; ctxIn.stroke();
-    ctxIn.fillStyle = '#16a34a'; ctxIn.font = 'bold 12px system-ui';
+    ctxIn.fillStyle = COLOR.pointP; ctxIn.font = 'bold 12px system-ui';
     ctxIn.fillText(`P(${st.inputPos.x.toFixed(1)}, ${st.inputPos.y.toFixed(1)})`, pP.x + 10, pP.y - 6);
 
   } else if (lvl.type === "TRANSFORMATION") {
@@ -961,9 +1011,9 @@ function render() {
     }
 
     let pIn = toScreen(cvsIn, st.inputPos.x, st.inputPos.y);
-    ctxIn.fillStyle = '#16a34a'; ctxIn.beginPath(); ctxIn.arc(pIn.x, pIn.y, 7, 0, Math.PI*2); ctxIn.fill();
+    ctxIn.fillStyle = COLOR.pointP; ctxIn.beginPath(); ctxIn.arc(pIn.x, pIn.y, 7, 0, Math.PI*2); ctxIn.fill();
     ctxIn.strokeStyle = '#fff'; ctxIn.lineWidth = 2; ctxIn.stroke();
-    ctxIn.fillStyle = '#16a34a'; ctxIn.font = 'bold 12px system-ui';
+    ctxIn.fillStyle = COLOR.pointP; ctxIn.font = 'bold 12px system-ui';
     ctxIn.fillText(`P(${st.inputPos.x.toFixed(1)}, ${st.inputPos.y.toFixed(1)})`, pIn.x + 10, pIn.y - 6);
 
     let labelX = buildExpression(st.matrix[0], st.matrix[1]);
@@ -980,17 +1030,20 @@ function render() {
       drawVectorAdditionPath(ctxOut, cvsOut, st.matrix, st.inputPos);
     }
 
+    // Matrix x vector, computed once via the shared helper instead of being
+    // re-derived inline (this same computation used to be written out by hand
+    // in three separate places in this file).
     let m = st.matrix;
-    let outX = m[0]*st.inputPos.x + m[1]*st.inputPos.y;
-    let outY = m[2]*st.inputPos.x + m[3]*st.inputPos.y;
+    let outPos = applyMatrix(m, st.inputPos);
+    let outX = outPos.x, outY = outPos.y;
 
     if (lvl.target) {
       let pTarget = toScreen(cvsOut, lvl.target.x, lvl.target.y);
-      ctxOut.strokeStyle = '#ea580c'; ctxOut.lineWidth = 2;
+      ctxOut.strokeStyle = COLOR.target; ctxOut.lineWidth = 2;
       ctxOut.beginPath(); ctxOut.arc(pTarget.x, pTarget.y, 8, 0, Math.PI*2); ctxOut.stroke();
 
       let pOut = toScreen(cvsOut, outX, outY);
-      ctxOut.fillStyle = '#ea580c'; ctxOut.beginPath(); ctxOut.arc(pOut.x, pOut.y, 7, 0, Math.PI*2); ctxOut.fill();
+      ctxOut.fillStyle = COLOR.target; ctxOut.beginPath(); ctxOut.arc(pOut.x, pOut.y, 7, 0, Math.PI*2); ctxOut.fill();
       ctxOut.strokeStyle = '#fff'; ctxOut.lineWidth = 2; ctxOut.stroke();
 
       document.getElementById('outputLabelBadge').innerText = `Output: (${outX.toFixed(1)}, ${outY.toFixed(1)})`;
@@ -1050,7 +1103,7 @@ function render() {
       
       ctxOut.save();
       ctxOut.font = 'bold 11px system-ui';
-      ctxOut.fillStyle = isOrthogonal ? '#16a34a' : '#d97706';
+      ctxOut.fillStyle = isOrthogonal ? COLOR.pointP : COLOR.line2;
       ctxOut.fillText(
         isOrthogonal ? "📐 ตั้งฉากสมบูรณ์! (Adjugate Matrix)" : `มุมบิดเอียง (Dot product: ${dotProd.toFixed(1)})`,
         10, cvsOut.height - 12
@@ -1089,7 +1142,8 @@ function selectSummaryConcept(idx) {
 function startSummaryAnimation() {
   stopSummaryAnimation();
   function loop() {
-    if (window.__GAME_STATE__.currentLevelIndex !== 8) return;
+    const lvl = levelsData[window.__GAME_STATE__.currentLevelIndex];
+    if (!lvl || lvl.type !== "SUMMARY") return;
     summaryAnimTime += 0.015;
     drawSummaryCanvasAnimation(summaryAnimTime);
     summaryAnimFrame = requestAnimationFrame(loop);
@@ -1131,15 +1185,15 @@ function drawSummaryCanvasAnimation(t) {
 
     ctxIn.save();
     ctxIn.setLineDash([4, 4]);
-    ctxIn.strokeStyle = '#94a3b8';
+    ctxIn.strokeStyle = COLOR.axis;
     ctxIn.beginPath(); ctxIn.moveTo(pOrig.x, pOrig.y); ctxIn.lineTo(pIn.x, pIn.y); ctxIn.stroke();
 
     ctxIn.setLineDash([]);
-    ctxIn.strokeStyle = '#0284c7'; ctxIn.lineWidth = 3;
+    ctxIn.strokeStyle = COLOR.invJ; ctxIn.lineWidth = 3;
     ctxIn.beginPath(); ctxIn.moveTo(pOrig.x, pOrig.y); ctxIn.lineTo(pOut.x, pOut.y); ctxIn.stroke();
-    drawArrowhead(ctxIn, pOrig.x, pOrig.y, pOut.x, pOut.y, '#0284c7');
+    drawArrowhead(ctxIn, pOrig.x, pOrig.y, pOut.x, pOut.y, COLOR.invJ);
 
-    ctxIn.fillStyle = '#0284c7'; ctxIn.font = 'bold 12px system-ui';
+    ctxIn.fillStyle = COLOR.invJ; ctxIn.font = 'bold 12px system-ui';
     ctxIn.fillText(`b = A·x (${outX.toFixed(1)}, ${outY.toFixed(1)})`, pOut.x + 8, pOut.y - 6);
     ctxIn.restore();
 
@@ -1178,7 +1232,7 @@ function drawSummaryCanvasAnimation(t) {
     ctxIn.closePath();
     ctxIn.fillStyle = 'rgba(22, 163, 74, 0.25)';
     ctxIn.fill();
-    ctxIn.strokeStyle = '#16a34a'; ctxIn.lineWidth = 2;
+    ctxIn.strokeStyle = COLOR.pointP; ctxIn.lineWidth = 2;
     ctxIn.stroke();
     ctxIn.restore();
 
@@ -1203,15 +1257,15 @@ function drawSummaryCanvasAnimation(t) {
   ctxIn.save();
   ctxIn.fillStyle = 'rgba(15, 23, 42, 0.9)';
   ctxIn.fillRect(10, 10, cvsIn.width - 20, 46);
-  ctxIn.strokeStyle = '#0284c7';
+  ctxIn.strokeStyle = COLOR.invJ;
   ctxIn.lineWidth = 1;
   ctxIn.strokeRect(10, 10, cvsIn.width - 20, 46);
 
-  ctxIn.fillStyle = '#38bdf8';
+  ctxIn.fillStyle = COLOR.accentLight;
   ctxIn.font = 'bold 12px system-ui';
   ctxIn.fillText(phaseTitle, 20, 28);
 
-  ctxIn.fillStyle = '#e2e8f0';
+  ctxIn.fillStyle = COLOR.grid;
   ctxIn.font = '11px system-ui';
   ctxIn.fillText(detailText, 20, 45);
   ctxIn.restore();
@@ -1239,14 +1293,14 @@ function drawStep4InputCanvas(ctx, cvs, vecI, vecJ) {
   ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pTargetI.x, pTargetI.y); ctx.stroke();
   ctx.fillStyle = 'rgba(236, 72, 153, 0.15)';
   ctx.beginPath(); ctx.arc(pTargetI.x, pTargetI.y, 11, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#ec4899';
+  ctx.strokeStyle = COLOR.invI;
   ctx.beginPath(); ctx.arc(pTargetI.x, pTargetI.y, 11, 0, Math.PI * 2); ctx.stroke();
 
   ctx.strokeStyle = 'rgba(2, 132, 199, 0.6)';
   ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pTargetJ.x, pTargetJ.y); ctx.stroke();
   ctx.fillStyle = 'rgba(2, 132, 199, 0.15)';
   ctx.beginPath(); ctx.arc(pTargetJ.x, pTargetJ.y, 11, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#0284c7';
+  ctx.strokeStyle = COLOR.invJ;
   ctx.beginPath(); ctx.arc(pTargetJ.x, pTargetJ.y, 11, 0, Math.PI * 2); ctx.stroke();
 
   ctx.setLineDash([]);
@@ -1290,9 +1344,9 @@ function drawColoredAxisLabel(ctx, text, x, y, align = 'right', baseline = 'bott
   ctx.textBaseline = baseline;
 
   tokens.forEach(token => {
-    if (token === 'x') { ctx.fillStyle = '#dc2626'; }
-    else if (token === 'y') { ctx.fillStyle = '#9333ea'; }
-    else { ctx.fillStyle = '#475569'; }
+    if (token === 'x') { ctx.fillStyle = COLOR.vectorI; }
+    else if (token === 'y') { ctx.fillStyle = COLOR.vectorJ; }
+    else { ctx.fillStyle = COLOR.muted; }
     ctx.fillText(token, currentX, y);
     currentX += ctx.measureText(token).width;
   });
@@ -1305,7 +1359,7 @@ function drawGrid(ctx, cvs, showGrid = true, labelX = "x", labelY = "y") {
 
   if (showGrid) {
     ctx.lineWidth = 0.5;
-    ctx.strokeStyle = '#e2e8f0';
+    ctx.strokeStyle = COLOR.grid;
 
     for (let x = origin.x % SCALE; x < cvs.width; x += SCALE) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cvs.height); ctx.stroke();
@@ -1316,7 +1370,7 @@ function drawGrid(ctx, cvs, showGrid = true, labelX = "x", labelY = "y") {
   }
 
   ctx.lineWidth = 1.5;
-  ctx.strokeStyle = '#94a3b8';
+  ctx.strokeStyle = COLOR.axis;
   ctx.beginPath(); ctx.moveTo(0, origin.y); ctx.lineTo(cvs.width, origin.y); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(origin.x, 0); ctx.lineTo(origin.x, cvs.height); ctx.stroke();
 
@@ -1354,16 +1408,26 @@ function updateMatrixFromUI() {
 
 let isDragging = false;
 
-cvsIn.addEventListener('mousedown', (e) => {
+// Reads either a MouseEvent or a TouchEvent so every drag handler below can
+// stay written in terms of clientX/clientY regardless of input device.
+function getPointerCoords(e) {
+  if (e.touches && e.touches.length > 0) return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+  if (e.changedTouches && e.changedTouches.length > 0) return { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY };
+  return { clientX: e.clientX, clientY: e.clientY };
+}
+
+function handlePointerDown(e) {
   const st = window.__GAME_STATE__;
   const lvl = levelsData[st.currentLevelIndex];
 
   if (lvl.type === "SUMMARY") return;
 
+  const { clientX, clientY } = getPointerCoords(e);
+
   if (lvl.type === "INVERSE_FLOW" && st.inverseStep === 4) {
     const rect = cvsIn.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
+    const mx = clientX - rect.left;
+    const my = clientY - rect.top;
 
     const pI = toScreen(cvsIn, st.step4_vecI.x, st.step4_vecI.y);
     const pJ = toScreen(cvsIn, st.step4_vecJ.x, st.step4_vecJ.y);
@@ -1383,16 +1447,32 @@ cvsIn.addEventListener('mousedown', (e) => {
 
   isDragging = true;
   handlePointer(e);
-});
+}
 
-window.addEventListener('mouseup', () => {
+function handlePointerUp() {
   isDragging = false;
   window.__GAME_STATE__.step4_draggedHandle = null;
-});
+}
 
-cvsIn.addEventListener('mousemove', (e) => {
-  if (isDragging) handlePointer(e);
-});
+function handlePointerMoveWrapper(e) {
+  if (isDragging) {
+    e.preventDefault();
+    handlePointer(e);
+  }
+}
+
+cvsIn.addEventListener('mousedown', handlePointerDown);
+window.addEventListener('mouseup', handlePointerUp);
+cvsIn.addEventListener('mousemove', handlePointerMoveWrapper);
+
+// Touch equivalents -- dragging P and the step-4 vector handles is the
+// entire interaction this activity is built on, so it has to work on
+// tablets/phones, not just mouse-driven desktops. preventDefault stops the
+// page from scrolling while a drag is in progress.
+cvsIn.addEventListener('touchstart', (e) => { e.preventDefault(); handlePointerDown(e); }, { passive: false });
+window.addEventListener('touchend', handlePointerUp);
+window.addEventListener('touchcancel', handlePointerUp);
+cvsIn.addEventListener('touchmove', handlePointerMoveWrapper, { passive: false });
 
 function handlePointer(e) {
   const st = window.__GAME_STATE__;
@@ -1400,10 +1480,12 @@ function handlePointer(e) {
 
   if (lvl.type === "SUMMARY") return;
 
+  const { clientX, clientY } = getPointerCoords(e);
+
   if (lvl.type === "INVERSE_FLOW") {
     if (st.inverseStep === 4 && st.step4_draggedHandle) {
       const rect = cvsIn.getBoundingClientRect();
-      let mPos = toMath(cvsIn, e.clientX - rect.left, e.clientY - rect.top);
+      let mPos = toMath(cvsIn, clientX - rect.left, clientY - rect.top);
       if (document.getElementById('snapToggle').checked) {
         mPos.x = Math.round(mPos.x);
         mPos.y = Math.round(mPos.y);
@@ -1419,7 +1501,7 @@ function handlePointer(e) {
   }
 
   const rect = cvsIn.getBoundingClientRect();
-  let mPos = toMath(cvsIn, e.clientX - rect.left, e.clientY - rect.top);
+  let mPos = toMath(cvsIn, clientX - rect.left, clientY - rect.top);
   if (document.getElementById('snapToggle').checked) {
     mPos.x = Math.round(mPos.x);
     mPos.y = Math.round(mPos.y);
@@ -1575,13 +1657,19 @@ function renderStep4UI() {
 
 function checkStep4WinCondition() {
   const st = window.__GAME_STATE__;
-  if (st.currentLevelIndex !== 7 || st.inverseStep !== 4) return;
+  const lvl = levelsData[st.currentLevelIndex];
+  if (!lvl || lvl.type !== "INVERSE_FLOW" || st.inverseStep !== 4) return;
 
   const A = st.step4_matrixA;
   const G = [st.step4_vecI.x, st.step4_vecJ.x, st.step4_vecI.y, st.step4_vecJ.y];
   const OutM = multiplyMatrices(A, G);
 
-  const isOrthogonal = Math.abs(OutM[1]) === 0 && Math.abs(OutM[2]) === 0 && OutM[0] > 0 && OutM[3] > 0;
+  // Same tolerance as the "ตั้งฉากสมบูรณ์" indicator drawn in render() -- this
+  // used to be an exact === 0 check, which disagreed with the visual state
+  // and made the level effectively unwinnable whenever "Hard Snap" was off
+  // (a mouse drag almost never lands on exactly 0).
+  const ORTHO_TOLERANCE = 0.01;
+  const isOrthogonal = Math.abs(OutM[1]) < ORTHO_TOLERANCE && Math.abs(OutM[2]) < ORTHO_TOLERANCE && OutM[0] > 0 && OutM[3] > 0;
 
   if (isOrthogonal) {
     const isAlreadyLogged = st.step4_history.some(h => 
@@ -1589,9 +1677,12 @@ function checkStep4WinCondition() {
     );
 
     if (!isAlreadyLogged) {
+      // Round the logged Adj values so the history table stays readable even
+      // when the vectors weren't dragged with Hard Snap on.
+      const roundedG = G.map(v => Math.round(v * 100) / 100);
       st.step4_history.push({
         A: [...A],
-        Adj: [...G]
+        Adj: roundedG
       });
       renderStep4UI();
     }
@@ -1748,6 +1839,7 @@ function openGeneralAdjModal() {
     <button class="btn-primary" onclick="closeModal()">ปิดหน้าต่าง</button>
   `;
 
+  hideFeedback();
   document.getElementById('obsModal').classList.add('active');
 }
 
@@ -1758,9 +1850,9 @@ function verifyGeneralAdjFormula() {
   const a11 = document.getElementById('genAdj11').value;
 
   if (a00 === 'd' && a01 === '-b' && a10 === '-c' && a11 === 'a') {
-    alert("🎉 ถูกต้องสมบูรณ์! รูปแบบกรณีทั่วไปของ Adjugate Matrix คือ [d, -b; -c, a] สลับตำแหน่งแนวเฉียงหลัก และเปลี่ยนเครื่องหมายแนวเฉียงรอง!");
+    showFeedback("🎉 ถูกต้องสมบูรณ์! รูปแบบกรณีทั่วไปของ Adjugate Matrix คือ [d, -b; -c, a] สลับตำแหน่งแนวเฉียงหลัก และเปลี่ยนเครื่องหมายแนวเฉียงรอง!", true);
   } else {
-    alert("❌ ยังไม่ถูกต้องครับ! ลองดูจากตาราง Log อีกครั้ง:\n- สังเกตตัวเลขตำแหน่งแรกและตำแหน่งสุดท้าย (แนวเฉียงหลัก)\n- สังเกตเครื่องหมายตัวเลขอีกสองตำแหน่ง (แนวเฉียงรอง)");
+    showFeedback("❌ ยังไม่ถูกต้องครับ! ลองดูจากตาราง Log อีกครั้ง — สังเกตตัวเลขตำแหน่งแรกและตำแหน่งสุดท้าย (แนวเฉียงหลัก) และเครื่องหมายตัวเลขอีกสองตำแหน่ง (แนวเฉียงรอง)", false);
   }
 }
 
@@ -1776,12 +1868,12 @@ function verifyCustomAdjInput() {
   const adj11 = parseFloat(document.getElementById('custAdj11').value);
 
   if (isNaN(adj00) || isNaN(adj01) || isNaN(adj10) || isNaN(adj11)) {
-    alert("โปรดเติมตัวเลขให้ครบทั้ง 4 ช่องในเมทริกซ์ Adj(A) ครับ!");
+    showFeedback("โปรดเติมตัวเลขให้ครบทั้ง 4 ช่องในเมทริกซ์ Adj(A) ครับ!", false);
     return;
   }
 
   if (adj00 === a11 && adj01 === -a01 && adj10 === -a10 && adj11 === a00) {
-    alert("🎉 ยอดเยี่ยมมาก! เมทริกซ์ Adj(A) ที่คุณสร้างขึ้นถูกต้องตามกฎการเปลี่ยนรูปแน่นอน!");
+    showFeedback("🎉 ยอดเยี่ยมมาก! เมทริกซ์ Adj(A) ที่คุณสร้างขึ้นถูกต้องตามกฎการเปลี่ยนรูปแน่นอน!", true);
     
     const st = window.__GAME_STATE__;
     const customA = [a00, a01, a10, a11];
@@ -1792,7 +1884,7 @@ function verifyCustomAdjInput() {
     }
     openGeneralAdjModal();
   } else {
-    alert(`❌ ค่า Adj(A) ยังไม่ถูกต้อง!\nคำแนะนำ: สำหรับ A = [${a00}, ${a01}; ${a10}, ${a11}]\nAdjugate ควรเป็น [${a11}, ${-a01}; ${-a10}, ${a00}]`);
+    showFeedback(`❌ ค่า Adj(A) ยังไม่ถูกต้อง! คำแนะนำ: สำหรับ A = [${a00}, ${a01}; ${a10}, ${a11}] Adjugate ควรเป็น [${a11}, ${-a01}; ${-a10}, ${a00}]`, false);
   }
 }
 
@@ -1802,8 +1894,8 @@ function recordCurrentLabData(lvlIdx) {
   if (lvl && lvl.type === "TRANSFORMATION") {
     const m = lvl.matrix;
     const inp = lvl.solve || lvl.target;
-    const outX = m[0]*inp.x + m[1]*inp.y;
-    const outY = m[2]*inp.x + m[3]*inp.y;
+    const out = applyMatrix(m, inp);
+    const outX = out.x, outY = out.y;
     
     if (!st.labRecords.some(r => r.level === lvlIdx)) {
       st.labRecords.push({
@@ -1838,6 +1930,7 @@ function showStartDialogue() {
     <button class="btn-primary" style="background:#16a34a;" onclick="closeModal()">ลุยกันเลย! 🚀</button>
   `;
 
+  hideFeedback();
   document.getElementById('obsModal').classList.add('active');
 }
 
@@ -1879,6 +1972,7 @@ function showLevel1SuccessModal() {
     <button class="btn-primary" onclick="closeModal()">เข้าใจแล้ว 🚀</button>
   `;
 
+  hideFeedback();
   document.getElementById('obsModal').classList.add('active');
 }
 
@@ -1894,9 +1988,9 @@ function checkWinCondition() {
   }
 
   if (lvl.type === "TRANSFORMATION") {
-    let outX = st.matrix[0]*st.inputPos.x + st.matrix[1]*st.inputPos.y;
-    let outY = st.matrix[2]*st.inputPos.x + st.matrix[3]*st.inputPos.y;
-    
+    const outPos = applyMatrix(st.matrix, st.inputPos);
+    const outX = outPos.x, outY = outPos.y;
+
     const isTargetHit = lvl.target && Math.abs(outX - lvl.target.x) < 0.1 && Math.abs(outY - lvl.target.y) < 0.1;
     if (isTargetHit) isClearedNow = true;
   } else if (lvl.type === "LINE_INTERSECTION") {
@@ -1910,7 +2004,7 @@ function checkWinCondition() {
     }
   }
 
-  if (isClearedNow && [1, 2, 3, 4].includes(st.currentLevelIndex)) {
+  if (isClearedNow && lvl.recordsLabData) {
     recordCurrentLabData(st.currentLevelIndex);
   }
 
@@ -2002,15 +2096,36 @@ function resetCurrentLevel() {
 }
 
 function prevLevel() {
-  let idx = window.__GAME_STATE__.currentLevelIndex;
+  const st = window.__GAME_STATE__;
+  const idx = st.currentLevelIndex;
+  const lvl = levelsData[idx];
+
+  // Level 7 (INVERSE_FLOW) has its own 4 sub-steps -- step back through
+  // those first before falling back to the previous level.
+  if (lvl.type === "INVERSE_FLOW" && st.inverseStep > 1) {
+    setStep(st.inverseStep - 1);
+    return;
+  }
+
   if (idx > 0) loadLevel(idx - 1);
 }
 
 function nextLevel() {
-  let idx = window.__GAME_STATE__.currentLevelIndex;
+  const st = window.__GAME_STATE__;
+  const idx = st.currentLevelIndex;
+  const lvl = levelsData[idx];
+
+  // Level 7 (INVERSE_FLOW) has its own 4 sub-steps -- the header "next"
+  // button walks through those first, and only moves on to the next level
+  // once step 4 has been reached.
+  if (lvl.type === "INVERSE_FLOW" && st.inverseStep < 4) {
+    setStep(st.inverseStep + 1);
+    return;
+  }
+
   if (idx < levelsData.length - 1) {
     let nextIdx = idx + 1;
-    if ([1, 2, 3, 4, 5, 6, 7].includes(nextIdx)) {
+    if (levelsData[nextIdx].introModal) {
       showObservationModal(nextIdx);
     } else {
       loadLevel(nextIdx);
@@ -2035,7 +2150,27 @@ function autoSolve() {
 
 let pendingLevelToLoad = null;
 
+// Shows non-blocking, right/wrong feedback inside the modal instead of a
+// browser alert() -- alert() froze the whole page and clashed with the
+// hint-box / conscious-dialog style used everywhere else in this activity.
+function showFeedback(message, isCorrect) {
+  const banner = document.getElementById('modalFeedbackBanner');
+  if (!banner) return;
+  banner.innerHTML = message;
+  banner.style.display = 'block';
+  banner.classList.toggle('feedback-correct', isCorrect);
+  banner.classList.toggle('feedback-incorrect', !isCorrect);
+}
+
+function hideFeedback() {
+  const banner = document.getElementById('modalFeedbackBanner');
+  if (!banner) return;
+  banner.style.display = 'none';
+  banner.innerHTML = '';
+}
+
 function closeModal() {
+  hideFeedback();
   document.getElementById('obsModal').classList.remove('active');
 }
 
@@ -2067,10 +2202,10 @@ function verifyMatrixPatternSecret() {
   const d4 = document.getElementById('patDrop4') ? document.getElementById('patDrop4').value : '';
 
   if (d1 === 'a' && d2 === 'b' && d3 === 'c' && d4 === 'd') {
-    alert("🎉 OK! ถูกต้องแล้ว! คุณได้ค้นพบรูปแบบการคูณเมทริกซ์ (Matrix Multiplication Pattern) สำเร็จ!");
-    closeModalAndLoadPending();
+    showFeedback("🎉 ถูกต้องแล้ว! คุณได้ค้นพบรูปแบบการคูณเมทริกซ์ (Matrix Multiplication Pattern) สำเร็จ!", true);
+    setTimeout(closeModalAndLoadPending, 900);
   } else {
-    alert("❌ รูปแบบยังไม่ถูกต้อง! ลองสังเกตการคูณแถวของเมทริกซ์ A กับหลักของ Vector Input อีกครั้งนะครับ (คำใบ้: ผลลัพธ์ตัวบนใช้ แถวที่ 1 (a, b) และผลลัพธ์ตัวล่างใช้ แถวที่ 2 (c, d))");
+    showFeedback("❌ รูปแบบยังไม่ถูกต้อง! ลองสังเกตการคูณแถวของเมทริกซ์ A กับหลักของ Vector Input อีกครั้งนะครับ (คำใบ้: ผลลัพธ์ตัวบนใช้ แถวที่ 1 (a, b) และผลลัพธ์ตัวล่างใช้ แถวที่ 2 (c, d))", false);
   }
 }
 
@@ -2078,15 +2213,15 @@ function verifyMatrixPatternSecret() {
 function verifyDetPatternSecret() {
   const selected = document.querySelector('input[name="detPatternOpt"]:checked');
   if (!selected) {
-    alert("โปรดเลือกตัวเลือกสูตรคำนวณพื้นที่ก่อนนะครับ!");
+    showFeedback("โปรดเลือกตัวเลือกสูตรคำนวณพื้นที่ก่อนนะครับ!", false);
     return;
   }
 
   if (selected.value === 'radio2') {
-    alert("🎉 OK! ถูกต้องแล้ว! สูตรพื้นที่ det(A) คือ (a × d) - (b × c)");
-    closeModalAndLoadPending();
+    showFeedback("🎉 ถูกต้องแล้ว! สูตรพื้นที่ det(A) คือ (a × d) - (b × c)", true);
+    setTimeout(closeModalAndLoadPending, 900);
   } else {
-    alert("❌ ยังไม่ถูกต้องครับ! ลองดูการเปรียบเทียบในตารางย้อนหลังอีกครั้ง (คำใบ้: เอาแนวเฉียงลง (a×d) ลบด้วย แนวเฉียงขึ้น (b×c) ครับ)");
+    showFeedback("❌ ยังไม่ถูกต้องครับ! ลองดูการเปรียบเทียบในตารางย้อนหลังอีกครั้ง (คำใบ้: เอาแนวเฉียงลง (a×d) ลบด้วย แนวเฉียงขึ้น (b×c) ครับ)", false);
   }
 }
 
@@ -2293,6 +2428,7 @@ function showObservationModal(targetLevel = 1) {
     `;
   }
 
+  hideFeedback();
   document.getElementById('obsModal').classList.add('active');
 }
 
