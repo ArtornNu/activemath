@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linear System Journey (Complete 8 Levels)</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --border: #d0d7de;
+      --accent-in: #0969da;
+      --accent-out: #cf222e;
+      --text: #1f2328;
+      --text-muted: #656d76;
+      --canvas-bg: #ffffff;
+      --color-x: #dc2626; 
+      --color-y: #9333ea; 
+      --color-line1: #2563eb; 
+      --color-line2: #d97706; 
+      --color-point: #16a34a; 
+      --color-inv-i: #ec4899; 
+      --color-inv-j: #0284c7;
+      --accent: #0284c7;
+      --amber: #d97706;
+      --green: #16a34a;
+      --purple: #9333ea;
+      --border-dark: #cbd5e1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body { 
+      background: var(--bg); 
+      color: var(--text); 
+      padding: 10px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 8px; 
+      box-sizing: border-box;
+    }
+    
+    header { 
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+      background: var(--card); padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-shrink: 0;
+    }
+    .nav-btns { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .nav-btns button { 
+      background: #f6f8fa; border: 1px solid var(--border); color: var(--text); 
+      padding: 5px 10px; cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 12px; transition: all 0.2s;
+    }
+    .nav-btns button:hover { background: #eaeef2; border-color: #0969da; }
+    
+    .btn-reset { background: #f3f4f6 !important; color: #4b5563 !important; border: 1px solid #d1d5db !important; }
+    .btn-reset:hover { background: #e5e7eb !important; color: #1f2937 !important; border-color: #9ca3af !important; }
+    .btn-solve { background: #8250df !important; color: white !important; border: none !important; }
+    .btn-solve:hover { background: #6e3ff3 !important; }
+
+    main { 
+      display: grid; 
+      grid-template-columns: 320px 1fr 1fr; 
+      gap: 10px; 
+      flex: 1; 
+      min-height: 0;
+      transition: grid-template-columns 0.3s ease;
+    }
+
+    main.single-view {
+      grid-template-columns: 320px 1fr !important;
+    }
+
+    @media (max-width: 900px) {
+      html, body { overflow: auto; }
+      main, main.single-view { grid-template-columns: 1fr !important; }
+      .canvas-container { height: 320px; }
+    }
+
+    .panel { 
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px; 
+      padding: 12px; display: flex; flex-direction: column; gap: 8px; 
+      overflow-y: auto;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      max-height: 100%;
+    }
+    
+    .panel h3 { color: #0969da; border-bottom: 2px solid #ddf4ff; padding-bottom: 4px; font-size: 14px; }
+
+    .conscious-dialog {
+      background: #fff8c5; border: 1px solid #d4a72c; color: #7d4e00;
+      padding: 8px 10px; border-radius: 8px; font-size: 11px; line-height: 1.4;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .conscious-dialog b { color: #533400; font-size: 12px; }
+
+    .matrix-section { display: flex; flex-direction: column; gap: 6px; }
+    .matrix-container { background: #f6f8fa; border: 1px solid var(--border); border-radius: 8px; padding: 8px; }
+    
+    .math-matrix-bracket {
+      display: inline-flex; align-items: center; position: relative; padding: 2px 6px; margin: 0 2px; vertical-align: middle;
+    }
+    .math-matrix-bracket::before, .math-matrix-bracket::after {
+      content: ""; position: absolute; top: 0; bottom: 0; width: 5px; border: 2px solid #1f2328;
+    }
+    .math-matrix-bracket::before { left: 0; border-right: none; border-radius: 4px 0 0 4px; }
+    .math-matrix-bracket::after { right: 0; border-left: none; border-radius: 0 4px 4px 0; }
+
+    .matrix-input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+    .matrix-input-grid input { 
+      width: 100%; background: #ffffff; border: 1px solid var(--border); 
+      text-align: center; padding: 4px 2px; border-radius: 6px; font-weight: bold; font-size: 13px;
+    }
+
+    .input-col-x { color: var(--color-x); border-color: #fca5a5 !important; }
+    .input-col-y { color: var(--color-y); border-color: #d8b4fe !important; }
+
+    .btn-toggle-record {
+      background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe;
+      font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 4px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-toggle-record:hover { background: #e9d5ff; }
+
+    .cramer-box {
+      background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 8px;
+      font-size: 11px; display: flex; flex-direction: column; gap: 4px;
+    }
+    .cramer-row { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+
+    /* Interactive Inverse Activity Styles (Level 7) */
+    .stepper { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px; }
+    .step-btn {
+      background: var(--bg); border: 1px solid var(--border-dark); color: var(--text-muted);
+      padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; cursor: pointer; transition: all 0.2s;
+    }
+    .step-btn.active { background: var(--accent); color: #ffffff; border-color: var(--accent); }
+    .step-btn.completed { border-color: var(--green); color: var(--green); background: #f0fdf4; }
+
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold;
+      background: #e0f2fe; color: var(--accent); border: 1px solid #bae6fd;
+    }
+
+    .instruction-card {
+      background: #f1f5f9; border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px; font-size: 11px; line-height: 1.4; color: var(--text);
+    }
+
+    .matrix-display {
+      background: #f8fafc; border: 1px solid var(--border-dark); border-radius: 6px;
+      padding: 8px 6px; text-align: center; font-size: 12px; font-weight: bold; color: var(--text);
+      display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px;
+    }
+
+    .controls-box {
+      background: #ffffff; border: 1px solid var(--border-dark); border-radius: 8px;
+      padding: 8px; display: flex; flex-direction: column; gap: 6px;
+    }
+
+    .btn {
+      background: var(--accent); color: #ffffff; border: none; padding: 8px 10px;
+      border-radius: 6px; font-weight: bold; font-size: 11px; cursor: pointer; transition: all 0.2s; text-align: center;
+    }
+    .btn:hover { filter: brightness(0.95); }
+    .btn-amber { background: var(--amber); color: #ffffff; }
+    .btn-green { background: var(--green); color: #ffffff; }
+
+    .lab-box {
+      background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 6px; padding: 6px;
+      font-size: 10px; display: flex; flex-direction: column; gap: 4px;
+    }
+    .lab-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 11px; }
+    .lab-table th, .lab-table td { border: 1px solid #f0abfc; padding: 4px; vertical-align: middle; }
+    .lab-table th { background: #fae8ff; color: #86198f; font-weight: bold; }
+
+    .canvas-container { 
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px; 
+      display: flex; flex-direction: column; align-items: center; padding: 6px; position: relative;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); height: 100%; min-height: 0;
+    }
+    canvas { background: var(--canvas-bg); border: 1px solid var(--border); border-radius: 6px; width: 100%; height: 100%; cursor: crosshair; }
+    
+    .canvas-label { 
+      position: absolute; top: 10px; left: 10px; font-weight: 700; font-size: 11px; padding: 3px 8px;
+      border-radius: 10px; background: rgba(255,255,255,0.95); border: 1px solid var(--border); z-index: 10;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .in-label { color: var(--accent-in); border-color: #54aafd; }
+    .out-label { color: var(--accent-out); border-color: #ff8182; }
+
+    .canvas-overlay-toggle {
+      position: absolute; top: 10px; right: 10px; z-index: 10;
+      background: rgba(255, 255, 255, 0.92); border: 1px solid var(--border);
+      padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;
+      display: flex; align-items: center; gap: 4px; backdrop-filter: blur(4px); cursor: pointer;
+    }
+
+    .output-info-label {
+      position: absolute; top: 38px; right: 10px; z-index: 10;
+      background: rgba(255, 255, 255, 0.92); border: 1px solid #f97316; color: #d97706;
+      padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; backdrop-filter: blur(4px);
+    }
+
+    footer {
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 12px; display: flex; align-items: center; justify-content: space-between;
+      font-weight: bold; font-size: 12px; color: #1f2328; flex-shrink: 0; flex-wrap: wrap; gap: 6px;
+    }
+    
+    .math-col { display: flex; flex-direction: column; align-items: center; line-height: 1.1; font-size: 13px; }
+
+    .status-badge { 
+      padding: 4px 10px; border-radius: 6px; font-weight: bold; background: #dafbe1; color: #1a7f37; 
+      border: 1px solid #4ac26b; text-align: center; font-size: 12px; animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-card {
+      background: #ffffff; border-radius: 12px; width: 92%; max-width: 540px;
+      padding: 20px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px;
+      transform: translateY(20px); transition: transform 0.3s ease; max-height: 90vh; overflow-y: auto;
+    }
+    .modal-overlay.active .modal-card { transform: translateY(0); }
+    .modal-header { display: flex; align-items: center; gap: 8px; }
+    .modal-header h4 { font-size: 16px; color: #0969da; }
+    .modal-body { font-size: 13px; line-height: 1.5; color: #334155; }
+    .hint-box {
+      background: #f0f7ff; border-left: 4px solid #0969da; padding: 10px;
+      border-radius: 4px; margin-top: 8px; font-size: 12px; color: #1e293b; display: none;
+    }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+    .btn-hint {
+      background: #fff8c5; border: 1px solid #d4a72c; color: #7d4e00;
+      padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px;
+    }
+    .btn-primary {
+      background: #0969da; color: white; border: none;
+      padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px;
+    }
+    .btn-purple {
+      background: #7e22ce; color: white; border: none;
+      padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;
+      box-shadow: 0 2px 4px rgba(126, 34, 206, 0.3); transition: all 0.2s;
+    }
+    .btn-purple:hover { background: #6b21a8; transform: translateY(-1px); }
+
+    .text-x { color: var(--color-x) !important; font-weight: bold; }
+    .text-y { color: var(--color-y) !important; font-weight: bold; }
+    .text-l1 { font-weight: bold; }
+    .text-l2 { font-weight: bold; }
+
+    #equationBox {
+      font-size: 15px; 
+      background: #f0f7ff; 
+      padding: 10px 14px; 
+      border-radius: 8px; 
+      border: 1px solid #0969da; 
+      line-height: 1.6;
+    }
+    #equationBox b {
+      font-size: 13px;
+    }
+
+    /* Pattern Synthesis Dialogue Specifics */
+    .pattern-card {
+      background: #fcf5ff; border: 1px solid #f0abfc; border-radius: 10px; padding: 12px;
+      margin-top: 6px; display: flex; flex-direction: column; gap: 10px; text-align: center;
+    }
+    .formula-row {
+      display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: bold;
+    }
+    .formula-select {
+      background: #ffffff; border: 2px solid #a855f7; border-radius: 6px;
+      padding: 4px 6px; font-weight: bold; color: #7e22ce; font-size: 13px; cursor: pointer; outline: none;
+    }
+
+    /* Option Radio Cards for Det Quiz */
+    .option-card {
+      display: flex; align-items: center; gap: 8px; background: #ffffff;
+      border: 2px solid #e2e8f0; border-radius: 8px; padding: 8px 12px;
+      cursor: pointer; transition: all 0.2s; font-weight: bold; color: #334155;
+    }
+    .option-card:hover { border-color: #a855f7; background: #fdf4ff; }
+    .option-card input[type="radio"] { accent-color: #7e22ce; transform: scale(1.2); }
+
+    /* Container สไตล์คณิตศาสตร์สำหรับ Level 1 Modal Success Dialogue */
+    .math-expr-box {
+      background: #000000;
+      color: #ffffff;
+      border: 1px solid #333333;
+      border-radius: 8px;
+      padding: 14px;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: normal;
+    }
+    .math-expr-box .dark-matrix-bracket {
+      display: inline-flex; align-items: center; position: relative; padding: 2px 6px; margin: 0 2px; vertical-align: middle;
+    }
+    .math-expr-box .dark-matrix-bracket::before, .math-expr-box .dark-matrix-bracket::after {
+      content: ""; position: absolute; top: 0; bottom: 0; width: 5px; border: 2px solid #ffffff;
+    }
+    .math-expr-box .dark-matrix-bracket::before { left: 0; border-right: none; border-radius: 4px 0 0 4px; }
+    .math-expr-box .dark-matrix-bracket::after { right: 0; border-left: none; border-radius: 0 4px 4px 0; }
+
+    /* Dialogue โลก 2 Space */
+    .space-intro-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .space-card {
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .space-card-left {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e3a8a;
+    }
+    .space-card-right {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h2 style="color: #1f2328; font-size: 16px;">🌌 Linear System Journey</h2>
+    <span style="font-size: 10px; color: var(--text-muted);">เชื่อมโยงเรขาคณิตกับ Inverse Matrix และ Cramer's Rule</span>
+  </div>
+  <div class="nav-btns">
+    <button onclick="prevLevel()">◀ ย้อนกลับ</button>
+    <span id="levelTitle" style="font-size: 13px; font-weight: bold; margin: 0 4px; min-width: 160px; text-align: center;">Level 0</span>
+    <button onclick="nextLevel()">ถัดไป ▶</button>
+    <button class="btn-reset" onclick="resetCurrentLevel()" style="margin-left:6px;">🔄 รีเซ็ต</button>
+    <button class="btn-solve" onclick="autoSolve()">💡 เฉลย</button>
+  </div>
+</header>
+
+<main id="mainContainer">
+  <!-- Control Panel -->
+  <div class="panel">
+    <h3>ศูนย์ควบคุม</h3>
+    <p id="levelDesc" style="font-size: 11px; line-height: 1.3; color: #57606a;"></p>
+
+    <!-- Conscious Dynamic Box -->
+    <div id="consciousBox" class="conscious-dialog" style="display:none;">
+      <b id="consciousTitle">💡 ข้อสังเกตประจำด่าน</b>
+      <span id="consciousText">...</span>
+    </div>
+    
+    <!-- Matrix Section -->
+    <div id="matrixSection" class="matrix-section" style="display:none;">
+      <div class="matrix-container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+          <label style="font-weight: 600; font-size: 11px; color: var(--text);">เมทริกซ์การแปลงพิกัด A:</label>
+          <button class="btn-toggle-record" onclick="openPatternModalDirectly()">👁️ บันทึก Pattern</button>
+        </div>
+        
+        <div style="display:flex; justify-content:center; align-items:center;">
+          <span style="font-size: 14px; font-weight: bold; margin-right: 4px;">A = </span>
+          <div class="math-matrix-bracket" style="width: 80%;">
+            <div class="matrix-input-grid">
+              <input type="number" id="m00" class="input-col-x" value="1" step="0.5" onchange="updateMatrixFromUI()">
+              <input type="number" id="m01" class="input-col-y" value="0" step="0.5" onchange="updateMatrixFromUI()">
+              <input type="number" id="m10" class="input-col-x" value="0" step="0.5" onchange="updateMatrixFromUI()">
+              <input type="number" id="m11" class="input-col-y" value="1" step="0.5" onchange="updateMatrixFromUI()">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-weight:600; font-size:12px; margin-top:2px;">
+        <span>Determinant det(A):</span>
+        <span id="detVal" style="color: #0969da; font-size: 13px; font-weight: bold;">1.00</span>
+      </div>
+    </div>
+
+    <!-- Cramer Section -->
+    <div id="cramerSection" class="cramer-box" style="display:none;">
+      <div style="font-weight:bold; color:#047857; font-size:10px;">🗝️ Cramer's Discovery:</div>
+      <div class="cramer-row"><span>det(A):</span><span id="detAValDisplay">1.00</span></div>
+      <div class="cramer-row"><span>det(A_x):</span><span id="detAxValDisplay">0.00</span></div>
+      <div class="cramer-row"><span>det(A_y):</span><span id="detAyValDisplay">0.00</span></div>
+      <div style="border-top: 1px dashed #a7f3d0; margin-top: 2px; padding-top: 2px;">
+        <div class="cramer-row"><span>x = det(A_x) / det(A):</span><span id="cramerXVal" class="text-x">0.00</span></div>
+        <div class="cramer-row"><span>y = det(A_y) / det(A):</span><span id="cramerYVal" class="text-y">0.00</span></div>
+      </div>
+    </div>
+
+    <!-- Level 7: Interactive Inverse Flow Section (แทนที่ของเดิม) -->
+    <div id="inverseActivitySection" style="display:none; flex-direction:column; gap:8px;">
+      <div class="stepper">
+        <button class="step-btn active" id="stBtn1" onclick="setStep(1)">1. Pure Scale</button>
+        <button class="step-btn" id="stBtn2" onclick="setStep(2)">2. 1/det</button>
+        <button class="step-btn" id="stBtn3" onclick="setStep(3)">3. Shear</button>
+        <button class="step-btn" id="stBtn4" onclick="setStep(4)">4. ตั้งฉาก (Adj)</button>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span class="badge" id="stepBadge">STEP 1</span>
+        <h4 style="font-size:12px; font-weight:bold; color:var(--text);" id="stepTitle"> pure scaling </h4>
+      </div>
+
+      <div class="matrix-display" id="matrixDisplay">
+        <!-- Dynamic Matrix Content -->
+      </div>
+
+      <div class="instruction-card" id="instructionText">
+        <!-- Dynamic Instruction -->
+      </div>
+
+      <div class="controls-box" id="controlBox">
+        <!-- Action Button Controls -->
+      </div>
+    </div>
+
+    <!-- Target Equations -->
+    <div id="equationBox">
+      <b style="display:block; margin-bottom:4px; color:#1f2328;">สมการเป้าหมาย:</b>
+      <div id="eq1" class="text-l1"></div>
+      <div id="eq2" class="text-l2"></div>
+    </div>
+  </div>
+
+  <!-- Input Space -->
+  <div class="canvas-container" id="containerIn">
+    <div class="canvas-label in-label" id="canvasInTitle">โลกอินพุต (Input Space)</div>
+    <label class="canvas-overlay-toggle">
+      <span>🧲 Hard Snap</span>
+      <input type="checkbox" id="snapToggle" checked onchange="render()">
+    </label>
+    <canvas id="canvasIn"></canvas>
+  </div>
+
+  <!-- Output Space -->
+  <div class="canvas-container" id="containerOut">
+    <div class="canvas-label out-label" id="canvasOutTitle">โลกเอาต์พุต (Output Space)</div>
+    <label class="canvas-overlay-toggle">
+      <span>📐 Standard Grid</span>
+      <input type="checkbox" id="stdGridToggle" onchange="render()">
+    </label>
+    
+    <div class="output-info-label" id="outputLabelBadge">Output: (0, 0)</div>
+    <canvas id="canvasOut"></canvas>
+  </div>
+</main>
+
+<footer>
+  <div id="footerMatrixEq" style="display: flex; align-items: center; gap: 6px;">
+    <span>สมการเมทริกซ์:</span>
+    <div class="math-matrix-bracket">
+      <div style="display: flex; gap: 6px;">
+        <div class="math-col"><span id="fm00" class="text-x">1</span><span id="fm10" class="text-x">0</span></div>
+        <div class="math-col"><span id="fm01" class="text-y">0</span><span id="fm11" class="text-y">1</span></div>
+      </div>
+    </div>
+    <span>·</span>
+    <div class="math-matrix-bracket">
+      <div class="math-col"><span id="fInX" class="text-x">0</span><span id="fInY" class="text-y">0</span></div>
+    </div>
+    <span>=</span>
+    <div class="math-matrix-bracket">
+      <div class="math-col"><span id="fOutX" style="color:#d97706;">0</span><span id="fOutY" style="color:#d97706;">0</span></div>
+    </div>
+  </div>
+
+  <div>
+    <div id="clearBadge" class="status-badge" style="display:none;">ภารกิจสำเร็จ! 🎉</div>
+  </div>
+</footer>
+
+<!-- Observation & Learning Modal -->
+<div id="obsModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span style="font-size: 20px;" id="modalIcon">🔍</span>
+      <h4 id="modalTitle">จุดที่น่าสังเกตในการเปลี่ยนด่าน</h4>
+    </div>
+    <div id="modalBodyText" class="modal-body">...</div>
+    <div class="modal-actions" id="modalActions">
+      <button id="btnHint" class="btn-hint" onclick="toggleHint()">💡 คำใบ้ (Hint)</button>
+      <button id="btnPrimaryModal" class="btn-primary" onclick="closeModal()">ลุยต่อ 🚀</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function formatMathMatrixHTML(a, b, c, d) {
+  return `<span class="math-matrix-bracket"><span style="display:inline-flex; gap:4px;"><span class="math-col"><span class="text-x">${a}</span><span class="text-x">${c}</span></span><span class="math-col"><span class="text-y">${b}</span><span class="text-y">${d}</span></span></span></span>`;
+}
+
+function formatMathColumnVectorHTML(x, y, cssClass = "") {
+  return `<span class="math-matrix-bracket"><span class="math-col"><span class="${cssClass}">${x}</span><span class="${cssClass}">${y}</span></span></span>`;
+}
+
+function buildExpression(a, b) {
+  let parts = [];
+  if (a === 1) parts.push("x");
+  else if (a === -1) parts.push("-x");
+  else if (a !== 0) parts.push(`${a}x`);
+  
+  if (b === 1) {
+    parts.push(parts.length > 0 ? "+ y" : "y");
+  } else if (b === -1) {
+    parts.push("- y");
+  } else if (b > 0) {
+    parts.push(parts.length > 0 ? `+ ${b}y` : `${b}y`);
+  } else if (b < 0) {
+    parts.push(`- ${Math.abs(b)}y`);
+  }
+  return parts.length > 0 ? parts.join(" ") : "0";
+}
+
+function buildFormattedEquationHTML(eqStr) {
+  return eqStr
+    .replace(/(-?\d*)\s*x/g, (match, coeff) => {
+      let num = coeff === '' ? '' : coeff === '-' ? '-' : coeff;
+      return `${num}<span class="text-x">x</span>`;
+    })
+    .replace(/(-?\d*)\s*y/g, (match, coeff) => {
+      let num = coeff === '' ? '' : coeff === '-' ? '-' : coeff;
+      return `${num}<span class="text-y">y</span>`;
+    });
+}
+
+const COLOR = {
+  vectorI: '#dc2626', vectorJ: '#9333ea', invI: '#ec4899', invJ: '#0284c7',
+  line1: '#2563eb', line2: '#d97706', pointP: '#16a34a', target: '#ea580c'
+};
+
+const levelsData = [
+  { 
+    level: 0, title: "Level 0: จุดตัดของเส้นตรง (ม.ต้น)", 
+    desc: "ลากจุด P(x,y) ไปที่จุดตัดของเส้นตรงทั้งสองเส้นบนระนาบพิกัดฉาก",
+    type: "LINE_INTERSECTION", lines: [{m: 2, c: -1}, {m: -1, c: 5}], target: { x: 2, y: 3 },
+    eq1: "L1: y = 2x - 1", eq2: "L2: y = -x + 5",
+    showMatrix: false, showCramer: false, hideOutputGrid: false,
+    consciousTitle: "🎯 ทบทวนความรู้ ม.ต้น",
+    consciousText: "คำตอบของระบบสมการเชิงเส้น คือจุด P(2, 3) ที่สอดคล้องกับทั้งสองเส้นตรงพร้อมกัน"
+  },
+  { 
+    level: 1, title: "Level 1: Vector Identity (แกนมาตรฐาน)", 
+    desc: `เริ่มต้นการแปลงเชิงเส้นด้วย Identity Matrix I = ${formatMathMatrixHTML(1,0,0,1)} ย้ายจุด P ไปที่ ${formatMathColumnVectorHTML(2, 2)}`, 
+    type: "TRANSFORMATION", matrix: [1, 0, 0, 1], target: { x: 2, y: 2 }, solve: { x: 2, y: 2 }, 
+    eq1: "x = 2", eq2: "y = 2",
+    showMatrix: true, showCramer: false, hideOutputGrid: false,
+    consciousTitle: "💡 Vector Identity สภาพตั้งต้น",
+    consciousText: `เมทริกซ์เอกลักษณ์ ${formatMathMatrixHTML(1,0,0,1)} รักษาระบบพิกัดเดิมไว้สมบูรณ์ (det = 1.00) พื้นที่ Grid ไม่เปลี่ยนรูป`
+  },
+  { 
+    level: 2, title: "Level 2: Area Consciousness (ยืดแกน X)", 
+    desc: `สังเกตพื้นที่ยืดขยาย! ย้ายจุด P เพื่อให้ Output ไปที่ ${formatMathColumnVectorHTML(4, 2)}`, 
+    type: "TRANSFORMATION", matrix: [2, 0, 0, 1], target: { x: 4, y: 2 }, solve: { x: 2, y: 2 }, 
+    eq1: "2x = 4", eq2: "y = 2",
+    showMatrix: true, showCramer: false, hideOutputGrid: false,
+    consciousTitle: "💡 Conscious #1: พื้นที่ยืดขยาย 2 เท่า",
+    consciousText: "det = 2.00 แปลว่าพื้นที่ขยาย 2 เท่าในแนวแกน x ดังนั้นจุด P(x, y) จึงใช้ค่า x แค่ครึ่งเดียว!"
+  },
+  { 
+    level: 3, title: "Level 3: Shear Transformation 📐", 
+    desc: "การเปลี่ยนแกนด้วยสมการ x + y = 5 และ x - y = 1", 
+    type: "TRANSFORMATION", matrix: [1, 1, 1, -1], target: { x: 5, y: 1 }, solve: { x: 3, y: 2 }, 
+    eq1: "x + y = 5", eq2: "x - y = 1",
+    showMatrix: true, showCramer: false, hideOutputGrid: false,
+    consciousTitle: "🔍 การผสานของพิกัด",
+    consciousText: "เวกเตอร์ i และ j เอียงและสะท้อน การตัดกันขององค์ประกอบเวกเตอร์จะนำจุดไปสู่ Target"
+  },
+  { 
+    level: 4, title: "Level 4: Determinant & Area Expansion", 
+    desc: "สังเกตพื้นที่ช่องตารางที่ขยายเป็น 3 เท่า (det = 3)", 
+    type: "TRANSFORMATION", matrix: [2, 1, 1, 2], target: { x: 4, y: 5 }, solve: { x: 1, y: 2 }, 
+    eq1: "2x + y = 4", eq2: "x + 2y = 5",
+    showMatrix: true, showCramer: false, hideOutputGrid: false,
+    consciousTitle: "💡 det หลัก = 3.00",
+    consciousText: "พื้นที่ตารางขยายเป็น 3 เท่า! สังเกตช่องตาราง Grid สีส้มขยายพื้นที่ขึ้นอย่างเห็นได้ชัด"
+  },
+  { 
+    level: 5, title: "Level 5: Cramer's Rule Discovery 🗝️", 
+    desc: "ปลดล็อกการหาคำตอบด้วยอัตราส่วนพื้นที่ Cramer's Rule", 
+    type: "TRANSFORMATION", matrix: [2, 1, 1, 3], target: { x: 5, y: 10 }, solve: { x: 1, y: 3 }, 
+    eq1: "2x + y = 5", eq2: "x + 3y = 10",
+    showMatrix: true, showCramer: true, hideOutputGrid: false,
+    consciousTitle: "🗝️ อัตราส่วนพื้นที่ของคราเมอร์",
+    consciousText: "ค่า x และ y สามารถหาได้ตรงๆ จาก det(A_x)/det(A) และ det(A_y)/det(A) โดยไม่ต้องแก้สมการทีละขั้นตอน!"
+  },
+  { 
+    level: 6, title: "Level 6: Blind Test (Cramer's Mastery) 🙈", 
+    desc: "<b>Grid ฝั่ง Output ถูกซ่อนแล้ว!</b> ใช้ผลหารของ Cramer's Rule คำนวณและวางจุด P", 
+    type: "TRANSFORMATION", matrix: [3, 1, 1, 2], target: { x: 7, y: 9 }, solve: { x: 1, y: 4 }, 
+    eq1: "3x + y = 7", eq2: "x + 2y = 9",
+    showMatrix: true, showCramer: true, hideOutputGrid: true,
+    consciousTitle: "🙈 ความท้าทายแบบไร้ Grid",
+    consciousText: "ใช้ค่า x = det(A_x)/det(A) และ y = det(A_y)/det(A) จากแผงซ้ายมือเพื่อวางจุดลงบนโลก Input!"
+  },
+  { 
+    level: 7, title: "Level 7: Inverse Matrix Exploration 📐", 
+    desc: "<b>มโนทัศน์ทางเรขาคณิตของ Inverse Matrix:</b> สำรวจขั้นตอนการสเกลขนาดพื้นที่และการดึงแกนพิกัดกลับสู่ระบบตั้งฉาก", 
+    type: "INVERSE_FLOW",
+    eq1: "A⁻¹ = (1 / det A) × Adj(A)", eq2: "Undo Transformation Flow",
+    showMatrix: false, showCramer: false, hideOutputGrid: false,
+    consciousTitle: "📐 มโนทัศน์ Inverse Matrix",
+    consciousText: "Inverse Matrix ไม่ใช่แค่สูตรพีชคณิต แต่คือกระบวนการล้างมุมเอียง (Adj) และย่อพื้นที่กลับ (1/det)"
+  }
+];
+
+window.__GAME_STATE__ = {
+  currentLevelIndex: 0,
+  matrix: [1, 0, 0, 1],
+  targetPos: { x: 2, y: 3 },
+  inputPos: { x: 0, y: 0 },
+  isLevelCleared: false,
+  animating: false,
+  hasShownL1Dialogue: false,
+  labRecords: [],
+  inverseStep: 1,
+  subStep4: 'none'
+};
+
+const cvsIn = document.getElementById('canvasIn');
+const cvsOut = document.getElementById('canvasOut');
+const ctxIn = cvsIn.getContext('2d');
+const ctxOut = cvsOut.getContext('2d');
+
+const SCALE = 24; 
+
+// Inverse Matrices for Step 1 - 4
+const inverseStepMatrices = {
+  step1: [3, 0, 0, 3],       
+  step2: [1, 0, 0, 1],       
+  step3: [2, 1, 1, 3],       
+  step4_adj: [3, -1, -1, 2], 
+  step4_inv: [0.6, -0.2, -0.2, 0.4] 
+};
+
+function resizeCanvases() {
+  [cvsIn, cvsOut].forEach(c => {
+    if (c.parentElement) {
+      c.width = c.parentElement.clientWidth - 12;
+      c.height = c.parentElement.clientHeight - 12;
+    }
+  });
+  render();
+}
+window.addEventListener('resize', resizeCanvases);
+
+function getOrigin(cvs) {
+  return { x: cvs.width / 2, y: cvs.height / 2 };
+}
+
+function toScreen(cvs, x, y) { 
+  const origin = getOrigin(cvs);
+  return { x: origin.x + x * SCALE, y: origin.y - y * SCALE }; 
+}
+
+function toMath(cvs, sx, sy) { 
+  const origin = getOrigin(cvs);
+  return { x: (sx - origin.x) / SCALE, y: (origin.y - sy) / SCALE }; 
+}
+
+function getDet(m) { return m[0]*m[3] - m[1]*m[2]; }
+
+function drawArrowhead(ctx, fromX, fromY, toX, toY, color) {
+  const headlen = 8;
+  const dx = toX - fromX;
+  const dy = toY - fromY;
+  const angle = Math.atan2(dy, dx);
+  
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(toX, toY);
+  ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+  ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawInputUnitAreaHighlight(ctx, cvs) {
+  let p0 = toScreen(cvs, 0, 0);
+  let p1 = toScreen(cvs, 1, 0);               
+  let p2 = toScreen(cvs, 1, 1);  
+  let p3 = toScreen(cvs, 0, 1);               
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(p0.x, p0.y);
+  ctx.lineTo(p1.x, p1.y);
+  ctx.lineTo(p2.x, p2.y);
+  ctx.lineTo(p3.x, p3.y);
+  ctx.closePath();
+
+  ctx.fillStyle = 'rgba(9, 105, 218, 0.2)';
+  ctx.fill();
+  ctx.strokeStyle = '#0969da';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  let text = `พื้นที่ = 1.00`;
+  ctx.font = 'bold 10px system-ui';
+  let textWidth = ctx.measureText(text).width;
+  let badgeW = textWidth + 14;
+  let badgeH = 18;
+  let rx = cvs.width - 10 - badgeW;
+  let ry = 38;
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+  ctx.strokeStyle = '#0969da';
+  ctx.lineWidth = 1;
+
+  if (ctx.roundRect) {
+    ctx.beginPath();
+    ctx.roundRect(rx, ry, badgeW, badgeH, 10);
+    ctx.fill();
+    ctx.stroke();
+  } else {
+    ctx.fillRect(rx, ry, badgeW, badgeH);
+    ctx.strokeRect(rx, ry, badgeW, badgeH);
+  }
+
+  ctx.fillStyle = '#0969da';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, rx + badgeW / 2, ry + badgeH / 2);
+
+  ctx.restore();
+}
+
+function drawUnitAreaHighlight(ctx, cvs, m) {
+  let p0 = toScreen(cvs, 0, 0);
+  let p1 = toScreen(cvs, m[0], m[2]);               
+  let p2 = toScreen(cvs, m[0] + m[1], m[2] + m[3]);  
+  let p3 = toScreen(cvs, m[1], m[3]);               
+
+  let det = Math.abs(getDet(m));
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(p0.x, p0.y);
+  ctx.lineTo(p1.x, p1.y);
+  ctx.lineTo(p2.x, p2.y);
+  ctx.lineTo(p3.x, p3.y);
+  ctx.closePath();
+
+  let text = "";
+  let strokeColor = "#ea580c";
+  let textColor = "#c2410c";
+
+  if (det === 0) {
+    ctx.strokeStyle = '#dc2626';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    text = `พื้นที่ = 0 (ยุบเป็นเส้นตรง)`;
+    strokeColor = '#dc2626';
+    textColor = '#dc2626';
+  } else {
+    ctx.fillStyle = 'rgba(234, 88, 12, 0.25)';
+    ctx.fill();
+    ctx.strokeStyle = '#ea580c';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    text = `พื้นที่ = ${det.toFixed(2)}`;
+  }
+
+  ctx.font = 'bold 10px system-ui';
+  let textWidth = ctx.measureText(text).width;
+  let badgeW = textWidth + 14;
+  let badgeH = 18;
+  let rx = cvs.width - 10 - badgeW;
+  let ry = 62;
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+  ctx.strokeStyle = strokeColor;
+  ctx.lineWidth = 1;
+
+  if (ctx.roundRect) {
+    ctx.beginPath();
+    ctx.roundRect(rx, ry, badgeW, badgeH, 10);
+    ctx.fill();
+    ctx.stroke();
+  } else {
+    ctx.fillRect(rx, ry, badgeW, badgeH);
+    ctx.strokeRect(rx, ry, badgeW, badgeH);
+  }
+
+  ctx.fillStyle = textColor;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, rx + badgeW / 2, ry + badgeH / 2);
+
+  ctx.restore();
+}
+
+function drawVectorAdditionPath(ctx, cvs, matrix, inputPos) {
+  const m = matrix;
+  const x = inputPos.x;
+  const y = inputPos.y;
+
+  const midX = x * m[0];
+  const midY = x * m[2];
+  const outX = midX + y * m[1];
+  const outY = midY + y * m[3];
+
+  const originP = toScreen(cvs, 0, 0);
+  const midP = toScreen(cvs, midX, midY);
+  const targetP = toScreen(cvs, outX, outY);
+
+  ctx.save();
+  ctx.setLineDash([5, 4]);
+  ctx.lineWidth = 2;
+
+  if (Math.abs(midP.x - originP.x) > 0.1 || Math.abs(midP.y - originP.y) > 0.1) {
+    ctx.strokeStyle = COLOR.vectorI;
+    ctx.beginPath();
+    ctx.moveTo(originP.x, originP.y);
+    ctx.lineTo(midP.x, midP.y);
+    ctx.stroke();
+    drawArrowhead(ctx, originP.x, originP.y, midP.x, midP.y, COLOR.vectorI);
+  }
+
+  if (Math.abs(targetP.x - midP.x) > 0.1 || Math.abs(targetP.y - midP.y) > 0.1) {
+    ctx.strokeStyle = COLOR.vectorJ;
+    ctx.beginPath();
+    ctx.moveTo(midP.x, midP.y);
+    ctx.lineTo(targetP.x, targetP.y);
+    ctx.stroke();
+    drawArrowhead(ctx, midP.x, midP.y, targetP.x, targetP.y, COLOR.vectorJ);
+  }
+
+  ctx.restore();
+}
+
+function render() {
+  const st = window.__GAME_STATE__;
+  const lvl = levelsData[st.currentLevelIndex];
+
+  ctxIn.clearRect(0, 0, cvsIn.width, cvsIn.height);
+  ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
+
+  drawGrid(ctxIn, cvsIn, true, "x", "y");
+
+  if (lvl.type === "LINE_INTERSECTION") {
+    const lineColors = ['#2563eb', '#d97706'];
+    lvl.lines.forEach((line, i) => {
+      ctxIn.strokeStyle = lineColors[i]; ctxIn.lineWidth = 2.5;
+      let p1 = toScreen(cvsIn, -15, line.m * -15 + line.c);
+      let p2 = toScreen(cvsIn, 15, line.m * 15 + line.c);
+      ctxIn.beginPath(); ctxIn.moveTo(p1.x, p1.y); ctxIn.lineTo(p2.x, p2.y); ctxIn.stroke();
+    });
+
+    let pT = toScreen(cvsIn, lvl.target.x, lvl.target.y);
+    ctxIn.strokeStyle = '#dc2626'; ctxIn.lineWidth = 2;
+    ctxIn.beginPath(); ctxIn.arc(pT.x, pT.y, 8, 0, Math.PI*2); ctxIn.stroke();
+
+    let pP = toScreen(cvsIn, st.inputPos.x, st.inputPos.y);
+    ctxIn.fillStyle = '#16a34a'; ctxIn.beginPath(); ctxIn.arc(pP.x, pP.y, 7, 0, Math.PI*2); ctxIn.fill();
+    ctxIn.strokeStyle = '#fff'; ctxIn.lineWidth = 2; ctxIn.stroke();
+    ctxIn.fillStyle = '#16a34a'; ctxIn.font = 'bold 12px system-ui';
+    ctxIn.fillText(`P(${st.inputPos.x.toFixed(1)}, ${st.inputPos.y.toFixed(1)})`, pP.x + 10, pP.y - 6);
+
+  } else if (lvl.type === "TRANSFORMATION") {
+    if (lvl.showMatrix && st.currentLevelIndex >= 1) {
+      drawInputUnitAreaHighlight(ctxIn, cvsIn);
+    }
+
+    let pIn = toScreen(cvsIn, st.inputPos.x, st.inputPos.y);
+    ctxIn.fillStyle = '#16a34a'; ctxIn.beginPath(); ctxIn.arc(pIn.x, pIn.y, 7, 0, Math.PI*2); ctxIn.fill();
+    ctxIn.strokeStyle = '#fff'; ctxIn.lineWidth = 2; ctxIn.stroke();
+    ctxIn.fillStyle = '#16a34a'; ctxIn.font = 'bold 12px system-ui';
+    ctxIn.fillText(`P(${st.inputPos.x.toFixed(1)}, ${st.inputPos.y.toFixed(1)})`, pIn.x + 10, pIn.y - 6);
+
+    let labelX = buildExpression(st.matrix[0], st.matrix[1]);
+    let labelY = buildExpression(st.matrix[2], st.matrix[3]);
+
+    const shouldHideAllGrid = lvl.hideOutputGrid && !st.isLevelCleared;
+    const isStdGridActive = document.getElementById('stdGridToggle').checked;
+
+    drawGrid(ctxOut, cvsOut, shouldHideAllGrid ? false : isStdGridActive, labelX, labelY);
+
+    if (!shouldHideAllGrid) {
+      drawTransformationGrid(ctxOut, cvsOut, st.matrix);
+      drawUnitAreaHighlight(ctxOut, cvsOut, st.matrix); 
+      drawVectorAdditionPath(ctxOut, cvsOut, st.matrix, st.inputPos);
+    }
+
+    let m = st.matrix;
+    let outX = m[0]*st.inputPos.x + m[1]*st.inputPos.y;
+    let outY = m[2]*st.inputPos.x + m[3]*st.inputPos.y;
+
+    if (lvl.target) {
+      let pTarget = toScreen(cvsOut, lvl.target.x, lvl.target.y);
+      ctxOut.strokeStyle = '#ea580c'; ctxOut.lineWidth = 2;
+      ctxOut.beginPath(); ctxOut.arc(pTarget.x, pTarget.y, 8, 0, Math.PI*2); ctxOut.stroke();
+
+      let pOut = toScreen(cvsOut, outX, outY);
+      ctxOut.fillStyle = '#ea580c'; ctxOut.beginPath(); ctxOut.arc(pOut.x, pOut.y, 7, 0, Math.PI*2); ctxOut.fill();
+      ctxOut.strokeStyle = '#fff'; ctxOut.lineWidth = 2; ctxOut.stroke();
+
+      document.getElementById('outputLabelBadge').innerText = `Output: (${outX.toFixed(1)}, ${outY.toFixed(1)})`;
+    }
+
+    document.getElementById('fm00').innerText = m[0];
+    document.getElementById('fm01').innerText = m[1];
+    document.getElementById('fm10').innerText = m[2];
+    document.getElementById('fm11').innerText = m[3];
+    document.getElementById('fInX').innerText = st.inputPos.x.toFixed(1);
+    document.getElementById('fInY').innerText = st.inputPos.y.toFixed(1);
+    document.getElementById('fOutX').innerText = outX.toFixed(1);
+    document.getElementById('fOutY').innerText = outY.toFixed(1);
+
+    if (lvl.showCramer) {
+      let det = getDet(m);
+      let detAx = lvl.target.x * m[3] - m[1] * lvl.target.y;
+      let detAy = m[0] * lvl.target.y - lvl.target.x * m[2];
+      
+      document.getElementById('detAValDisplay').innerText = det.toFixed(2);
+      document.getElementById('detAxValDisplay').innerText = detAx.toFixed(2);
+      document.getElementById('detAyValDisplay').innerText = detAy.toFixed(2);
+      
+      document.getElementById('cramerXVal').innerText = (det !== 0) ? (detAx / det).toFixed(2) : "N/A";
+      document.getElementById('cramerYVal').innerText = (det !== 0) ? (detAy / det).toFixed(2) : "N/A";
+    }
+
+  } else if (lvl.type === "INVERSE_FLOW") {
+    // Render Interactive Inverse Flow Activity (Level 7)
+    drawInputUnitAreaHighlight(ctxIn, cvsIn);
+
+    let activeMatrix = inverseStepMatrices.step1;
+    if (st.inverseStep === 1) activeMatrix = inverseStepMatrices.step1;
+    else if (st.inverseStep === 2) activeMatrix = inverseStepMatrices.step2;
+    else if (st.inverseStep === 3) activeMatrix = inverseStepMatrices.step3;
+    else if (st.inverseStep === 4) {
+      if (st.subStep4 === 'adj') activeMatrix = [5, 0, 0, 5];
+      else if (st.subStep4 === 'inv') activeMatrix = [1, 0, 0, 1];
+      else activeMatrix = inverseStepMatrices.step3;
+    }
+
+    drawGrid(ctxOut, cvsOut, true, "x", "y");
+    drawTransformationGrid(ctxOut, cvsOut, activeMatrix);
+    drawUnitAreaHighlight(ctxOut, cvsOut, activeMatrix);
+  }
+}
+
+function drawColoredAxisLabel(ctx, text, x, y, align = 'right', baseline = 'bottom') {
+  ctx.save();
+  ctx.font = 'bold 12px system-ui';
+  
+  const tokens = text.split(/([x|y])/g);
+  let totalWidth = 0;
+  tokens.forEach(t => { totalWidth += ctx.measureText(t).width; });
+
+  let currentX = (align === 'right') ? x - totalWidth : (align === 'center' ? x - totalWidth / 2 : x);
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = baseline;
+
+  tokens.forEach(token => {
+    if (token === 'x') { ctx.fillStyle = '#dc2626'; }
+    else if (token === 'y') { ctx.fillStyle = '#9333ea'; }
+    else { ctx.fillStyle = '#475569'; }
+    ctx.fillText(token, currentX, y);
+    currentX += ctx.measureText(token).width;
+  });
+  
+  ctx.restore();
+}
+
+function drawGrid(ctx, cvs, showGrid = true, labelX = "x", labelY = "y") {
+  const origin = getOrigin(cvs);
+
+  if (showGrid) {
+    ctx.lineWidth = 0.5;
+    ctx.strokeStyle = '#e2e8f0';
+
+    for (let x = origin.x % SCALE; x < cvs.width; x += SCALE) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cvs.height); ctx.stroke();
+    }
+    for (let y = origin.y % SCALE; y < cvs.height; y += SCALE) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cvs.width, y); ctx.stroke();
+    }
+  }
+
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = '#94a3b8';
+  ctx.beginPath(); ctx.moveTo(0, origin.y); ctx.lineTo(cvs.width, origin.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(origin.x, 0); ctx.lineTo(origin.x, cvs.height); ctx.stroke();
+
+  drawColoredAxisLabel(ctx, labelX, cvs.width - 12, origin.y - 6, 'right', 'bottom');
+  drawColoredAxisLabel(ctx, labelY, origin.x + 8, 12, 'left', 'top');
+}
+
+function drawTransformationGrid(ctx, cvs, m) {
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(217, 119, 6, 0.25)';
+
+  for (let i = -15; i <= 15; i++) {
+    let p1 = toScreen(cvs, m[0]*i + m[1]*(-15), m[2]*i + m[3]*(-15));
+    let p2 = toScreen(cvs, m[0]*i + m[1]*15, m[2]*i + m[3]*15);
+    ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+
+    let p3 = toScreen(cvs, m[0]*(-15) + m[1]*i, m[2]*(-15) + m[3]*i);
+    let p4 = toScreen(cvs, m[0]*15 + m[1]*i, m[2]*15 + m[3]*i);
+    ctx.beginPath(); ctx.moveTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.stroke();
+  }
+}
+
+function updateMatrixFromUI() {
+  window.__GAME_STATE__.matrix = [
+    parseFloat(document.getElementById('m00').value) || 0,
+    parseFloat(document.getElementById('m01').value) || 0,
+    parseFloat(document.getElementById('m10').value) || 0,
+    parseFloat(document.getElementById('m11').value) || 0
+  ];
+  let det = getDet(window.__GAME_STATE__.matrix);
+  document.getElementById('detVal').innerText = det.toFixed(2);
+  checkWinCondition();
+  render();
+}
+
+let isDragging = false;
+cvsIn.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  handlePointer(e);
+});
+window.addEventListener('mouseup', () => isDragging = false);
+cvsIn.addEventListener('mousemove', (e) => {
+  if (isDragging) handlePointer(e);
+});
+
+function handlePointer(e) {
+  if (levelsData[window.__GAME_STATE__.currentLevelIndex].type === "INVERSE_FLOW") return;
+
+  const rect = cvsIn.getBoundingClientRect();
+  let mPos = toMath(cvsIn, e.clientX - rect.left, e.clientY - rect.top);
+  if (document.getElementById('snapToggle').checked) {
+    mPos.x = Math.round(mPos.x);
+    mPos.y = Math.round(mPos.y);
+  }
+  window.__GAME_STATE__.inputPos = mPos;
+  checkWinCondition();
+  render();
+}
+
+function setStep(step) {
+  const st = window.__GAME_STATE__;
+  st.inverseStep = step;
+  
+  for (let i = 1; i <= 4; i++) {
+    const btn = document.getElementById(`stBtn${i}`);
+    if (btn) {
+      btn.className = 'step-btn';
+      if (i === step) btn.classList.add('active');
+      else if (i < step) btn.classList.add('completed');
+    }
+  }
+
+  const badge = document.getElementById('stepBadge');
+  const title = document.getElementById('stepTitle');
+  const display = document.getElementById('matrixDisplay');
+  const text = document.getElementById('instructionText');
+  const ctrl = document.getElementById('controlBox');
+  const outTitle = document.getElementById('canvasOutTitle');
+
+  if (step === 1) {
+    badge.innerText = "STEP 1";
+    title.innerText = "1. ตัวอย่างเวกเตอร์ขยาย 3 เท่า [3,0] และ [0,3]";
+    display.innerHTML = `
+      <span>A = </span>
+      ${formatMathMatrixHTML(3, 0, 0, 3)}
+      <span style="margin-left:8px; color:var(--text-muted);">| det(A) = 9</span>
+    `;
+    text.innerHTML = `
+      สังเกต<b>สีส้ม (พื้นที่ unit square)</b> ฝั่งเอาต์พุต เวกเตอร์ถูกขยายขึ้นเป็น 3 เท่าทั้ง 2 แกน ทำให้พื้นที่ขยายเพิ่มขึ้นเป็น <b>9 เท่า</b> (3 × 3)<br><br>
+      คำถาม: ถ้าเราต้องการปรับขนาดย่อพื้นที่นี้กลับลงมาเป็น <b>1 ยูนิต</b> เท่าเดิม เราต้องทำอย่างไร?
+    `;
+    ctrl.innerHTML = `<button class="btn btn-amber" onclick="setStep(2)">👉 ถัดไป: ย่อขนาดย้อนกลับด้วย 1/det</button>`;
+    if (outTitle) outTitle.innerText = "โลกเอาต์พุต (เวกเตอร์ขยาย 3 เท่า / พื้นที่ขยาย 9 เท่า)";
+  } 
+  else if (step === 2) {
+    badge.innerText = "STEP 2";
+    title.innerText = "2. ปรับขนาดลงด้วยการหาร det (1/det)";
+    display.innerHTML = `
+      <span>A⁻¹ = <sup>1</sup>/<sub>9</sub></span>
+      ${formatMathMatrixHTML(3, 0, 0, 3)}
+      <span>=</span>
+      ${formatMathMatrixHTML('1/3', '0', '0', '1/3')}
+    `;
+    text.innerHTML = `
+      <b>ถูกต้องครับ!</b> เมื่อพื้นที่ขยาย 9 เท่า เราแค่คูณด้วยเศษส่วน <b>1/9 (หรือ 1/det)</b> เพื่อสเกลย่อขนาดพื้นที่ให้กลับคืนสู่ <b>1 ยูนิตมาตรฐาน</b> ดังเดิม!
+    `;
+    ctrl.innerHTML = `<button class="btn btn-amber" onclick="setStep(3)">👉 ถัดไป: ลองดูเคสที่มีการบิดเอียง (Shear Transformation)</button>`;
+    if (outTitle) outTitle.innerText = "โลกเอาต์พุต (ถูกสเกลขนาดกลับคืนด้วย 1/det)";
+  } 
+  else if (step === 3) {
+    badge.innerText = "STEP 3";
+    title.innerText = "3. เกิดการบิดเอียง (Shear & Skewed)";
+    display.innerHTML = `
+      <span>A = </span>
+      ${formatMathMatrixHTML(2, 1, 1, 3)}
+      <span style="margin-left:8px; color:var(--text-muted);">| det(A) = 5</span>
+    `;
+    text.innerHTML = `
+      <b>ปัญหาใหม่เกิดขึ้นแล้ว!</b><br>
+      เมทริกซ์นี้ไม่ได้แค่เปลี่ยนขนาด แต่ละแกนยัง<b>บิดเบี้ยวเอียงเฉียง</b>จนตารางกลายเป็นสี่เหลี่ยมขนมเปียกปูน!<br><br>
+      <i>ถ้าเราแค่หารด้วย det = 5 พื้นที่จะลดลงเท่าเดิมก็จริง แต่แกนตารางจะยังคง "เอียงเบี้ยว" อยู่ดี!</i>
+    `;
+    ctrl.innerHTML = `<button class="btn" onclick="setStep(4)">🧩 เรียนรู้วิธีดึงแกนกลับมาตั้งฉากด้วย Adj(A)</button>`;
+    if (outTitle) outTitle.innerText = "โลกเอาต์พุต (บิดเบี้ยวเอียงเฉียง + ขยายพื้นที่ 5 เท่า)";
+  } 
+  else if (step === 4) {
+    badge.innerText = "STEP 4";
+    title.innerText = "4. ดึงแกนกลับมาตั้งฉาก (Adj) + ปรับขนาด (1/det)";
+    display.innerHTML = `
+      <span>A⁻¹ = <sup>1</sup>/<sub>det(A)</sub> Adj(A) = <sup>1</sup>/<sub>5</sub></span>
+      ${formatMathMatrixHTML(3, -1, -1, 2)}
+    `;
+    text.innerHTML = `
+      <b>กระบวนการถอด Inverse Matrix มี 2 ขั้นตอนหลัก:</b><br>
+      1️⃣ <b>ใช้ Adj(A)</b>: เพื่อล้างมุมเอียง ดึงแกนเวกเตอร์ให้กลับมา<b>ตั้งฉาก</b>กัน<br>
+      2️⃣ <b>คูณด้วย 1/det(A)</b>: เพื่อย่อขนาดพื้นที่จาก 5 เท่าให้เหลือ 1 ยูนิตพอดี
+    `;
+    ctrl.innerHTML = `
+      <button class="btn" style="background:var(--purple); color:#fff;" onclick="applyAdjOnly()">📐 Step 4.1: ลองใช้ Adj(A) ดึงให้ตั้งฉากก่อน</button>
+      <button class="btn btn-green" onclick="applyFullInverse()">🎉 Step 4.2: คูณ 1/det ปรับขนาดสมบูรณ์ (A⁻¹)</button>
+    `;
+    if (outTitle) outTitle.innerText = "โลกเอาต์พุต (พร้อมดึงแกนกลับสู่มาตรฐาน)";
+  }
+
+  render();
+}
+
+function applyAdjOnly() {
+  window.__GAME_STATE__.subStep4 = 'adj';
+  const outTitle = document.getElementById('canvasOutTitle');
+  if (outTitle) outTitle.innerText = "โลกเอาต์พุต (ใช้ Adj(A) ดึงแกนกลับมาตั้งฉากแล้ว! แต่ขนาดเป็น 5 เท่า)";
+  render();
+}
+
+function applyFullInverse() {
+  window.__GAME_STATE__.subStep4 = 'inv';
+  window.__GAME_STATE__.isLevelCleared = true;
+  document.getElementById('clearBadge').style.display = 'block';
+  const outTitle = document.getElementById('canvasOutTitle');
+  if (outTitle) outTitle.innerText = "โลกเอาต์พุต (ใช้ A⁻¹ ดึงกลับมาตั้งฉาก + ย่อขนาดเหลือ 1 ยูนิต สมบูรณ์!)";
+  render();
+}
+
+function recordCurrentLabData(lvlIdx) {
+  const st = window.__GAME_STATE__;
+  const lvl = levelsData[lvlIdx];
+  if (lvl && lvl.type === "TRANSFORMATION") {
+    const m = lvl.matrix;
+    const inp = lvl.solve || lvl.target;
+    const outX = m[0]*inp.x + m[1]*inp.y;
+    const outY = m[2]*inp.x + m[3]*inp.y;
+    
+    if (!st.labRecords.some(r => r.level === lvlIdx)) {
+      st.labRecords.push({
+        level: lvlIdx,
+        matrix: m,
+        det: Math.abs(getDet(m)),
+        matrixHTML: formatMathMatrixHTML(m[0], m[1], m[2], m[3]),
+        inputHTML: formatMathColumnVectorHTML(inp.x, inp.y, "text-x"),
+        outputHTML: formatMathColumnVectorHTML(outX, outY, "text-y")
+      });
+    }
+  }
+}
+
+function showLevel1SuccessModal() {
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBodyText = document.getElementById('modalBodyText');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalActions = document.getElementById('modalActions');
+
+  modalIcon.innerText = "💡";
+  modalTitle.innerText = "ทำไมจุดบนทั้งสองกราฟถึงอยู่ที่เดียวกัน?";
+
+  const st = window.__GAME_STATE__;
+  const px = st.inputPos.x.toFixed(1);
+  const py = st.inputPos.y.toFixed(1);
+
+  modalBodyText.innerHTML = `
+    <p>การที่จุดบน <b>"กราฟฝั่งตั้งต้น"</b> และ <b>"กราฟฝั่งผลลัพธ์"</b> อยู่ตำแหน่งเดียวกันเป๊ะ</p>
+    <p style="margin-top:8px;">
+      เป็นเพราะทั้งสองกราฟเชื่อมโยงกันด้วย <b>เมทริกซ์เอกลักษณ์ (Identity Matrix)</b>
+      ${formatMathMatrixHTML(1, 0, 0, 1)}
+    </p>
+    <p style="margin-top:8px;">
+      ซึ่งทำหน้าที่เหมือน <b>"ตัวคูณ 1"</b> ในคณิตศาสตร์ — ไม่ว่าจะนำไปคูณกับจุดไหน ก็จะได้ตำแหน่งเดิมเสมอ!
+    </p>
+    
+    <div class="math-expr-box">
+      <span style="color: #cccccc; font-weight: bold;">สมการเมทริกซ์:</span>
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 16px;">
+        <span class="dark-matrix-bracket"><span style="display:inline-flex; gap:6px;"><span class="math-col"><span>1</span><span>0</span></span><span class="math-col"><span>0</span><span>1</span></span></span></span>
+        <span>${formatMathColumnVectorHTML(px, py)}</span>
+        <span>=</span>
+        <span>${formatMathColumnVectorHTML(px, py)}</span>
+      </div>
+    </div>
+  `;
+
+  modalActions.innerHTML = `
+    <button class="btn-primary" onclick="closeModal()">เข้าใจแล้ว 🚀</button>
+  `;
+
+  document.getElementById('obsModal').classList.add('active');
+}
+
+function checkWinCondition() {
+  const st = window.__GAME_STATE__;
+  const lvl = levelsData[st.currentLevelIndex];
+  let isClearedNow = false;
+
+  if (lvl.type === "TRANSFORMATION") {
+    let outX = st.matrix[0]*st.inputPos.x + st.matrix[1]*st.inputPos.y;
+    let outY = st.matrix[2]*st.inputPos.x + st.matrix[3]*st.inputPos.y;
+    
+    const isTargetHit = lvl.target && Math.abs(outX - lvl.target.x) < 0.1 && Math.abs(outY - lvl.target.y) < 0.1;
+    const inputAreaCreated = true; 
+    const outputAreaCreated = Math.abs(getDet(st.matrix)) >= 0; 
+
+    if (isTargetHit && inputAreaCreated && outputAreaCreated) {
+      isClearedNow = true;
+    }
+  } else if (lvl.type === "LINE_INTERSECTION") {
+    if (lvl.target && Math.abs(st.inputPos.x - lvl.target.x) < 0.1 && Math.abs(st.inputPos.y - lvl.target.y) < 0.1) {
+      isClearedNow = true;
+    }
+  } else if (lvl.type === "INVERSE_FLOW") {
+    if (st.subStep4 === 'inv') isClearedNow = true;
+  }
+
+  if (isClearedNow && [1, 2, 3, 4].includes(st.currentLevelIndex)) {
+    recordCurrentLabData(st.currentLevelIndex);
+  }
+
+  if (isClearedNow && st.currentLevelIndex === 1 && !st.hasShownL1Dialogue) {
+    st.hasShownL1Dialogue = true;
+    showLevel1SuccessModal();
+  }
+
+  st.isLevelCleared = isClearedNow;
+  document.getElementById('clearBadge').style.display = isClearedNow ? 'block' : 'none';
+}
+
+function loadLevel(idx) {
+  const level = levelsData[idx];
+  window.__GAME_STATE__.currentLevelIndex = idx;
+  window.__GAME_STATE__.inputPos = { x: 0, y: 0 };
+  window.__GAME_STATE__.isLevelCleared = false;
+  if (idx === 1) {
+    window.__GAME_STATE__.hasShownL1Dialogue = false;
+  }
+
+  document.getElementById('levelTitle').innerText = level.title;
+  document.getElementById('levelDesc').innerHTML = level.desc;
+  
+  document.getElementById('eq1').innerHTML = buildFormattedEquationHTML(level.eq1);
+  document.getElementById('eq2').innerHTML = buildFormattedEquationHTML(level.eq2);
+
+  document.getElementById('matrixSection').style.display = level.showMatrix ? 'flex' : 'none';
+  document.getElementById('cramerSection').style.display = level.showCramer ? 'flex' : 'none';
+  document.getElementById('footerMatrixEq').style.display = level.showMatrix ? 'flex' : 'none';
+  
+  const invSection = document.getElementById('inverseActivitySection');
+  if (level.type === "INVERSE_FLOW") {
+    invSection.style.display = 'flex';
+    setStep(1);
+  } else {
+    invSection.style.display = 'none';
+  }
+
+  if (level.showMatrix) {
+    window.__GAME_STATE__.matrix = [...level.matrix];
+    document.getElementById('m00').value = level.matrix[0];
+    document.getElementById('m01').value = level.matrix[1];
+    document.getElementById('m10').value = level.matrix[2];
+    document.getElementById('m11').value = level.matrix[3];
+    document.getElementById('detVal').innerText = getDet(level.matrix).toFixed(2);
+  }
+
+  const consciousBox = document.getElementById('consciousBox');
+  if (level.consciousTitle) {
+    consciousBox.style.display = 'flex';
+    document.getElementById('consciousTitle').innerText = level.consciousTitle;
+    document.getElementById('consciousText').innerHTML = level.consciousText;
+  } else {
+    consciousBox.style.display = 'none';
+  }
+
+  checkWinCondition();
+  render();
+}
+
+function resetCurrentLevel() {
+  loadLevel(window.__GAME_STATE__.currentLevelIndex);
+}
+
+function prevLevel() {
+  let idx = window.__GAME_STATE__.currentLevelIndex;
+  if (idx > 0) loadLevel(idx - 1);
+}
+
+function nextLevel() {
+  let idx = window.__GAME_STATE__.currentLevelIndex;
+  if (idx < levelsData.length - 1) {
+    let nextIdx = idx + 1;
+    if ([1, 2, 3, 4, 5, 6, 7].includes(nextIdx)) {
+      showObservationModal(nextIdx);
+    } else {
+      loadLevel(nextIdx);
+    }
+  }
+}
+
+function autoSolve() {
+  const currentIdx = window.__GAME_STATE__.currentLevelIndex;
+  const level = levelsData[currentIdx];
+  if (level.type === "INVERSE_FLOW") {
+    setStep(4);
+    applyFullInverse();
+    return;
+  }
+  if (level.solve) window.__GAME_STATE__.inputPos = { ...level.solve };
+  else if (level.target) window.__GAME_STATE__.inputPos = { ...level.target };
+  checkWinCondition();
+  render();
+}
+
+let pendingLevelToLoad = null;
+
+function showObservationModal(targetLevel = 1) {
+  pendingLevelToLoad = targetLevel;
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBodyText = document.getElementById('modalBodyText');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalActions = document.getElementById('modalActions');
+
+  modalActions.innerHTML = `
+    <button id="btnHint" class="btn-hint" onclick="toggleHint()">💡 คำใบ้ (Hint)</button>
+    <button id="btnPrimaryModal" class="btn-primary" onclick="closeModal()">ลุยต่อ 🚀</button>
+  `;
+  modalIcon.innerText = "🔍";
+
+  if (targetLevel === 1) {
+    modalTitle.innerText = "🔍 ก้าวสู่มิติใหม่: ยินดีต้อนรับสู่ระบบ 2 Spaces!";
+    modalBodyText.innerHTML = `
+      <p style="font-size: 13px; color: #334155;">
+        ต่อจากนี้ไป หน้าจอจะแบ่งออกเป็น <b>2 Space (2 มิติการทำงาน)</b> เพื่อให้น้อง ๆ เห็นภาพการแปลงทางคณิตศาสตร์อย่างชัดเจน:
+      </p>
+      
+      <div class="space-intro-box">
+        <div class="space-card space-card-left">
+          <b style="font-size: 13px; display: block; margin-bottom: 4px;">📍 ฝั่งซ้าย: Input Space</b>
+          คือ <b>Space พิกัด (x, y) ปกติ</b> ที่นักเรียนเคยเรียนมาเลย! จุดที่เราลากเปลี่ยนตำแหน่งจะเริ่มต้นจากฝั่งนี้เสมอ
+        </div>
+        <div class="space-card space-card-right">
+          <b style="font-size: 13px; display: block; margin-bottom: 4px;">🔄 ฝั่งขวา: Output Space</b>
+          คือ <b>Space ที่เกิดจากการแปลง</b> ด้วยตัวแปลงทางคณิตศาสตร์ (เมทริกซ์ A) ซึ่งจะยืดหรือปรับพิกัดตามกฎเกณฑ์!
+        </div>
+      </div>
+      <div id="hintContent" class="hint-box">
+        💡 <b>คำใบ้ (Hint):</b><br>
+        ใน Level 1 เมทริกซ์การแปลงคือ Identity Matrix I ซึ่งยังไม่เปลี่ยนรูปทรงของ Space
+      </div>
+    `;
+  } else if (targetLevel === 2) {
+    modalTitle.innerText = "🤔 ชวนคิดก่อนเข้า Level 2: ถ้าแกนยืดออก?";
+    modalBodyText.innerHTML = `
+      <p style="font-size: 14px; font-weight: bold; color: #0969da;">"ถ้าแกนอ้างอิง Output กลายเป็น 2x พิกัดจุดจะเปลี่ยนไปอย่างไร?"</p>
+      <p style="margin-top: 8px;">
+        เมื่อแกน Output ขยายเป็น 2 เท่า ความยาวเท่าเดิมจะใช้ช่องบนแกน Input น้อยลง เราต้องขยับจุด P เพิ่มขึ้นหรือลดลงกันแน่?
+      </p>
+      <div id="hintContent" class="hint-box">
+        💡 <b>คำใบ้ (Hint):</b><br>
+        เมื่อแกน x ยืดเป็น 2 เท่า แต่ละก้าวบน Input จะส่งจุดไปไกลขึ้น 2 เท่า จึงใช้ค่า x แค่ครึ่งเดียว!
+      </div>
+    `;
+  } else if (targetLevel === 3) {
+    modalTitle.innerText = "📐 ชวนคิดก่อนเข้า Level 3: เมื่อแกน x และ y ผสมกัน";
+    modalBodyText.innerHTML = `
+      <p style="font-size: 14px; font-weight: bold; color: #0969da;">"ถ้าแกนไม่ขนานกัน แต่มีการผสมระหว่าง x และ y จะเกิดอะไรขึ้น?"</p>
+      <p style="margin-top: 8px;">
+        ตาราง Grid จะเกิดการเปลี่ยนรูปแบบของพิกัด ทำให้เกิดแกนอ้างอิงชุดใหม่ในการนำทาง
+      </p>
+      <div id="hintContent" class="hint-box">
+        💡 <b>คำใบ้ (Hint):</b><br>
+        เวกเตอร์ i และ j จะเอียงทำมุมกัน และพา Output ไปตามผลรวมเชิงเส้นของเวกเตอร์
+      </div>
+    `;
+  } else if (targetLevel === 4) {
+    modalIcon.innerText = "🕵️‍♂️";
+    modalTitle.innerText = "ภารกิจถอดรหัส: ถอดแบบรูปการคูณเมทริกซ์!";
+
+    const records = window.__GAME_STATE__.labRecords;
+    let tableRowsHTML = "";
+    if (records.length === 0) {
+      tableRowsHTML = `<tr><td colspan="4" style="color:#656d76;">ยังไม่มีการบันทึก (ลองเล่นด่าน 1-3 ให้ผ่าน)</td></tr>`;
+    } else {
+      records.forEach(r => {
+        tableRowsHTML += `
+          <tr>
+            <td><b>ด่าน ${r.level}</b></td>
+            <td>${r.matrixHTML}</td>
+            <td>${r.inputHTML}</td>
+            <td>${r.outputHTML}</td>
+          </tr>
+        `;
+      });
+    }
+
+    modalBodyText.innerHTML = `
+      <p style="font-weight: bold; color: #6b21a8;">จากข้อมูลที่บันทึกได้ในด่าน 1-3 น้อง ๆ สังเกตเห็น "แบบรูป" หรือ "ความสัมพันธ์" อะไรซ่อนอยู่ไหม?</p>
+      
+      <div style="background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 8px; padding: 8px; margin-top: 6px;">
+        <b style="color: #86198f; font-size: 11px;">📋 ข้อมูลที่บันทึกไว้ใน Lab:</b>
+        <table class="lab-table" style="margin-top: 4px;">
+          <thead>
+            <tr>
+              <th>ด่าน</th>
+              <th>เมทริกซ์ A</th>
+              <th>ตัวตั้ง / ค่าตั้งต้น</th>
+              <th>ผลลัพธ์ที่ได้</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRowsHTML}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="background: #ffffff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 10px; margin-top: 10px; text-align: center;">
+        <div style="font-size: 11px; color: #6b21a8; font-weight: bold; margin-bottom: 4px;">📌 รูปการคูณเมทริกซ์ (ประโยคสัญลักษณ์)</div>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; font-weight: bold;">
+          <span>เมทริกซ์ A</span>
+          ${formatMathMatrixHTML('a', 'b', 'c', 'd')}
+          <span>×</span>
+          <span>ค่าตั้งต้น</span>
+          ${formatMathColumnVectorHTML('x', 'y')}
+          <span>=</span>
+          <span class="math-matrix-bracket">
+            <span class="math-col">
+              <span style="font-size: 11px; color: #2563eb;">(a×x) + (b×y)</span>
+              <span style="font-size: 11px; color: #d97706;">(c×x) + (d×y)</span>
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <div class="pattern-card">
+        <b style="color: #7e22ce;">ลองมาช่วยกันสร้าง "สูตรหาผลลัพธ์" กันเลย:</b>
+        
+        <div class="formula-row">
+          <span>ผลลัพธ์ตัวบน (X) = (</span>
+          <select id="selXa" class="formula-select">
+            <option value="a" selected>a</option>
+            <option value="b">b</option>
+            <option value="c">c</option>
+            <option value="d">d</option>
+          </select>
+          <span class="text-x"> × x</span>
+          <span>) + (</span>
+          <select id="selXb" class="formula-select">
+            <option value="a" selected>a</option>
+            <option value="b">b</option>
+            <option value="c">c</option>
+            <option value="d">d</option>
+          </select>
+          <span class="text-y"> × y</span>
+          <span>)</span>
+        </div>
+
+        <div class="formula-row">
+          <span>ผลลัพธ์ตัวล่าง (Y) = (</span>
+          <select id="selYa" class="formula-select">
+            <option value="a" selected>a</option>
+            <option value="b">b</option>
+            <option value="c">c</option>
+            <option value="d">d</option>
+          </select>
+          <span class="text-x"> × x</span>
+          <span>) + (</span>
+          <select id="selYb" class="formula-select">
+            <option value="a" selected>a</option>
+            <option value="b">b</option>
+            <option value="c">c</option>
+            <option value="d">d</option>
+          </select>
+          <span class="text-y"> × y</span>
+          <span>)</span>
+        </div>
+      </div>
+    `;
+
+    modalActions.innerHTML = `
+      <button class="btn-purple" onclick="verifyMatrixPatternSecret()">ตรวจคำตอบ 🔑</button>
+    `;
+
+  } else if (targetLevel === 5) {
+    modalIcon.innerText = "📐";
+    modalTitle.innerText = "สรุปรูปทั่วไป: การคำนวณพื้นที่ตาราง (Determinant / det)";
+
+    const records = window.__GAME_STATE__.labRecords;
+    let tableRowsHTML = "";
+    if (records.length === 0) {
+      tableRowsHTML = `<tr><td colspan="3" style="color:#656d76;">ยังไม่มีการบันทึก</td></tr>`;
+    } else {
+      records.forEach(r => {
+        tableRowsHTML += `
+          <tr>
+            <td><b>ด่าน ${r.level}</b></td>
+            <td>${r.matrixHTML}</td>
+            <td><b style="color:#d97706;">${r.det ? r.det.toFixed(2) : '1.00'} เท่า</b></td>
+          </tr>
+        `;
+      });
+    }
+
+    modalBodyText.innerHTML = `
+      <p style="font-size: 13px; color: #334155;">
+        ในด่านก่อนหน้า ตาราง Grid ฝั่ง Output มีการยืดขยายพื้นที่ขึ้น! สังเกตพื้นที่ตาราง 1 ช่องย่อย จากเมทริกซ์ A = ${formatMathMatrixHTML('a', 'b', 'c', 'd')}
+      </p>
+
+      <div style="background: #fff7ed; border: 1px solid #ffedd5; border-radius: 8px; padding: 8px; margin-top: 6px;">
+        <b style="color: #c2410c; font-size: 11px;">📋 การขยายพื้นที่ในด่านก่อนหน้า:</b>
+        <table class="lab-table" style="margin-top: 4px;">
+          <thead>
+            <tr>
+              <th>ด่าน</th>
+              <th>เมทริกซ์ A</th>
+              <th>ขนาดพื้นที่ที่ขยาย (det)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRowsHTML}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pattern-card" style="text-align: left; background: #faf5ff;">
+        <b style="color: #7e22ce; font-size: 13px; display: block; text-align: center;">🎯 ตัวเลือกไหน คือสูตรคำนวณพื้นที่ (det) ที่ถูกต้อง?</b>
+        
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
+          <label class="option-card">
+            <input type="radio" name="detOption" value="wrong1">
+            <span>(a × d) + (b × c)</span>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="detOption" value="correct">
+            <span>(a × d) - (b × c)</span>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="detOption" value="wrong2">
+            <span>(a × c) - (b × d)</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 8px 10px; border-radius: 4px; font-size: 12px; color: #14532d; line-height: 1.4;">
+        💡 <b>ประโยชน์ของ det (สำหรับ ม.ต้น):</b><br>
+        1. รู้ว่าพื้นที่ตารางถูกขยายกี่เท่า<br>
+        2. <b>เช็กว่าแก้สมการได้ไหม:</b> ถ้า det = 0 (พื้นที่ = 0) แปลว่าเส้นตรงขนานกันหรือซ้อนทับกัน หาจุดตัดเดี่ยวไม่ได้!
+      </div>
+    `;
+
+    modalActions.innerHTML = `
+      <button class="btn-purple" onclick="verifyDetPatternSecret()">ตรวจคำตอบ 🔑</button>
+    `;
+
+  } else if (targetLevel === 6) {
+    modalTitle.innerText = "🙈 ด่านทดสอบความเข้าใจ (Blind Test)";
+    modalBodyText.innerHTML = `
+      <p style="font-weight: bold; color: #cf222e;">⚠️ Grid ฝั่ง Output ถูกซ่อนแล้ว!</p>
+      <p style="margin-top: 8px;">ใช้คำตอบจากแผง <b>Cramer's Discovery</b> ด้านซ้าย:</p>
+      <ul style="margin-top: 4px; padding-left: 20px; color: #1e293b; line-height: 1.5;">
+        <li><b class="text-x">x</b> = det(A_x) / det(A)</li>
+        <li><b class="text-y">y</b> = det(A_y) / det(A)</li>
+      </ul>
+      <p style="margin-top: 8px;">นำพิกัด (x, y) ที่ได้ ไปวางจุด P บนฝั่ง Input เพื่อเข้าชนเป้าหมาย เมื่อวางถูก Grid ทั้งหมดจะปรากฏขึ้น!</p>
+      <div id="hintContent" class="hint-box">
+        💡 <b>คำใบ้ (Hint):</b><br>
+        คำนวณค่า x และ y จากแผงสีเขียวซ้ายมือ แล้วลากจุด P ไปวางที่พิกัดนั้นได้เลย
+      </div>
+    `;
+  } else if (targetLevel === 7) {
+    modalTitle.innerText = "📐 ทำความเข้าใจ Inverse Matrix เรขาคณิต";
+    modalBodyText.innerHTML = `
+      <p style="font-size: 13px; color: #334155;">
+        ใน Level 7 นี้ เราจะมาทำความเข้าใจว่าทำไม Inverse Matrix ถึงสเกลขนาดและดึงแกนพิกัดกลับมาตั้งฉากกันผ่าน <b>4 ขั้นตอนสเกลเรขาคณิต</b>!
+      </p>
+      <div id="hintContent" class="hint-box">
+        💡 <b>คำใบ้ (Hint):</b><br>
+        คลิกปุ่มขั้นตอนสเต็ป 1 ถึง 4 บนศูนย์ควบคุม เพื่อดูการเปลี่ยนแปลงของพื้นที่และมุมเวกเตอร์
+      </div>
+    `;
+  }
+
+  document.getElementById('obsModal').classList.add('active');
+}
+
+function verifyMatrixPatternSecret() {
+  const xa = document.getElementById('selXa').value;
+  const xb = document.getElementById('selXb').value;
+  const ya = document.getElementById('selYa').value;
+  const yb = document.getElementById('selYb').value;
+
+  if (xa === 'a' && xb === 'b' && ya === 'c' && yb === 'd') {
+    alert("🎉 OK! ถูกต้องแล้ว! คุณได้ค้นพบรูปแบบการคูณเมทริกซ์ (Matrix Multiplication Pattern) สำเร็จ!");
+    closeModal();
+  } else {
+    alert("❌ รูปแบบยังไม่ถูกต้อง! ลองสังเกตการคูณแถวของเมทริกซ์ A กับหลักของ Vector Input อีกครั้งนะครับ\n\nคำใบ้: ผลลัพธ์ตัวบนใช้ แถวที่ 1 (a, b) และผลลัพธ์ตัวล่างใช้ แถวที่ 2 (c, d)");
+  }
+}
+
+function verifyDetPatternSecret() {
+  const selectedOpt = document.querySelector('input[name="detOption"]:checked');
+  if (!selectedOpt) {
+    alert("โปรดเลือกตัวเลือกสูตรคำนวณพื้นที่ก่อนนะครับ!");
+    return;
+  }
+
+  if (selectedOpt.value === 'correct') {
+    alert("🎉 OK! ถูกต้องแล้ว! สูตรพื้นที่ det(A) คือ (a × d) - (b × c)");
+    closeModal();
+  } else {
+    alert("❌ ยังไม่ถูกต้องครับ! ลองดูการเปรียบเทียบในตารางย้อนหลังอีกครั้ง\n\nคำใบ้: เอาแนวเฉียงลง (a×d) ลบด้วย แนวเฉียงขึ้น (b×c) ครับ");
+  }
+}
+
+function openPatternModalDirectly() {
+  showObservationModal(4);
+}
+
+function toggleHint() {
+  const hint = document.getElementById('hintContent');
+  if (hint) {
+    hint.style.display = (hint.style.display === 'none' || hint.style.display === '') ? 'block' : 'none';
+  }
+}
+
+function closeModal() {
+  document.getElementById('obsModal').classList.remove('active');
+  if (pendingLevelToLoad !== null) {
+    loadLevel(pendingLevelToLoad);
+    pendingLevelToLoad = null;
+  }
+}
+
+window.onload = () => {
+  resizeCanvases();
+  loadLevel(0);
+};
+</script>
+</body>
+</html>
