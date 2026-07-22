@@ -189,15 +189,6 @@
       border: 1px solid #4ac26b; text-align: center; font-size: 12px; animation: pulse 1.5s infinite;
     }
 
-    .toast-dialog {
-      position: fixed; bottom: 50px; right: 20px; z-index: 2000;
-      background: #065f46; color: #ffffff; padding: 10px 14px; border-radius: 8px;
-      font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 8px;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
-      opacity: 0; transform: translateY(15px); transition: all 0.3s ease; pointer-events: none;
-    }
-    .toast-dialog.show { opacity: 1; transform: translateY(0); }
-
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
 
     /* Modal Overlay */
@@ -261,14 +252,11 @@
       margin-top: 6px; display: flex; flex-direction: column; gap: 10px; text-align: center;
     }
     .formula-row {
-      display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; font-weight: bold;
+      display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: bold;
     }
     .formula-select {
       background: #ffffff; border: 2px solid #a855f7; border-radius: 6px;
       padding: 4px 6px; font-weight: bold; color: #7e22ce; font-size: 13px; cursor: pointer; outline: none;
-    }
-    .matrix-symbol-badge {
-      color: #9333ea; font-size: 18px; font-weight: bold;
     }
 
     /* Container สไตล์คณิตศาสตร์สำหรับ Level 1 Modal Success Dialogue */
@@ -295,6 +283,30 @@
     }
     .math-expr-box .dark-matrix-bracket::before { left: 0; border-right: none; border-radius: 4px 0 0 4px; }
     .math-expr-box .dark-matrix-bracket::after { right: 0; border-left: none; border-radius: 0 4px 4px 0; }
+
+    /* Dialogue โลก 2 Space */
+    .space-intro-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .space-card {
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .space-card-left {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e3a8a;
+    }
+    .space-card-right {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
   </style>
 </head>
 <body>
@@ -358,7 +370,7 @@
       <div class="inv-step">
         <b>ความหมายของ A⁻¹ (Undo Matrix)</b>
         <div style="margin-top:2px; font-size:10px; color:#475569;">
-          หาก A คือการยืด/เอียงระบบไปฝั่ง Output... <br>
+          หาก A คือการแปลงระบบไปฝั่ง Output... <br>
           <b>A⁻¹ คือตัวย้อนเวลาระบบ</b> นำจุด Target ในโลก Output กลับคืนสู่พิกัดเดิมบนโลก Input!
         </div>
         <div id="adjMatrixDisplay" style="text-align:center; margin-top:4px; font-weight:bold;"></div>
@@ -529,7 +541,7 @@ const levelsData = [
   },
   { 
     level: 3, title: "Level 3: Shear Transformation 📐", 
-    desc: "การเฉือนแกนด้วยสมการ x + y = 5 และ x - y = 1", 
+    desc: "การเปลี่ยนแกนด้วยสมการ x + y = 5 และ x - y = 1", 
     type: "TRANSFORMATION", matrix: [1, 1, 1, -1], target: { x: 5, y: 1 }, solve: { x: 3, y: 2 }, 
     eq1: "x + y = 5", eq2: "x - y = 1",
     showMatrix: true, showCramer: false, showInverse: false, hideOutputGrid: false,
@@ -570,7 +582,7 @@ const levelsData = [
     eq1: "2x + y = 5", eq2: "x + 3y = 5",
     showMatrix: true, showCramer: false, showInverse: true, hideOutputGrid: false,
     consciousTitle: "⏳ การย้อนเวลากลับของระบบ",
-    consciousText: "สังเกตกริดสีส้มที่เอียงตามเวกเตอร์ i=(2,1) และ j=(1,3) เมื่อใช้ Inverse Matrix มันจะส่งจุดกลับสู่พิกัด Input อย่างถูกต้อง"
+    consciousText: "สังเกตกริดสีส้มที่เปลี่ยนตามเวกเตอร์ i=(2,1) และ j=(1,3) เมื่อใช้ Inverse Matrix มันจะส่งจุดกลับสู่พิกัด Input อย่างถูกต้อง"
   }
 ];
 
@@ -682,7 +694,6 @@ function render() {
   ctxIn.clearRect(0, 0, cvsIn.width, cvsIn.height);
   ctxOut.clearRect(0, 0, cvsOut.width, cvsOut.height);
 
-  // วาด Standard Grid ให้ Input Space เสมอในทุกด่าน
   drawGrid(ctxIn, cvsIn, true, "x", "y");
 
   if (lvl.type === "LINE_INTERSECTION") {
@@ -814,17 +825,14 @@ function drawGrid(ctx, cvs, showGrid = true, labelX = "x", labelY = "y") {
     ctx.lineWidth = 0.5;
     ctx.strokeStyle = '#e2e8f0';
 
-    // วาดแนวตั้ง
     for (let x = origin.x % SCALE; x < cvs.width; x += SCALE) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cvs.height); ctx.stroke();
     }
-    // วาดแนวนอน
     for (let y = origin.y % SCALE; y < cvs.height; y += SCALE) {
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cvs.width, y); ctx.stroke();
     }
   }
 
-  // วาดแกน X - Y หลัก
   ctx.lineWidth = 1.5;
   ctx.strokeStyle = '#94a3b8';
   ctx.beginPath(); ctx.moveTo(0, origin.y); ctx.lineTo(cvs.width, origin.y); ctx.stroke();
@@ -1031,7 +1039,7 @@ function nextLevel() {
   let idx = window.__GAME_STATE__.currentLevelIndex;
   if (idx < levelsData.length - 1) {
     let nextIdx = idx + 1;
-    if ([2, 3, 4, 6, 7].includes(nextIdx)) {
+    if ([1, 2, 3, 4, 6, 7].includes(nextIdx)) {
       showObservationModal(nextIdx);
     } else {
       loadLevel(nextIdx);
@@ -1067,7 +1075,29 @@ function showObservationModal(targetLevel = 1) {
   `;
   modalIcon.innerText = "🔍";
 
-  if (targetLevel === 2) {
+  if (targetLevel === 1) {
+    modalTitle.innerText = "🔍 ก้าวสู่มิติใหม่: ยินดีต้อนรับสู่ระบบ 2 Spaces!";
+    modalBodyText.innerHTML = `
+      <p style="font-size: 13px; color: #334155;">
+        ต่อจากนี้ไป หน้าจอจะแบ่งออกเป็น <b>2 Space (2 มิติการทำงาน)</b> เพื่อให้น้อง ๆ เห็นภาพการแปลงทางคณิตศาสตร์อย่างชัดเจน:
+      </p>
+      
+      <div class="space-intro-box">
+        <div class="space-card space-card-left">
+          <b style="font-size: 13px; display: block; margin-bottom: 4px;">📍 ฝั่งซ้าย: Input Space</b>
+          คือ <b>Space พิกัด (x, y) ปกติ</b> ที่นักเรียนเคยเรียนมาเลย! จุดที่เราลากเปลี่ยนตำแหน่งจะเริ่มต้นจากฝั่งนี้เสมอ
+        </div>
+        <div class="space-card space-card-right">
+          <b style="font-size: 13px; display: block; margin-bottom: 4px;">🔄 ฝั่งขวา: Output Space</b>
+          คือ <b>Space ที่เกิดจากการแปลง</b> ด้วยตัวแปลงทางคณิตศาสตร์ (เมทริกซ์ A) ซึ่งจะยืดหรือปรับพิกัดตามกฎเกณฑ์!
+        </div>
+      </div>
+      <div id="hintContent" class="hint-box">
+        💡 <b>คำใบ้ (Hint):</b><br>
+        ใน Level 1 เมทริกซ์การแปลงคือ Identity Matrix I ซึ่งยังไม่เปลี่ยนรูปทรงของ Space
+      </div>
+    `;
+  } else if (targetLevel === 2) {
     modalTitle.innerText = "🤔 ชวนคิดก่อนเข้า Level 2: ถ้าแกนยืดออก?";
     modalBodyText.innerHTML = `
       <p style="font-size: 14px; font-weight: bold; color: #0969da;">"ถ้าแกนอ้างอิง Output กลายเป็น 2x พิกัดจุดจะเปลี่ยนไปอย่างไร?"</p>
@@ -1084,7 +1114,7 @@ function showObservationModal(targetLevel = 1) {
     modalBodyText.innerHTML = `
       <p style="font-size: 14px; font-weight: bold; color: #0969da;">"ถ้าแกนไม่ขนานกัน แต่มีการผสมระหว่าง x และ y จะเกิดอะไรขึ้น?"</p>
       <p style="margin-top: 8px;">
-        ตาราง Grid จะเกิดการ <b>เฉือนและเอียง (Shear & Rotate)</b> ทำให้เกิดแกนอ้างอิงชุดใหม่ในการนำทาง
+        ตาราง Grid จะเกิดการเปลี่ยนรูปแบบของพิกัด ทำให้เกิดแกนอ้างอิงชุดใหม่ในการนำทาง
       </p>
       <div id="hintContent" class="hint-box">
         💡 <b>คำใบ้ (Hint):</b><br>
@@ -1093,7 +1123,7 @@ function showObservationModal(targetLevel = 1) {
     `;
   } else if (targetLevel === 4) {
     modalIcon.innerText = "🕵️‍♂️";
-    modalTitle.innerText = "ภารกิจถอดรหัส: Matrix Multiplication Pattern!";
+    modalTitle.innerText = "ภารกิจถอดรหัส: ถอดแบบรูปการคูณเมทริกซ์!";
 
     const records = window.__GAME_STATE__.labRecords;
     let tableRowsHTML = "";
@@ -1113,17 +1143,17 @@ function showObservationModal(targetLevel = 1) {
     }
 
     modalBodyText.innerHTML = `
-      <p style="font-weight: bold; color: #6b21a8;">จากหลักฐานที่คุณบันทึกมาในด่าน 1-3 สังเกตเห็นสูตรลับหรือไม่?</p>
+      <p style="font-weight: bold; color: #6b21a8;">จากข้อมูลที่บันทึกได้ในด่าน 1-3 น้อง ๆ สังเกตเห็น "แบบรูป" หรือ "ความสัมพันธ์" อะไรซ่อนอยู่ไหม?</p>
       
       <div style="background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 8px; padding: 8px; margin-top: 6px;">
-        <b style="color: #86198f; font-size: 11px;">📋 หลักฐานที่บันทึกไว้ใน Lab:</b>
+        <b style="color: #86198f; font-size: 11px;">📋 ข้อมูลที่บันทึกไว้ใน Lab:</b>
         <table class="lab-table" style="margin-top: 4px;">
           <thead>
             <tr>
               <th>ด่าน</th>
               <th>เมทริกซ์ A</th>
-              <th>Input Vector</th>
-              <th>Output Vector</th>
+              <th>ตัวตั้ง / ค่าตั้งต้น</th>
+              <th>ผลลัพธ์ที่ได้</th>
             </tr>
           </thead>
           <tbody>
@@ -1132,18 +1162,31 @@ function showObservationModal(targetLevel = 1) {
         </table>
       </div>
 
-      <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; font-weight: bold; font-size: 13px;">
-        <span>กำหนดให้เมทริกซ์การแปลง A =</span>
-        ${formatMathMatrixHTML('a', 'b', 'c', 'd')}
-        <span>กระทำกับ Input Vector</span>
-        ${formatMathColumnVectorHTML('x', 'y')}
+      <!-- ส่วนรูปการคูณเชิงคณิตศาสตร์แบบชัดเจน -->
+      <div style="background: #ffffff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 10px; margin-top: 10px; text-align: center;">
+        <div style="font-size: 11px; color: #6b21a8; font-weight: bold; margin-bottom: 4px;">📌 รูปการคูณเมทริกซ์ (ประโยคสัญลักษณ์)</div>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; font-weight: bold;">
+          <span>เมทริกซ์ A</span>
+          ${formatMathMatrixHTML('a', 'b', 'c', 'd')}
+          <span>×</span>
+          <span>ค่าตั้งต้น</span>
+          ${formatMathColumnVectorHTML('x', 'y')}
+          <span>=</span>
+          <span class="math-matrix-bracket">
+            <span class="math-col">
+              <span style="font-size: 11px; color: #2563eb;">(a×x) + (b×y)</span>
+              <span style="font-size: 11px; color: #d97706;">(c×x) + (d×y)</span>
+            </span>
+          </span>
+        </div>
       </div>
 
       <div class="pattern-card">
-        <b style="color: #7e22ce;">ลองเติมสูตรสร้าง Output Vector ด้วยตนเอง:</b>
+        <b style="color: #7e22ce;">ลองมาช่วยกันสร้าง "สูตรหาผลลัพธ์" กันเลย:</b>
         
+        <!-- ปรับค่าตั้งต้นใน Listbox ให้ไม่ถูกต้อง เพื่อให้ผู้เรียนสังเกตและเปลี่ยนให้ถูกต้อง -->
         <div class="formula-row">
-          <span>X_out = (</span>
+          <span>ผลลัพธ์ตัวบน (X) = (</span>
           <select id="selXa" class="formula-select">
             <option value="a" selected>a</option>
             <option value="b">b</option>
@@ -1153,9 +1196,9 @@ function showObservationModal(targetLevel = 1) {
           <span class="text-x"> × x</span>
           <span>) + (</span>
           <select id="selXb" class="formula-select">
-            <option value="a">a</option>
+            <option value="a" selected>a</option>
             <option value="b">b</option>
-            <option value="c" selected>c</option>
+            <option value="c">c</option>
             <option value="d">d</option>
           </select>
           <span class="text-y"> × y</span>
@@ -1163,20 +1206,20 @@ function showObservationModal(targetLevel = 1) {
         </div>
 
         <div class="formula-row">
-          <span>Y_out = (</span>
+          <span>ผลลัพธ์ตัวล่าง (Y) = (</span>
           <select id="selYa" class="formula-select">
-            <option value="a">a</option>
-            <option value="b" selected>b</option>
+            <option value="a" selected>a</option>
+            <option value="b">b</option>
             <option value="c">c</option>
             <option value="d">d</option>
           </select>
           <span class="text-x"> × x</span>
           <span>) + (</span>
           <select id="selYb" class="formula-select">
-            <option value="a">a</option>
+            <option value="a" selected>a</option>
             <option value="b">b</option>
             <option value="c">c</option>
-            <option value="d" selected>d</option>
+            <option value="d">d</option>
           </select>
           <span class="text-y"> × y</span>
           <span>)</span>
@@ -1185,7 +1228,7 @@ function showObservationModal(targetLevel = 1) {
     `;
 
     modalActions.innerHTML = `
-      <button class="btn-purple" onclick="verifyMatrixPatternSecret()">ตรวจรหัสลับ 🔑</button>
+      <button class="btn-purple" onclick="verifyMatrixPatternSecret()">ตรวจคำตอบ 🔑</button>
     `;
 
   } else if (targetLevel === 6) {
@@ -1230,7 +1273,7 @@ function verifyMatrixPatternSecret() {
     alert("🎉 ถูกต้องแล้ว! คุณได้ค้นพบรูปแบบการคูณเมทริกซ์ (Matrix Multiplication Pattern) สำเร็จ!");
     closeModal();
   } else {
-    alert("❌ รูปแบบยังไม่ถูกต้อง! ลองสังเกตการคูณแถวของเมทริกซ์ A กับหลักของ Vector Input อีกครั้งนะครับ");
+    alert("❌ รูปแบบยังไม่ถูกต้อง! ลองสังเกตการคูณแถวของเมทริกซ์ A กับหลักของ Vector Input อีกครั้งนะครับ\n\nคำใบ้: ผลลัพธ์ตัวบนใช้ แถวที่ 1 (a, b) และผลลัพธ์ตัวล่างใช้ แถวที่ 2 (c, d)");
   }
 }
 
