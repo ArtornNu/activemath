@@ -727,7 +727,6 @@ const levelsData = [
     type: "SUMMARY",
     eq1: "Ax = b ⇔ x = A⁻¹b", eq2: "Geometry ⇔ Algebra Synthesis",
     showMatrix: false, showCramer: false, hideOutputGrid: false,
-    introModal: true,
     consciousTitle: "🎓 กลับมาที่คำถามแรก",
     consciousText: "จำได้ไหม แกนเป็น 2x หรือ x+y แล้วเกิดอะไรขึ้น? ตอนนี้รู้คำตอบครบแล้ว! แตะกล่องสรุปด้านล่างทบทวนได้เลย"
   }
@@ -1737,7 +1736,7 @@ function autoSolveStep4() {
   render();
 }
 
-function openGeneralAdjModal() {
+function openGeneralAdjModal(advanceOnClose = false) {
   const st = window.__GAME_STATE__;
   const modalTitle = document.getElementById('modalTitle');
   const modalBodyText = document.getElementById('modalBodyText');
@@ -1850,7 +1849,10 @@ function openGeneralAdjModal() {
     </div>
   `;
 
-  modalActions.innerHTML = `
+  modalActions.innerHTML = advanceOnClose ? `
+    <button class="btn-purple" onclick="verifyGeneralAdjFormula()">ตรวจคำตอบแบบรูปกรณีทั่วไป 🔑</button>
+    <button class="btn-primary" onclick="closeModalAndLoadPending()">ไปหน้าสรุป 🎓</button>
+  ` : `
     <button class="btn-purple" onclick="verifyGeneralAdjFormula()">ตรวจคำตอบแบบรูปกรณีทั่วไป 🔑</button>
     <button class="btn-primary" onclick="closeModal()">ปิดหน้าต่าง</button>
   `;
@@ -2170,6 +2172,16 @@ function nextLevel() {
 
   if (idx < levelsData.length - 1) {
     let nextIdx = idx + 1;
+
+    if (lvl.type === "INVERSE_FLOW" && st.inverseStep === 4) {
+      // Leaving Level 7's Adjugate lab -- show the "generalize the pattern"
+      // exercise, built from the learner's own step4_history discoveries,
+      // before moving on to the summary.
+      pendingLevelToLoad = nextIdx;
+      openGeneralAdjModal(true);
+      return;
+    }
+
     if (levelsData[nextIdx].introModal) {
       showObservationModal(nextIdx);
     } else {
@@ -2501,50 +2513,6 @@ function showObservationModal(targetLevel = 1) {
       <button class="btn-primary" onclick="closeModalAndLoadPending()">เริ่มสำรวจเมทริกซ์ผกผัน 🚀</button>
     `;
   }
-  else if (targetLevel === 8) {
-    modalIcon.innerText = "🎓";
-    modalTitle.innerText = "🎓 สรุป: หา Inverse Matrix ได้อย่างไร";
-
-    // Recap using the learner's OWN discoveries from the Step 4 lab in
-    // Level 7 (st.step4_history), not generic filler text -- grounds the
-    // summary in what they actually just did.
-    const st8 = window.__GAME_STATE__;
-    let step4RecapHTML = `<span style="font-size:11px; color:#94a3b8;">(ยังไม่มีบันทึกจากด่าน 7 ลองกลับไปทำกิจกรรม Step 4 ดูก่อนได้นะ)</span>`;
-    if (st8.step4_history.length > 0) {
-      step4RecapHTML = `
-        <table class="lab-table" style="margin-top:4px; background:white;">
-          <thead>
-            <tr><th>เมทริกซ์ A ที่คุณลองเอง</th><th>Adjugate ที่คุณหาเจอ</th></tr>
-          </thead>
-          <tbody>
-            ${st8.step4_history.map(h => `
-              <tr>
-                <td>${formatMathMatrixHTML(h.A[0], h.A[1], h.A[2], h.A[3])}</td>
-                <td><b style="color:#86198f;">${formatMathMatrixHTML(h.Adj[0], h.Adj[1], h.Adj[2], h.Adj[3])}</b></td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
-    }
-
-    modalBodyText.innerHTML = `
-      <p style="font-size: 13px; color: #334155;">
-        จากด่าน 7 คุณค้นพบว่า <b>A⁻¹ = (1/det(A)) × Adj(A)</b> เกิดจาก 2 ขั้นตอน: ดึงแกนเอียงให้ตั้งฉาก แล้วย่อพื้นที่กลับด้วย 1/det
-      </p>
-      <div style="margin: 8px 0;">
-        <b style="font-size:11px; color:#0969da;">📋 ผลจากที่คุณลองเอง:</b>
-        ${step4RecapHTML}
-      </div>
-      <p style="margin-top: 6px; font-size: 12px; color: #475569;">
-        ต่อไปนี้ไปดูภาพรวมทั้งหมดของการเดินทางนี้กัน!
-      </p>
-    `;
-    modalActions.innerHTML = `
-      <button class="btn-primary" onclick="closeModalAndLoadPending()">ไปหน้าสรุป 🎓</button>
-    `;
-  }
-
   hideFeedback();
   document.getElementById('obsModal').classList.add('active');
 }
