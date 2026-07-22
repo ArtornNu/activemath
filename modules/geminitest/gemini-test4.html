@@ -284,6 +284,11 @@
     }
     .feedback-banner.feedback-correct { background: #f0fdf4; border-left: 4px solid #16a34a; color: #14532d; }
     .feedback-banner.feedback-incorrect { background: #fef2f2; border-left: 4px solid #dc2626; color: #7f1d1d; }
+    /* Per-field right/wrong highlight for multi-part quizzes -- lets a
+       learner see exactly which part of a multi-blank answer to revisit,
+       instead of one all-or-nothing pass/fail message. */
+    .field-correct { border: 2px solid #16a34a !important; background: #f0fdf4 !important; }
+    .field-incorrect { border: 2px solid #dc2626 !important; background: #fef2f2 !important; }
     .btn-hint {
       background: #fff8c5; border: 1px solid #d4a72c; color: #7d4e00;
       padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px;
@@ -749,6 +754,7 @@ window.__GAME_STATE__ = {
   step4_vecI: { x: 1, y: 0 }, 
   step4_vecJ: { x: 0, y: 1 }, 
   step4_draggedHandle: null,
+  step4_hintRevealed: false,
   step4_history: []
 };
 
@@ -1098,15 +1104,19 @@ function render() {
       const vecOutI = toScreen(cvsOut, OutM[0], OutM[2]);
       const vecOutJ = toScreen(cvsOut, OutM[1], OutM[3]);
 
+      // Colors match vectorI/vectorJ (red/purple) -- the same convention
+      // used everywhere else in the game for "first column / second
+      // column" -- instead of the separate pink/blue pair this used to
+      // use, which broke the one-color-per-meaning rule for no reason.
       ctxOut.save();
       ctxOut.lineWidth = 3;
-      ctxOut.strokeStyle = COLOR.invI;
+      ctxOut.strokeStyle = COLOR.vectorI;
       ctxOut.beginPath(); ctxOut.moveTo(orig.x, orig.y); ctxOut.lineTo(vecOutI.x, vecOutI.y); ctxOut.stroke();
-      drawArrowhead(ctxOut, orig.x, orig.y, vecOutI.x, vecOutI.y, COLOR.invI);
+      drawArrowhead(ctxOut, orig.x, orig.y, vecOutI.x, vecOutI.y, COLOR.vectorI);
 
-      ctxOut.strokeStyle = COLOR.invJ;
+      ctxOut.strokeStyle = COLOR.vectorJ;
       ctxOut.beginPath(); ctxOut.moveTo(orig.x, orig.y); ctxOut.lineTo(vecOutJ.x, vecOutJ.y); ctxOut.stroke();
-      drawArrowhead(ctxOut, orig.x, orig.y, vecOutJ.x, vecOutJ.y, COLOR.invJ);
+      drawArrowhead(ctxOut, orig.x, orig.y, vecOutJ.x, vecOutJ.y, COLOR.vectorJ);
       ctxOut.restore();
 
       const dotProd = OutM[0]*OutM[1] + OutM[2]*OutM[3];
@@ -1297,46 +1307,53 @@ function drawStep4InputCanvas(ctx, cvs, vecI, vecJ) {
 
   ctx.save();
 
-  ctx.setLineDash([4, 4]);
-  ctx.lineWidth = 2;
+  // The target-position hints are opt-in (revealed via the "ดูคำใบ้" button
+  // in the control box) instead of always-on, so the learner has to reason
+  // about where î_G/ĵ_G should go before being shown the answer position.
+  if (st.step4_hintRevealed) {
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 2;
 
-  ctx.strokeStyle = 'rgba(236, 72, 153, 0.6)';
-  ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pTargetI.x, pTargetI.y); ctx.stroke();
-  ctx.fillStyle = 'rgba(236, 72, 153, 0.15)';
-  ctx.beginPath(); ctx.arc(pTargetI.x, pTargetI.y, 11, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = COLOR.invI;
-  ctx.beginPath(); ctx.arc(pTargetI.x, pTargetI.y, 11, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(220, 38, 38, 0.6)';
+    ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pTargetI.x, pTargetI.y); ctx.stroke();
+    ctx.fillStyle = 'rgba(220, 38, 38, 0.15)';
+    ctx.beginPath(); ctx.arc(pTargetI.x, pTargetI.y, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = COLOR.vectorI;
+    ctx.beginPath(); ctx.arc(pTargetI.x, pTargetI.y, 11, 0, Math.PI * 2); ctx.stroke();
 
-  ctx.strokeStyle = 'rgba(2, 132, 199, 0.6)';
-  ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pTargetJ.x, pTargetJ.y); ctx.stroke();
-  ctx.fillStyle = 'rgba(2, 132, 199, 0.15)';
-  ctx.beginPath(); ctx.arc(pTargetJ.x, pTargetJ.y, 11, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = COLOR.invJ;
-  ctx.beginPath(); ctx.arc(pTargetJ.x, pTargetJ.y, 11, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(147, 51, 234, 0.6)';
+    ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pTargetJ.x, pTargetJ.y); ctx.stroke();
+    ctx.fillStyle = 'rgba(147, 51, 234, 0.15)';
+    ctx.beginPath(); ctx.arc(pTargetJ.x, pTargetJ.y, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = COLOR.vectorJ;
+    ctx.beginPath(); ctx.arc(pTargetJ.x, pTargetJ.y, 11, 0, Math.PI * 2); ctx.stroke();
 
-  ctx.setLineDash([]);
+    ctx.setLineDash([]);
+  }
 
-  ctx.strokeStyle = COLOR.invI;
+  // Colors match vectorI/vectorJ (red/purple) -- same convention as
+  // everywhere else in the game -- instead of a separate pink/blue pair.
+  ctx.strokeStyle = COLOR.vectorI;
   ctx.lineWidth = 3.5;
   ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pI.x, pI.y); ctx.stroke();
-  drawArrowhead(ctx, orig.x, orig.y, pI.x, pI.y, COLOR.invI);
+  drawArrowhead(ctx, orig.x, orig.y, pI.x, pI.y, COLOR.vectorI);
 
-  ctx.fillStyle = COLOR.invI;
+  ctx.fillStyle = COLOR.vectorI;
   ctx.beginPath(); ctx.arc(pI.x, pI.y, 8, 0, Math.PI*2); ctx.fill();
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
-  ctx.fillStyle = COLOR.invI; ctx.font = 'bold 11px system-ui';
-  ctx.fillText(`î_G (${vecI.x}, ${vecI.y})`, pI.x + 10, pI.y - 6);
+  ctx.fillStyle = COLOR.vectorI; ctx.font = 'bold 11px system-ui';
+  ctx.fillText(`î_G (${vecI.x}, ${vecI.y})`, pI.x + 10, pI.y - 6);
 
-  ctx.strokeStyle = COLOR.invJ;
+  ctx.strokeStyle = COLOR.vectorJ;
   ctx.lineWidth = 3.5;
   ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pJ.x, pJ.y); ctx.stroke();
-  drawArrowhead(ctx, orig.x, orig.y, pJ.x, pJ.y, COLOR.invJ);
+  drawArrowhead(ctx, orig.x, orig.y, pJ.x, pJ.y, COLOR.vectorJ);
 
-  ctx.fillStyle = COLOR.invJ;
+  ctx.fillStyle = COLOR.vectorJ;
   ctx.beginPath(); ctx.arc(pJ.x, pJ.y, 8, 0, Math.PI*2); ctx.fill();
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
-  ctx.fillStyle = COLOR.invJ; ctx.font = 'bold 11px system-ui';
-  ctx.fillText(`ĵ_G (${vecJ.x}, ${vecJ.y})`, pJ.x + 10, pJ.y - 6);
+  ctx.fillStyle = COLOR.vectorJ; ctx.font = 'bold 11px system-ui';
+  ctx.fillText(`ĵ_G (${vecJ.x}, ${vecJ.y})`, pJ.x + 10, pJ.y - 6);
 
   ctx.restore();
 }
@@ -1632,11 +1649,11 @@ function renderStep4UI() {
   `).join('');
 
   if (st.step4_history.length === 0) {
-    historyRowsHTML = `<tr><td colspan="3" style="color:#94a3b8;">ยังไม่มีการบันทึก (ลองลากเวกเตอร์ตามเส้นประ Hint)</td></tr>`;
+    historyRowsHTML = `<tr><td colspan="3" style="color:#94a3b8;">ยังไม่มีการบันทึก (ลองลากเวกเตอร์ดูก่อน หรือกดปุ่มคำใบ้ถ้าติดขัด)</td></tr>`;
   }
 
   text.innerHTML = `
-    <b>🎯 ภารกิจ:</b> ลากปลายเวกเตอร์ <b style="color:${COLOR.invI}">î_G (สีชมพู)</b> และ <b style="color:${COLOR.invJ}">ĵ_G (สีฟ้า)</b> ฝั่ง Input ไปที่ <b>"วงกลมเส้นประ Hint"</b> เพื่อปรับเมทริกซ์ G จนกระทั่งรูปฝั่ง Output <b>"ตั้งฉากกันสมบูรณ์"</b><br><br>
+    <b>🎯 ภารกิจ:</b> ลากปลายเวกเตอร์ <b style="color:${COLOR.vectorI}">î_G (สีแดง)</b> และ <b style="color:${COLOR.vectorJ}">ĵ_G (สีม่วง)</b> ในโลกอินพุต ปรับเมทริกซ์ G จนกระทั่งรูปฝั่ง Output <b>"ตั้งฉากกันสมบูรณ์"</b> — ลองคิดดูก่อนว่าควรลากไปทางไหน ถ้าติดขัดกดปุ่ม 💡 คำใบ้ ด้านล่างได้เลย<br><br>
     <div class="lab-box">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <b style="color:#86198f;">📋 บันทึก Log อัตโนมัติ:</b>
@@ -1658,9 +1675,12 @@ function renderStep4UI() {
   `;
 
   ctrl.innerHTML = `
-    <div style="display:flex; gap:6px;">
+    <button class="btn-hint" style="width:100%;" onclick="toggleStep4Hint()">
+      💡 ${st.step4_hintRevealed ? 'ซ่อนคำใบ้ตำแหน่งเป้าหมาย' : 'ดูคำใบ้ตำแหน่งเป้าหมาย'}
+    </button>
+    <div style="display:flex; gap:6px; margin-top:6px;">
       <button class="btn btn-amber" style="flex:1;" onclick="randomizeStep4Matrix()">🎲 สุ่มโจทย์ A ใหม่ (กรณีถัดไป)</button>
-      <button class="btn btn-green" style="flex:1;" onclick="autoSolveStep4()">💡 เฉลยด่านนี้</button>
+      <button class="btn btn-green" style="flex:1;" onclick="autoSolveStep4()">🔑 เฉลยด่านนี้</button>
     </div>
     <button class="btn-purple" style="width:100%; margin-top:4px; padding:6px 10px;" onclick="openGeneralAdjModal()">
       ✨ สร้างกรณีทั่วไปของ Adj (${st.step4_history.length}/3)
@@ -1718,9 +1738,17 @@ function randomizeStep4Matrix() {
   st.step4_matrixA = [...nextA];
   st.step4_vecI = { x: 1, y: 0 };
   st.step4_vecJ = { x: 0, y: 1 };
+  st.step4_hintRevealed = false;
   st.isLevelCleared = false;
   document.getElementById('clearBadge').style.display = 'none';
   
+  renderStep4UI();
+  render();
+}
+
+function toggleStep4Hint() {
+  const st = window.__GAME_STATE__;
+  st.step4_hintRevealed = !st.step4_hintRevealed;
   renderStep4UI();
   render();
 }
@@ -1730,13 +1758,17 @@ function autoSolveStep4() {
   const A = st.step4_matrixA;
   st.step4_vecI = { x: A[3], y: -A[2] };
   st.step4_vecJ = { x: -A[1], y: A[0] };
-  
+  st.step4_hintRevealed = true;
+
   checkStep4WinCondition();
   renderStep4UI();
   render();
 }
 
+let generalAdjModalAdvanceMode = false;
+
 function openGeneralAdjModal(advanceOnClose = false) {
+  generalAdjModalAdvanceMode = advanceOnClose;
   const st = window.__GAME_STATE__;
   const modalTitle = document.getElementById('modalTitle');
   const modalBodyText = document.getElementById('modalBodyText');
@@ -1862,15 +1894,29 @@ function openGeneralAdjModal(advanceOnClose = false) {
 }
 
 function verifyGeneralAdjFormula() {
-  const a00 = document.getElementById('genAdj00').value;
-  const a01 = document.getElementById('genAdj01').value;
-  const a10 = document.getElementById('genAdj10').value;
-  const a11 = document.getElementById('genAdj11').value;
+  const a00 = document.getElementById('genAdj00');
+  const a01 = document.getElementById('genAdj01');
+  const a10 = document.getElementById('genAdj10');
+  const a11 = document.getElementById('genAdj11');
+  if (!a00 || !a01 || !a10 || !a11) return;
 
-  if (a00 === 'd' && a01 === '-b' && a10 === '-c' && a11 === 'a') {
+  // Checked and highlighted as two groups (main diagonal, anti-diagonal),
+  // mirroring how the hint text itself is already split -- so feedback can
+  // say exactly which diagonal is still wrong instead of "not correct."
+  const mainDiagCorrect = a00.value === 'd' && a11.value === 'a';
+  const antiDiagCorrect = a01.value === '-b' && a10.value === '-c';
+
+  [a00, a11].forEach(el => { el.classList.toggle('field-correct', mainDiagCorrect); el.classList.toggle('field-incorrect', !mainDiagCorrect); });
+  [a01, a10].forEach(el => { el.classList.toggle('field-correct', antiDiagCorrect); el.classList.toggle('field-incorrect', !antiDiagCorrect); });
+
+  if (mainDiagCorrect && antiDiagCorrect) {
     showFeedback("🎉 ถูกต้องสมบูรณ์! รูปแบบกรณีทั่วไปของ Adjugate Matrix คือ [d, -b; -c, a] สลับตำแหน่งแนวเฉียงหลัก และเปลี่ยนเครื่องหมายแนวเฉียงรอง!", true);
+  } else if (mainDiagCorrect) {
+    showFeedback("แนวเฉียงหลัก (สองช่องกลาง) ถูกแล้ว ✅ — แนวเฉียงรอง (สองช่องข้าง) ยังไม่ถูก ลองดูเครื่องหมายอีกครั้ง", false);
+  } else if (antiDiagCorrect) {
+    showFeedback("แนวเฉียงรอง (สองช่องข้าง) ถูกแล้ว ✅ — แนวเฉียงหลัก (สองช่องกลาง) ยังไม่ถูก ลองดูตำแหน่ง a, d อีกครั้ง", false);
   } else {
-    showFeedback("❌ ยังไม่ถูกต้องครับ! ลองดูจากตาราง Log อีกครั้ง — สังเกตตัวเลขตำแหน่งแรกและตำแหน่งสุดท้าย (แนวเฉียงหลัก) และเครื่องหมายตัวเลขอีกสองตำแหน่ง (แนวเฉียงรอง)", false);
+    showFeedback("❌ ยังไม่ถูกทั้งสองแนว ลองดูจากตาราง Log อีกครั้ง — สังเกตตำแหน่งแรกและตำแหน่งสุดท้าย (แนวเฉียงหลัก) แล้วสังเกตเครื่องหมายอีกสองตำแหน่ง (แนวเฉียงรอง)", false);
   }
 }
 
@@ -1880,27 +1926,44 @@ function verifyCustomAdjInput() {
   const a10 = parseFloat(document.getElementById('custA10').value) || 0;
   const a11 = parseFloat(document.getElementById('custA11').value) || 0;
 
-  const adj00 = parseFloat(document.getElementById('custAdj00').value);
-  const adj01 = parseFloat(document.getElementById('custAdj01').value);
-  const adj10 = parseFloat(document.getElementById('custAdj10').value);
-  const adj11 = parseFloat(document.getElementById('custAdj11').value);
+  const adj00El = document.getElementById('custAdj00');
+  const adj01El = document.getElementById('custAdj01');
+  const adj10El = document.getElementById('custAdj10');
+  const adj11El = document.getElementById('custAdj11');
+
+  const adj00 = parseFloat(adj00El.value);
+  const adj01 = parseFloat(adj01El.value);
+  const adj10 = parseFloat(adj10El.value);
+  const adj11 = parseFloat(adj11El.value);
 
   if (isNaN(adj00) || isNaN(adj01) || isNaN(adj10) || isNaN(adj11)) {
     showFeedback("โปรดเติมตัวเลขให้ครบทั้ง 4 ช่องในเมทริกซ์ Adj(A) ครับ!", false);
     return;
   }
 
-  if (adj00 === a11 && adj01 === -a01 && adj10 === -a10 && adj11 === a00) {
+  // Same diagonal-grouped highlighting as verifyGeneralAdjFormula, so the
+  // feedback here is consistent with the exercise right above it.
+  const mainDiagCorrect = adj00 === a11 && adj11 === a00;
+  const antiDiagCorrect = adj01 === -a01 && adj10 === -a10;
+
+  [adj00El, adj11El].forEach(el => { el.classList.toggle('field-correct', mainDiagCorrect); el.classList.toggle('field-incorrect', !mainDiagCorrect); });
+  [adj01El, adj10El].forEach(el => { el.classList.toggle('field-correct', antiDiagCorrect); el.classList.toggle('field-incorrect', !antiDiagCorrect); });
+
+  if (mainDiagCorrect && antiDiagCorrect) {
     showFeedback("🎉 ยอดเยี่ยมมาก! เมทริกซ์ Adj(A) ที่คุณสร้างขึ้นถูกต้องตามกฎการเปลี่ยนรูปแน่นอน!", true);
-    
+
     const st = window.__GAME_STATE__;
     const customA = [a00, a01, a10, a11];
     const customAdj = [adj00, adj01, adj10, adj11];
-    
+
     if (!st.step4_history.some(h => h.A[0]===customA[0] && h.A[1]===customA[1] && h.A[2]===customA[2] && h.A[3]===customA[3])) {
       st.step4_history.push({ A: customA, Adj: customAdj });
     }
-    openGeneralAdjModal();
+    openGeneralAdjModal(generalAdjModalAdvanceMode);
+  } else if (mainDiagCorrect) {
+    showFeedback("แนวเฉียงหลักถูกแล้ว ✅ — แนวเฉียงรองยังไม่ถูก ลองดูใหม่", false);
+  } else if (antiDiagCorrect) {
+    showFeedback("แนวเฉียงรองถูกแล้ว ✅ — แนวเฉียงหลักยังไม่ถูก ลองดูใหม่", false);
   } else {
     showFeedback(`❌ ค่า Adj(A) ยังไม่ถูกต้อง! คำแนะนำ: สำหรับ A = [${a00}, ${a01}; ${a10}, ${a11}] Adjugate ควรเป็น [${a11}, ${-a01}; ${-a10}, ${a00}]`, false);
   }
@@ -2001,10 +2064,10 @@ function showStep4IntroModal() {
 
   modalBodyText.innerHTML = `
     <p style="font-size: 13px; color: #334155;">
-      ลากปลายลูกศร <b style="color:#ec4899;">î_G</b> และ <b style="color:#0284c7;">ĵ_G</b> ในโลกอินพุต ไปวางตรง <b>วงกลมเส้นประ (Hint)</b> ที่เห็นบนจอ
+      ลากปลายลูกศร <b style="color:#dc2626;">î_G</b> และ <b style="color:#9333ea;">ĵ_G</b> ในโลกอินพุต ลองเดาดูก่อนว่าควรลากไปทางไหน ให้รูปฝั่งโลกเอาต์พุตกลาย<b>ตั้งฉาก</b>
     </p>
     <p style="margin-top: 8px; font-size: 12px; color: #475569;">
-      พอวางถูกตำแหน่ง รูปฝั่งโลกเอาต์พุตจะกลายเป็นสี่เหลี่ยม<b>ตั้งฉาก</b>ทันที (ไม่เอียงอีกต่อไป) — นั่นแหละคือ Adjugate Matrix ที่ตามหา!
+      ถ้าติดขัด กดปุ่ม 💡 คำใบ้ ในแผงซ้ายมือ เพื่อดูตำแหน่งเป้าหมายได้เลย — พอวางถูก จะเจอ Adjugate Matrix ที่ตามหา!
     </p>
   `;
 
@@ -2068,6 +2131,7 @@ function loadLevel(idx) {
   }
   if (idx === 7) {
     window.__GAME_STATE__.hasShownStep4Dialogue = false;
+    window.__GAME_STATE__.step4_hintRevealed = false;
   }
 
   document.getElementById('levelTitle').innerText = level.title;
@@ -2253,16 +2317,30 @@ function openPatternModalDirectly() {
 
 // Verification for Level 4 Modal
 function verifyMatrixPatternSecret() {
-  const d1 = document.getElementById('patDrop1') ? document.getElementById('patDrop1').value : '';
-  const d2 = document.getElementById('patDrop2') ? document.getElementById('patDrop2').value : '';
-  const d3 = document.getElementById('patDrop3') ? document.getElementById('patDrop3').value : '';
-  const d4 = document.getElementById('patDrop4') ? document.getElementById('patDrop4').value : '';
+  const d1 = document.getElementById('patDrop1');
+  const d2 = document.getElementById('patDrop2');
+  const d3 = document.getElementById('patDrop3');
+  const d4 = document.getElementById('patDrop4');
+  if (!d1 || !d2 || !d3 || !d4) return;
 
-  if (d1 === 'a' && d2 === 'b' && d3 === 'c' && d4 === 'd') {
+  // Checked and highlighted as two groups (Output_x row, Output_y row)
+  // instead of one pass/fail over all 4 blanks, so a learner who gets one
+  // row right can see that and focus only on the row that's still wrong.
+  const rowXCorrect = d1.value === 'a' && d2.value === 'b';
+  const rowYCorrect = d3.value === 'c' && d4.value === 'd';
+
+  [d1, d2].forEach(el => { el.classList.toggle('field-correct', rowXCorrect); el.classList.toggle('field-incorrect', !rowXCorrect); });
+  [d3, d4].forEach(el => { el.classList.toggle('field-correct', rowYCorrect); el.classList.toggle('field-incorrect', !rowYCorrect); });
+
+  if (rowXCorrect && rowYCorrect) {
     showFeedback("🎉 ถูกต้องแล้ว! คุณได้ค้นพบรูปแบบการคูณเมทริกซ์ (Matrix Multiplication Pattern) สำเร็จ!", true);
     setTimeout(closeModalAndLoadPending, 900);
+  } else if (rowXCorrect) {
+    showFeedback("แถว Output ตัวบนถูกแล้ว ✅ — แถว Output ตัวล่างยังไม่ถูก ลองดูใหม่ (คำใบ้: แถวที่ 2 ของ A คือ (c, d))", false);
+  } else if (rowYCorrect) {
+    showFeedback("แถว Output ตัวล่างถูกแล้ว ✅ — แถว Output ตัวบนยังไม่ถูก ลองดูใหม่ (คำใบ้: แถวที่ 1 ของ A คือ (a, b))", false);
   } else {
-    showFeedback("❌ รูปแบบยังไม่ถูกต้อง! ลองสังเกตการคูณแถวของเมทริกซ์ A กับหลักของ Vector Input อีกครั้งนะครับ (คำใบ้: ผลลัพธ์ตัวบนใช้ แถวที่ 1 (a, b) และผลลัพธ์ตัวล่างใช้ แถวที่ 2 (c, d))", false);
+    showFeedback("❌ ยังไม่ถูกทั้งสองแถว ลองสังเกตการคูณแถวของเมทริกซ์ A กับหลักของ Vector Input อีกครั้ง (คำใบ้: ผลลัพธ์ตัวบนใช้แถวที่ 1 (a, b) และผลลัพธ์ตัวล่างใช้แถวที่ 2 (c, d))", false);
   }
 }
 
