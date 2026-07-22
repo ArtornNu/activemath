@@ -1714,7 +1714,7 @@ function openGeneralAdjModal() {
     <div style="background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px; margin-top: 10px;">
       <b style="color: #1e40af; font-size: 12px; display:block; margin-bottom:6px;">🧪 2. ทดลองสร้างกรณีด้วยตนเอง (ผู้เรียนเติมตัวเลขเพื่อสร้าง Adj):</b>
       <div style="display:flex; flex-direction:column; gap:8px;">
-        <div style="display:flex; align-items:center; justify-content:space-around;">
+        <div style="display:flex; align-items:center; justify-style:space-around;">
           <div>
             <span style="font-size:11px; font-weight:bold; color:#1e40af;">กำหนด เมทริกซ์ A เอง:</span>
             <div class="math-matrix-bracket" style="display:block; margin-top:2px;">
@@ -2162,165 +2162,142 @@ function showObservationModal(targetLevel = 1) {
     `;
   }
   else if (targetLevel === 4) {
-    modalIcon.innerText = "🕵️‍♂️";
-    modalTitle.innerText = "ภารกิจถอดรหัส: ถอดแบบรูปการคูณเมทริกซ์!";
+    modalIcon.innerText = "🧪";
+    modalTitle.innerText = "🧪 ค้นพบแบบรูป Matrix Multiplication";
 
+    let labTableHTML = "";
     const st = window.__GAME_STATE__;
-    
-    // Sample rows fallback if labRecords is not populated yet
-    const defaultData = [
-      { level: 1, matrixHTML: formatMathMatrixHTML(1,0,0,1), inputHTML: formatMathColumnVectorHTML(2,2,"text-x"), outputHTML: formatMathColumnVectorHTML(2,2,"text-y") },
-      { level: 2, matrixHTML: formatMathMatrixHTML(2,0,0,1), inputHTML: formatMathColumnVectorHTML(2,2,"text-x"), outputHTML: formatMathColumnVectorHTML(4,2,"text-y") },
-      { level: 3, matrixHTML: formatMathMatrixHTML(1,1,1,-1), inputHTML: formatMathColumnVectorHTML(3,2,"text-x"), outputHTML: formatMathColumnVectorHTML(5,1,"text-y") }
-    ];
-
-    const recordsToDisplay = (st.labRecords && st.labRecords.length >= 3) ? st.labRecords : defaultData;
-
-    const rowsHTML = recordsToDisplay.map(r => `
-      <tr>
-        <td><b>ด่าน ${r.level}</b></td>
-        <td>${r.matrixHTML}</td>
-        <td>${r.inputHTML}</td>
-        <td><b>${r.outputHTML}</b></td>
-      </tr>
-    `).join('');
+    if (st.labRecords.length > 0) {
+      labTableHTML = `
+        <div style="margin-bottom:10px;">
+          <b style="font-size:11px; color:#0969da;">📋 ข้อมูลที่บันทึกจากการทดลองในด่านก่อนหน้า:</b>
+          <table class="lab-table" style="margin-top:4px; background:white;">
+            <thead>
+              <tr><th>Level</th><th>เมทริกซ์ A</th><th>Input (x,y)</th><th>Output (x',y')</th></tr>
+            </thead>
+            <tbody>
+              ${st.labRecords.map(r => `
+                <tr>
+                  <td>L${r.level}</td>
+                  <td>${r.matrixHTML}</td>
+                  <td>${r.inputHTML}</td>
+                  <td>${r.outputHTML}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
 
     modalBodyText.innerHTML = `
-      <p style="font-size: 13px; color: #334155; margin-bottom: 8px;">
-        จากข้อมูลที่บันทึกได้ในด่าน 1-3 น้อง ๆ สังเกตเห็น "แบบรูป" หรือ "ความสัมพันธ์" อะไรซ่อนอยู่ไหม?
-      </p>
-
-      <div style="background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 8px; padding: 8px; margin-bottom: 12px;">
-        <b style="color: #86198f; font-size: 11px; display: block; margin-bottom: 4px; text-align: center;">📋 ตารางข้อมูลที่บันทึกไว้ใน Lab:</b>
-        <table class="lab-table" style="background: white;">
-          <thead>
-            <tr>
-              <th>ด่าน</th>
-              <th>เมทริกซ์ A</th>
-              <th>ตัวตั้ง/ค่าตั้งต้น</th>
-              <th>ผลลัพธ์</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rowsHTML}
-          </tbody>
-        </table>
+      ${labTableHTML}
+      <div class="pattern-card">
+        <b style="font-size:12px; color:#7e22ce;">ให้ A = [a, b; c, d] และ Vector Input = [x; y]</b>
+        <p style="font-size:11px; color:#475569; margin-top:2px;">จงเลือกตัวแปรเพื่อสร้างสมการการคูณเมทริกซ์ที่ถูกต้อง:</p>
+        <div style="margin-top:8px; font-size:13px;">
+          Output<sub>x</sub> = 
+          <select id="patDrop1" class="formula-select">
+            <option value="">?</option><option value="a">a</option><option value="b">b</option><option value="c">c</option><option value="d">d</option>
+          </select> · x + 
+          <select id="patDrop2" class="formula-select">
+            <option value="">?</option><option value="a">a</option><option value="b">b</option><option value="c">c</option><option value="d">d</option>
+          </select> · y
+        </div>
+        <div style="margin-top:6px; font-size:13px;">
+          Output<sub>y</sub> = 
+          <select id="patDrop3" class="formula-select">
+            <option value="">?</option><option value="a">a</option><option value="b">b</option><option value="c">c</option><option value="d">d</option>
+          </select> · x + 
+          <select id="patDrop4" class="formula-select">
+            <option value="">?</option><option value="a">a</option><option value="b">b</option><option value="c">c</option><option value="d">d</option>
+          </select> · y
+        </div>
       </div>
-
-      <div class="pattern-card" style="text-align: center; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px;">
-        <b style="color: #0969da; font-size: 13px; display: block; margin-bottom: 8px;">📌 รูปการคูณเมทริกซ์ (ประโยคสัญลักษณ์)</b>
-        
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0; font-size: 14px; font-weight: bold;">
-          <span class="math-matrix-bracket"><span style="display:inline-flex; gap:4px;"><span class="math-col"><span>a</span><span>c</span></span><span class="math-col"><span>b</span><span>d</span></span></span></span>
-          <span>·</span>
-          <span class="math-matrix-bracket"><span class="math-col"><span class="text-x">x</span><span class="text-y">y</span></span></span>
-          <span>=</span>
-          <span class="math-matrix-bracket"><span class="math-col"><span style="color:#0969da; font-size:11px;">ผลลัพธ์ตัวบน (X)</span><span style="color:#d97706; font-size:11px;">ผลลัพธ์ตัวล่าง (Y)</span></span></span>
-        </div>
-
-        <p style="font-size: 12px; color: #475569; margin-top: 8px; margin-bottom: 10px;">
-          ลองมาช่วยกันสร้าง "สูตรหาผลลัพธ์" กันเลย:
-        </p>
-
-        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center; font-size: 13px; font-weight: bold;">
-          <div class="formula-row">
-            <span>ผลลัพธ์ตัวบน (X) =</span>
-            <select id="patDrop1" class="formula-select">
-              <option value="" disabled selected>?</option>
-              <option value="a">a</option>
-              <option value="b">b</option>
-              <option value="c">c</option>
-              <option value="d">d</option>
-            </select>
-            <span>x  +</span>
-            <select id="patDrop2" class="formula-select">
-              <option value="" disabled selected>?</option>
-              <option value="a">a</option>
-              <option value="b">b</option>
-              <option value="c">c</option>
-              <option value="d">d</option>
-            </select>
-            <span>y</span>
-          </div>
-
-          <div class="formula-row">
-            <span>ผลลัพธ์ตัวล่าง (Y) =</span>
-            <select id="patDrop3" class="formula-select">
-              <option value="" disabled selected>?</option>
-              <option value="a">a</option>
-              <option value="b">b</option>
-              <option value="c">c</option>
-              <option value="d">d</option>
-            </select>
-            <span>x  +</span>
-            <select id="patDrop4" class="formula-select">
-              <option value="" disabled selected>?</option>
-              <option value="a">a</option>
-              <option value="b">b</option>
-              <option value="c">c</option>
-              <option value="d">d</option>
-            </select>
-            <span>y</span>
-          </div>
-        </div>
+      <div id="hintContent" class="hint-box">
+        💡 <b>คำใบ้:</b> แถวที่ 1 ของเมทริกซ์ A คือ (a, b) จะส่งผลต่อค่า Output<sub>x</sub> และ แถวที่ 2 (c, d) จะส่งผลต่อ Output<sub>y</sub>
       </div>
     `;
 
     modalActions.innerHTML = `
-      <button class="btn-purple" style="width: 100%;" onclick="verifyMatrixPatternSecret()">ตรวจคำตอบ 🔑</button>
+      <button class="btn-hint" onclick="toggleHint()">💡 คำใบ้</button>
+      <button class="btn-primary" onclick="verifyMatrixPatternSecret()">ตรวจสอบแบบรูป 🔑</button>
     `;
   }
   else if (targetLevel === 5) {
-    modalIcon.innerText = "🗝️";
-    modalTitle.innerText = "🗝️ Level 5: Cramer's Rule Discovery";
+    modalIcon.innerText = "📐";
+    modalTitle.innerText = "📐 ค้นพบความลับของ Determinant (det)";
     modalBodyText.innerHTML = `
-      <p style="font-size: 13px; color: #334155;">
-        ยินดีต้อนรับสู่การค้นพบกฎของคราเมอร์ (Cramer's Rule)!
+      <p style="font-size:13px; color:#334155;">
+        Determinant คือ<b>อัตราส่วนขยายพื้นที่</b>ของตาราง Grid ใน Output Space!
       </p>
-      <p style="margin-top: 8px; font-size: 12px; color: #475569;">
-        เราสามารถหาค่า x และ y ได้โดยตรงจากอัตราส่วนพื้นที่ det(A_x)/det(A) และ det(A_y)/det(A)<br>
-        โดยไม่ต้องแก้สมการทีละขั้นตอน!
+      <p style="margin-top:6px; font-size:12px; color:#475569;">
+        สำหรับเมทริกซ์ A = ${formatMathMatrixHTML('a', 'b', 'c', 'd')} จงเลือกสูตรคำนวณ det(A) ที่ถูกต้อง:
       </p>
+      <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+        <label class="option-card">
+          <input type="radio" name="detPatternOpt" value="radio1">
+          <span>det(A) = (a + d) - (b + c)</span>
+        </label>
+        <label class="option-card">
+          <input type="radio" name="detPatternOpt" value="radio2">
+          <span>det(A) = (a × d) - (b × c)</span>
+        </label>
+        <label class="option-card">
+          <input type="radio" name="detPatternOpt" value="radio3">
+          <span>det(A) = (a × b) + (c × d)</span>
+        </label>
+      </div>
+      <div id="hintContent" class="hint-box">
+        💡 <b>คำใบ้:</b> เอาผลคูณแนวเฉียงลง (a × d) ลบด้วย ผลคูณแนวเฉียงขึ้น (b × c)
+      </div>
     `;
     modalActions.innerHTML = `
-      <button class="btn-primary" onclick="closeModalAndLoadPending()">เริ่มทำ Level 5 🚀</button>
+      <button class="btn-hint" onclick="toggleHint()">💡 คำใบ้</button>
+      <button class="btn-primary" onclick="verifyDetPatternSecret()">ยืนยันการค้นพบ 🔑</button>
     `;
   }
   else if (targetLevel === 6) {
     modalIcon.innerText = "🙈";
-    modalTitle.innerText = "🙈 Level 6: Blind Test (Cramer's Mastery)";
+    modalTitle.innerText = "🙈 Level 6: Blind Test (Cramer's Rule Mastery)";
     modalBodyText.innerHTML = `
       <p style="font-size: 13px; color: #334155;">
-        <b>คำท้าทาย:</b> ในด่านนี้ Grid ฝั่ง Output จะถูกซ่อนไว้!
+        <b>ความท้าทายไร้ Grid!</b> ในด่านนี้ ตาราง Grid ในฝั่ง Output ถูกซ่อนแล้ว!
       </p>
       <p style="margin-top: 8px; font-size: 12px; color: #475569;">
-        คำนวณตำแหน่ง x และ y ด้วย Cramer's Rule จากตัวเลขฝั่งซ้ายมือ แล้ววางจุด P ให้ถูกต้อง
+        ใช้อัตราส่วนพื้นที่จาก Cramer's Rule ในแผงซ้ายมือ:<br>
+        • <b>x = det(A_x) / det(A)</b><br>
+        • <b>y = det(A_y) / det(A)</b><br>
+        คำนวณและวางจุด P ลงบนฝั่ง Input ได้เลย!
       </p>
     `;
     modalActions.innerHTML = `
-      <button class="btn-primary" onclick="closeModalAndLoadPending()">ท้าทาย Level 6 🚀</button>
+      <button class="btn-primary" onclick="closeModalAndLoadPending()">เริ่มทำ Blind Test 🚀</button>
     `;
   }
   else if (targetLevel === 7) {
-    modalIcon.innerText = "📐";
-    modalTitle.innerText = "📐 Level 7: Inverse Matrix Exploration";
+    modalIcon.innerText = "🔄";
+    modalTitle.innerText = "🔄 Level 7: สำรวจมโนทัศน์ Inverse Matrix";
     modalBodyText.innerHTML = `
       <p style="font-size: 13px; color: #334155;">
-        เรียนรู้มโนทัศน์ทางเรขาคณิตของ Inverse Matrix
+        ยินดีต้อนรับสู่ด่านสำรวจมโนทัศน์ทางเรขาคณิตของ <b>Inverse Matrix (A⁻¹)</b>!
       </p>
       <p style="margin-top: 8px; font-size: 12px; color: #475569;">
-        สำรวจกระบวนการสเกลขนาดพื้นที่ (1/det) และการปรับแกนให้ตั้งฉาก (Adjugate Matrix)
+        คุณจะได้เรียนรู้ว่า Inverse Matrix ทำหน้าที่ 2 อย่างคือ:<br>
+        1. <b>Adjugate Matrix:</b> ปรับแกนตารางที่บิดเอียงให้กลับมาตั้งฉาก<br>
+        2. <b>1 / det(A):</b> ย่อ/ขยายพื้นที่ตารางให้กลับคืนสู่ 1 ยูนิตมาตรฐาน
       </p>
     `;
     modalActions.innerHTML = `
-      <button class="btn-primary" onclick="closeModalAndLoadPending()">เริ่มทำ Level 7 🚀</button>
+      <button class="btn-primary" onclick="closeModalAndLoadPending()">เริ่มสำรวจ Inverse Matrix 🚀</button>
     `;
   }
 
   document.getElementById('obsModal').classList.add('active');
 }
 
-window.addEventListener('load', () => {
+// Initial setup on page load
+window.addEventListener('DOMContentLoaded', () => {
   loadLevel(0);
   showStartDialogue();
 });
