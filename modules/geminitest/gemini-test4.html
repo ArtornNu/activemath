@@ -595,12 +595,12 @@ const COLOR = {
 const levelsData = [
   { 
     level: 0, title: "Level 0: จุดตัดของเส้นตรง (ม.ต้น)", 
-    desc: "<b>ภารกิจ:</b> ให้ลากจุดสีเขียว P(x,y) ไปวางตรงตำแหน่งจุดตัดสีแดงของเส้นตรงทั้งสองเส้นบนระนาบพิกัดเพื่อทำภารกิจให้สำเร็จ",
+    desc: "<b>ภารกิจ:</b> ให้ลากจุดสีเขียว P(x,y) ไปพิกัดที่เป็นคำตอบของระบบสมการเชิงเส้น",
     type: "LINE_INTERSECTION", lines: [{m: 2, c: -1}, {m: -1, c: 5}], target: { x: 2, y: 3 },
     eq1: "L1: y = 2x - 1", eq2: "L2: y = -x + 5",
     showMatrix: false, showCramer: false, hideOutputGrid: false,
     consciousTitle: "🟢 แนะนำภารกิจแรก",
-    consciousText: "👋 ให้ลาก<b>จุดสีเขียว P</b> บนระนาบพิกัด ไปยัง<b>จุดตัดเป้าหมาย (วงกลมสีแดง)</b> ของเส้นตรงทั้งสองเส้นเพื่อทำภารกิจให้สำเร็จ!"
+    consciousText: "👋 ให้ลาก<b>จุดสีเขียว P</b> ไปยัง<b>พิกัดที่เป็นคำตอบ(วงกลมสีแดง)</b> ของระบบสมการเชิงเส้น!"
   },
   { 
     level: 1, title: "Level 1: Vector Identity (แกนมาตรฐาน)", 
@@ -1830,7 +1830,7 @@ function showStartDialogue() {
   modalBodyText.innerHTML = `
     <div style="font-size: 14px; line-height: 1.6; color: #334155; text-align: center; padding: 10px 0;">
       <p style="font-size: 16px; font-weight: bold; color: #16a34a; margin-bottom: 8px;">👋 ยินดีต้อนรับสู่ Linear System Journey!</p>
-      <p><b>คำแนะนำภารกิจแรก:</b> ให้ลาก<b>จุดสีเขียว P</b> บนระนาบพิกัด ไปวางตรงตำแหน่งจุดตัดสีแดงของเส้นตรงทั้งสองเส้น เพื่อทำภารกิจให้สำเร็จ!</p>
+      <p><b>คำแนะนำภารกิจแรก:</b> ให้ลาก<b>จุดสีเขียว P</b> ไปยังพิกัดที่เป็นคำตอบของระบบสมการเชิงเส้น เพื่อทำภารกิจให้สำเร็จ!</p>
     </div>
   `;
 
