@@ -367,6 +367,51 @@
       width: 100%; border: 1px solid var(--border-dark); border-radius: 6px;
       padding: 6px; font-size: 11px; font-family: inherit; resize: vertical;
     }
+
+    /* Guided tour overlay -- spotlight cutout via a huge box-shadow on the
+       highlight box itself, so only one element needs positioning per step
+       instead of a separate backdrop + hole. */
+    .tour-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      display: none; pointer-events: auto;
+    }
+    .tour-overlay.active { display: block; }
+    .tour-highlight-box {
+      position: fixed; border: 3px solid #fbbf24; border-radius: 10px;
+      box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.72), 0 0 18px 6px rgba(251, 191, 36, 0.55);
+      transition: left 0.35s ease, top 0.35s ease, width 0.35s ease, height 0.35s ease;
+      pointer-events: none; z-index: 2001;
+      animation: tourBlink 0.9s steps(1, end) infinite;
+    }
+    /* steps(1, end) makes this snap between states instead of fading, so it
+       reads as an actual blink rather than a gentle glow pulse. */
+    @keyframes tourBlink {
+      0%, 49% {
+        border-color: #fbbf24;
+        box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.72), 0 0 20px 7px rgba(251, 191, 36, 0.6);
+      }
+      50%, 100% {
+        border-color: rgba(251, 191, 36, 0.15);
+        box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.72), 0 0 0 0 rgba(251, 191, 36, 0);
+      }
+    }
+    .tour-callout {
+      position: fixed; z-index: 2002; width: 300px; max-width: calc(100vw - 32px);
+      background: #ffffff; border-radius: 12px; padding: 14px 16px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.25);
+      display: flex; flex-direction: column; gap: 8px;
+      transition: left 0.35s ease, top 0.35s ease;
+    }
+    .tour-callout-header { display: flex; justify-content: space-between; align-items: center; }
+    .tour-skip-btn {
+      background: #f3f4f6; border: 1px solid #d1d5db; color: #4b5563;
+      font-size: 11px; font-weight: 700; border-radius: 6px;
+      cursor: pointer; padding: 5px 10px;
+    }
+    .tour-skip-btn:hover { background: #e5e7eb; color: #1f2937; border-color: #9ca3af; }
+    .tour-callout-title { font-size: 14px; color: #0969da; }
+    .tour-callout-desc { font-size: 12px; line-height: 1.5; color: #334155; }
+    .tour-callout-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -377,17 +422,18 @@
     <span style="font-size: 10px; color: var(--text-muted);">เชื่อมโยงเรขาคณิตกับ Inverse Matrix และ Cramer's Rule</span>
   </div>
   <div class="nav-btns">
+    <button class="btn-reset" onclick="startAppTour()" title="แนะนำหน้าเว็บอีกครั้ง">🧭 แนะนำหน้าเว็บ</button>
     <button onclick="prevLevel()">◀ ย้อนกลับ</button>
     <span id="levelTitle" style="font-size: 13px; font-weight: bold; margin: 0 4px; min-width: 160px; text-align: center;">Level 0</span>
     <button onclick="nextLevel()">ถัดไป ▶</button>
     <button class="btn-reset" onclick="resetCurrentLevel()" style="margin-left:6px;">🔄 รีเซ็ต</button>
-    <button class="btn-solve" onclick="autoSolve()">💡 เฉลย</button>
+    <button class="btn-solve" id="btnAutoSolveHeader" onclick="autoSolve()">💡 เฉลย</button>
   </div>
 </header>
 
 <main id="mainContainer">
   <!-- Control Panel -->
-  <div class="panel">
+  <div class="panel" id="controlPanelEl">
     <h3>ศูนย์ควบคุม</h3>
     <p id="levelDesc" style="font-size: 11px; line-height: 1.3; color: #57606a;"></p>
 
@@ -539,7 +585,7 @@
   <!-- Output Space -->
   <div class="canvas-container" id="containerOut">
     <div class="canvas-label out-label" id="canvasOutTitle">โลกเอาต์พุต (Output Space)</div>
-    <label class="canvas-overlay-toggle">
+    <label class="canvas-overlay-toggle" id="stdGridToggleLabel">
       <span>📐 Standard Grid</span>
       <input type="checkbox" id="stdGridToggle" onchange="render()">
     </label>
@@ -585,6 +631,24 @@
     <div class="modal-actions" id="modalActions">
       <button id="btnHint" class="btn-hint" onclick="toggleHint()">💡 คำใบ้ (Hint)</button>
       <button id="btnPrimaryModal" class="btn-primary" onclick="closeModal()">เริ่มทำภารกิจ 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- Guided tour: spotlight-style walkthrough of the page's UI parts, shown
+     on first load (and replayable via the header's "🧭 แนะนำหน้าเว็บ" button). -->
+<div id="tourOverlay" class="tour-overlay">
+  <div id="tourHighlightBox" class="tour-highlight-box"></div>
+  <div id="tourCallout" class="tour-callout">
+    <div class="tour-callout-header">
+      <span id="tourStepBadge" class="badge">1/7</span>
+      <button class="tour-skip-btn" onclick="skipAppTour()">ข้าม Intro เข้าสู่บทเรียน ⏭️</button>
+    </div>
+    <h4 id="tourTitle" class="tour-callout-title"></h4>
+    <p id="tourDesc" class="tour-callout-desc"></p>
+    <div class="tour-callout-actions">
+      <button id="tourPrevBtn" class="btn-reset" onclick="tourPrevStep()">◀ ก่อนหน้า</button>
+      <button id="tourNextBtn" class="btn-primary" onclick="tourNextStep()">ถัดไป ▶</button>
     </div>
   </div>
 </div>
@@ -2858,10 +2922,140 @@ function showObservationModal(targetLevel = 1) {
   document.getElementById('obsModal').classList.add('active');
 }
 
+// ===================== Guided tour of the page's UI =====================
+// Spotlight-style walkthrough shown once on first load (and replayable via
+// the header's "🧭 แนะนำหน้าเว็บ" button), before the existing Level 0
+// welcome dialogue. Each step just needs a selector + short title/desc;
+// positioning, the pulsing highlight, and the callout placement are all
+// handled generically by renderTourStep().
+const tourSteps = [
+  {
+    selector: '#controlPanelEl',
+    title: '1. แผงควบคุม ข้อมูล และการบันทึกข้อมูล',
+    desc: 'แสดงภารกิจ คำแนะนำ เมทริกซ์ที่ใช้อยู่ และปุ่มบันทึกข้อมูลการทดลอง — ทุกอย่างที่ต้องรู้ก่อนลงมือทำอยู่ที่นี่'
+  },
+  {
+    selector: '#containerIn',
+    title: '2. โลกอินพุต (Input Space)',
+    desc: 'พื้นที่พิกัดต้นทาง — ลากจุดหรือเวกเตอร์ตรงนี้เพื่อทดลอง'
+  },
+  {
+    selector: '#containerOut',
+    title: '3. โลกเอาต์พุต (Output Space)',
+    desc: 'พื้นที่พิกัดหลังถูกแปลงด้วยเมทริกซ์ — ดูผลลัพธ์และตำแหน่งเป้าหมายที่นี่'
+  },
+  {
+    selector: '.nav-btns',
+    title: '4. แถบควบคุมด่าน (Navigator)',
+    desc: 'เปลี่ยนด่าน ย้อนกลับ/ถัดไป หรือรีเซ็ตด่านปัจจุบันได้จากแถบนี้'
+  },
+  {
+    selector: '#btnAutoSolveHeader',
+    title: '5. ปุ่มเฉลย',
+    desc: 'ติดขัดตรงไหน กดปุ่มนี้เพื่อดูคำตอบของด่านนั้นได้ทันที'
+  },
+  {
+    selector: '#snapToggleLabel',
+    title: '6. ปุ่ม Hard Snap',
+    desc: 'เปิดไว้จะช่วยให้จุด/เวกเตอร์ที่ลากไปตกที่ตำแหน่งจำนวนเต็มพอดี ลากได้ง่ายและแม่นยำขึ้น'
+  },
+  {
+    selector: '#stdGridToggleLabel',
+    title: '7. ปุ่ม Standard Grid',
+    desc: 'เปิดเพื่อดูตารางพิกัดมาตรฐานพร้อมพิกัดเป้าหมายในโลกเอาต์พุต',
+    dimInput: true
+  }
+];
+
+let tourIndex = 0;
+
+function startAppTour() {
+  tourIndex = 0;
+  document.getElementById('tourOverlay').classList.add('active');
+  renderTourStep();
+}
+
+function endAppTour() {
+  document.getElementById('tourOverlay').classList.remove('active');
+  document.getElementById('containerIn').style.opacity = '';
+}
+
+// "ข้าม Intro เข้าสู่บทเรียน" is available on every single step (not just
+// the last one) so the tour never has to be watched end-to-end -- skipping
+// still hands off into the Level 0 welcome dialogue, same as finishing
+// normally, so the learner always lands in the same place either way.
+function skipAppTour() {
+  finishAppTour();
+}
+
+function finishAppTour() {
+  endAppTour();
+  showStartDialogue();
+}
+
+function tourNextStep() {
+  if (tourIndex >= tourSteps.length - 1) { finishAppTour(); return; }
+  tourIndex++;
+  renderTourStep();
+}
+function tourPrevStep() {
+  if (tourIndex <= 0) return;
+  tourIndex--;
+  renderTourStep();
+}
+
+function renderTourStep() {
+  const step = tourSteps[tourIndex];
+  const containerIn = document.getElementById('containerIn');
+  // Step 7 (Standard Grid) lives entirely in Output Space -- dim Input
+  // Space instead of removing it from layout, so canvas sizing stays
+  // stable but attention is pulled fully to the highlighted side.
+  containerIn.style.opacity = step.dimInput ? '0.12' : '';
+
+  const target = document.querySelector(step.selector);
+  if (!target) { tourNextStep(); return; }
+
+  const rect = target.getBoundingClientRect();
+  const pad = 6;
+  const box = document.getElementById('tourHighlightBox');
+  box.style.left = (rect.left - pad) + 'px';
+  box.style.top = (rect.top - pad) + 'px';
+  box.style.width = (rect.width + pad * 2) + 'px';
+  box.style.height = (rect.height + pad * 2) + 'px';
+
+  document.getElementById('tourStepBadge').innerText = `${tourIndex + 1}/${tourSteps.length}`;
+  document.getElementById('tourTitle').innerText = step.title;
+  document.getElementById('tourDesc').innerText = step.desc;
+  document.getElementById('tourPrevBtn').style.visibility = tourIndex === 0 ? 'hidden' : 'visible';
+  document.getElementById('tourNextBtn').innerHTML = tourIndex === tourSteps.length - 1 ? 'พร้อมแล้ว ลุยเลย! 🚀' : 'ถัดไป ▶';
+
+  positionTourCallout(rect);
+}
+
+function positionTourCallout(rect) {
+  const callout = document.getElementById('tourCallout');
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const calloutW = callout.offsetWidth || 300;
+  const calloutH = callout.offsetHeight || 160;
+
+  let top = rect.bottom + 16;
+  if (top + calloutH > vh - 12) top = Math.max(12, rect.top - calloutH - 16);
+  let left = rect.left;
+  if (left + calloutW > vw - 12) left = vw - calloutW - 12;
+  if (left < 12) left = 12;
+
+  callout.style.top = top + 'px';
+  callout.style.left = left + 'px';
+}
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('tourOverlay').classList.contains('active')) renderTourStep();
+});
+
 // Initial setup on page load
 window.addEventListener('DOMContentLoaded', () => {
   loadLevel(0);
-  showStartDialogue();
+  startAppTour();
 });
 </script>
 
