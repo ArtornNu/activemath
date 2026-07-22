@@ -436,14 +436,12 @@
     </div>
 
     <!-- Level 7: Interactive Inverse Flow Section -->
+    <!-- The sub-step stepper buttons used to live here (direct-jump to any
+         of the 4 sub-steps), but the header's ◀/▶ buttons already drive
+         sub-step progression -- having both was confusing, so the in-panel
+         stepper was removed. setStep() still safely no-ops its stBtn*
+         styling lookups since those ids no longer exist. -->
     <div id="inverseActivitySection" style="display:none; flex-direction:column; gap:8px;">
-      <div class="stepper">
-        <button class="step-btn active" id="stBtn1" onclick="setStep(1)">1. Pure Scale</button>
-        <button class="step-btn" id="stBtn2" onclick="setStep(2)">2. 1/det</button>
-        <button class="step-btn" id="stBtn3" onclick="setStep(3)">3. Shear</button>
-        <button class="step-btn" id="stBtn4" onclick="setStep(4)">4. ตั้งฉาก (Adj)</button>
-      </div>
-
       <div style="display:flex; align-items:center; gap:6px;">
         <span class="badge" id="stepBadge">STEP 1</span>
         <h4 style="font-size:12px; font-weight:bold; color:var(--text);" id="stepTitle"> pure scaling </h4>
@@ -596,8 +594,13 @@ function formatMathMatrixHTML(a, b, c, d) {
   return `<span class="math-matrix-bracket"><span style="display:inline-flex; gap:4px;"><span class="math-col"><span class="text-x">${a}</span><span class="text-x">${c}</span></span><span class="math-col"><span class="text-y">${b}</span><span class="text-y">${d}</span></span></span></span>`;
 }
 
-function formatMathColumnVectorHTML(x, y, cssClass = "") {
-  return `<span class="math-matrix-bracket"><span class="math-col"><span class="${cssClass}">${x}</span><span class="${cssClass}">${y}</span></span></span>`;
+function formatMathColumnVectorHTML(x, y, cssClass = "", bracketClass = "math-matrix-bracket") {
+  // bracketClass lets a dark-background caller (see the black math-expr-box
+  // in showLevel1SuccessModal) swap in "dark-matrix-bracket" (white border)
+  // instead of the default black-bordered bracket, which was rendering
+  // invisibly -- black brackets on a black background -- and reading as
+  // "missing" brackets around the vectors there.
+  return `<span class="${bracketClass}"><span class="math-col"><span class="${cssClass}">${x}</span><span class="${cssClass}">${y}</span></span></span>`;
 }
 
 function buildExpression(a, b) {
@@ -746,6 +749,7 @@ window.__GAME_STATE__ = {
   animating: false,
   hasShownL1Dialogue: false,
   hasShownStep4Dialogue: false,
+  hasShownStep4NoGuideDialogue: false,
   labRecords: [],
   inverseStep: 1,
   selectedSummaryIndex: 0,
@@ -771,7 +775,40 @@ const cvsOut = document.getElementById('canvasOut');
 const ctxIn = cvsIn.getContext('2d');
 const ctxOut = cvsOut.getContext('2d');
 
-const SCALE = 24; 
+// Not const: levels whose target sits far from the origin (e.g. Level 5's
+// (5,10), Level 6's (7,9)) need to zoom out so the target ring stays inside
+// the visible canvas -- computeAutoScale() adjusts this once per render()
+// call. Every toScreen/toMath call in the file reads this same variable, so
+// updating it in one place is enough to keep all of them consistent.
+let SCALE = 24;
+
+function computeAutoScale(lvl) {
+  // Baseline of 6 reproduces the previous fixed SCALE=24 for every level
+  // that already fit comfortably (their target/solve points are all <= 5),
+  // so this only kicks in (zooms out) for levels with a genuinely larger target.
+  let maxExtent = 6;
+  if (lvl.target) maxExtent = Math.max(maxExtent, Math.abs(lvl.target.x), Math.abs(lvl.target.y));
+  if (lvl.solve) maxExtent = Math.max(maxExtent, Math.abs(lvl.solve.x), Math.abs(lvl.solve.y));
+
+  // Level 7 Step 4: A and the dragged G vectors are player-chosen, so A x G
+  // can land on values much bigger than any other level's fixed target --
+  // that's what was overflowing the output canvas. Fit to whatever the
+  // current case actually produces instead of assuming a fixed range.
+  if (lvl.type === "INVERSE_FLOW" && window.__GAME_STATE__.inverseStep === 4) {
+    const st = window.__GAME_STATE__;
+    const A = st.step4_matrixA;
+    const G = [st.step4_vecI.x, st.step4_vecJ.x, st.step4_vecI.y, st.step4_vecJ.y];
+    const OutM = multiplyMatrices(A, G);
+    [A[0], A[1], A[2], A[3], OutM[0], OutM[1], OutM[2], OutM[3],
+     st.step4_vecI.x, st.step4_vecI.y, st.step4_vecJ.x, st.step4_vecJ.y].forEach(v => {
+      maxExtent = Math.max(maxExtent, Math.abs(v));
+    });
+  }
+
+  const avail = Math.min(cvsOut.width, cvsOut.height) / 2 || 200;
+  const fitScale = (avail * 0.78) / maxExtent;
+  SCALE = Math.max(10, Math.min(24, fitScale));
+}
 
 const inverseStepMatrices = {
   step1: [3, 0, 0, 3],       
@@ -997,6 +1034,7 @@ function render() {
     return;
   }
 
+  computeAutoScale(lvl);
   drawGrid(ctxIn, cvsIn, true, "x", "y");
 
   if (lvl.type === "LINE_INTERSECTION") {
@@ -1038,8 +1076,13 @@ function render() {
 
     const shouldHideAllGrid = lvl.hideOutputGrid && !st.isLevelCleared;
     const isStdGridActive = document.getElementById('stdGridToggle').checked;
+    // Same gating the grid lines themselves already use -- Blind Test
+    // (Level 6) forces this off regardless of the checkbox, since showing
+    // the target's coordinates would hand over the answer it's designed to
+    // make the learner compute instead.
+    const showStdGridExtras = shouldHideAllGrid ? false : isStdGridActive;
 
-    drawGrid(ctxOut, cvsOut, shouldHideAllGrid ? false : isStdGridActive, labelX, labelY);
+    drawGrid(ctxOut, cvsOut, showStdGridExtras, labelX, labelY);
 
     if (!shouldHideAllGrid) {
       drawTransformationGrid(ctxOut, cvsOut, st.matrix);
@@ -1056,6 +1099,13 @@ function render() {
 
     if (lvl.target) {
       let pTarget = toScreen(cvsOut, lvl.target.x, lvl.target.y);
+
+      // Standard Grid on: drop dashed orange guide lines from the target
+      // straight to each axis, plus its coordinates -- gives a direct
+      // readout of the target's (x, y) instead of having to eyeball it
+      // against the grid.
+      if (showStdGridExtras) drawTargetCoordGuide(ctxOut, cvsOut, lvl.target);
+
       ctxOut.strokeStyle = COLOR.target; ctxOut.lineWidth = 2;
       ctxOut.beginPath(); ctxOut.arc(pTarget.x, pTarget.y, 8, 0, Math.PI*2); ctxOut.stroke();
 
@@ -1292,6 +1342,46 @@ function drawSummaryCanvasAnimation(t) {
   ctxIn.restore();
 }
 
+// Trials 1-2 of the Step 4 lab auto-show the target guide (no hiding it
+// behind a button a learner might not find) so they can find î_G/ĵ_G's
+// destination without hunting; trial 3 is the one place the guide is
+// opt-in, since that's the point where they're meant to apply the pattern
+// themselves. step4_history.length counts *completed* trials, so "< 2"
+// means "still working on trial 1 or 2".
+function step4GuideIsAuto(st) { return st.step4_history.length < 2; }
+function step4GuideVisible(st) { return step4GuideIsAuto(st) || st.step4_hintRevealed; }
+
+let step4BlinkFrame = null;
+let step4BlinkTime = 0;
+
+// Keeps a slow pulse animation running any time the guide is on screen --
+// whether it's auto-shown (trials 1-2) or manually opened via the hint
+// button (trial 3+) -- so it always reads as "look here" rather than a
+// static decoration; self-stops once the guide is hidden or the step ends.
+function syncStep4GuideBlink() {
+  const st = window.__GAME_STATE__;
+  const lvl = levelsData[st.currentLevelIndex];
+  const shouldBlink = lvl && lvl.type === "INVERSE_FLOW" && st.inverseStep === 4 && step4GuideVisible(st);
+
+  if (shouldBlink && !step4BlinkFrame) {
+    const loop = () => {
+      const st2 = window.__GAME_STATE__;
+      const lvl2 = levelsData[st2.currentLevelIndex];
+      if (!lvl2 || lvl2.type !== "INVERSE_FLOW" || st2.inverseStep !== 4 || !step4GuideVisible(st2)) {
+        step4BlinkFrame = null;
+        return;
+      }
+      step4BlinkTime += 0.05;
+      render();
+      step4BlinkFrame = requestAnimationFrame(loop);
+    };
+    loop();
+  } else if (!shouldBlink && step4BlinkFrame) {
+    cancelAnimationFrame(step4BlinkFrame);
+    step4BlinkFrame = null;
+  }
+}
+
 function drawStep4InputCanvas(ctx, cvs, vecI, vecJ) {
   const st = window.__GAME_STATE__;
   const A = st.step4_matrixA;
@@ -1307,23 +1397,27 @@ function drawStep4InputCanvas(ctx, cvs, vecI, vecJ) {
 
   ctx.save();
 
-  // The target-position hints are opt-in (revealed via the "ดูคำใบ้" button
-  // in the control box) instead of always-on, so the learner has to reason
-  // about where î_G/ĵ_G should go before being shown the answer position.
-  if (st.step4_hintRevealed) {
+  // Trials 1-2: guide is always visible. Trial 3+: guide is opt-in via the
+  // "ดูคำใบ้" button. Either way, once it's showing it pulses -- makes it
+  // easy to spot regardless of whether it appeared automatically or the
+  // learner opened it themselves.
+  if (step4GuideVisible(st)) {
+    const linePulse = 0.55 + 0.35 * Math.sin(step4BlinkTime * 3);
+    const ringPulse = 0.12 + 0.1 * Math.sin(step4BlinkTime * 3);
+
     ctx.setLineDash([4, 4]);
     ctx.lineWidth = 2;
 
-    ctx.strokeStyle = 'rgba(220, 38, 38, 0.6)';
+    ctx.strokeStyle = `rgba(220, 38, 38, ${linePulse})`;
     ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pTargetI.x, pTargetI.y); ctx.stroke();
-    ctx.fillStyle = 'rgba(220, 38, 38, 0.15)';
+    ctx.fillStyle = `rgba(220, 38, 38, ${ringPulse})`;
     ctx.beginPath(); ctx.arc(pTargetI.x, pTargetI.y, 11, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = COLOR.vectorI;
     ctx.beginPath(); ctx.arc(pTargetI.x, pTargetI.y, 11, 0, Math.PI * 2); ctx.stroke();
 
-    ctx.strokeStyle = 'rgba(147, 51, 234, 0.6)';
+    ctx.strokeStyle = `rgba(147, 51, 234, ${linePulse})`;
     ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pTargetJ.x, pTargetJ.y); ctx.stroke();
-    ctx.fillStyle = 'rgba(147, 51, 234, 0.15)';
+    ctx.fillStyle = `rgba(147, 51, 234, ${ringPulse})`;
     ctx.beginPath(); ctx.arc(pTargetJ.x, pTargetJ.y, 11, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = COLOR.vectorJ;
     ctx.beginPath(); ctx.arc(pTargetJ.x, pTargetJ.y, 11, 0, Math.PI * 2); ctx.stroke();
@@ -1404,6 +1498,64 @@ function drawGrid(ctx, cvs, showGrid = true, labelX = "x", labelY = "y") {
 
   drawColoredAxisLabel(ctx, labelX, cvs.width - 12, origin.y - 6, 'right', 'bottom');
   drawColoredAxisLabel(ctx, labelY, origin.x + 8, 12, 'left', 'top');
+
+  // (0,0) is always marked, on every canvas, independent of whether the
+  // grid lines themselves are shown -- gives a fixed reference point to
+  // read every other coordinate against (e.g. Blind Test hides the grid
+  // but should still anchor the origin).
+  ctx.save();
+  ctx.fillStyle = COLOR.muted;
+  ctx.beginPath(); ctx.arc(origin.x, origin.y, 3.5, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.font = 'bold 10px system-ui';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.fillStyle = COLOR.muted;
+  ctx.fillText('(0,0)', origin.x + 6, origin.y + 4);
+  ctx.restore();
+}
+
+// Standard-Grid-only overlay: dashed orange lines dropped from the target
+// point to each axis, plus small value labels where they land and the full
+// coordinate next to the target ring itself.
+function drawTargetCoordGuide(ctx, cvs, target) {
+  const pTarget = toScreen(cvs, target.x, target.y);
+  const pOnXAxis = toScreen(cvs, target.x, 0);
+  const pOnYAxis = toScreen(cvs, 0, target.y);
+  const fmt1 = v => (Math.round(v * 10) / 10).toString();
+
+  ctx.save();
+  ctx.setLineDash([5, 4]);
+  ctx.strokeStyle = COLOR.target;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pTarget.x, pTarget.y); ctx.lineTo(pOnXAxis.x, pOnXAxis.y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pTarget.x, pTarget.y); ctx.lineTo(pOnYAxis.x, pOnYAxis.y); ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = COLOR.targetDark;
+  ctx.font = 'bold 10px system-ui';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText(fmt1(target.x), pOnXAxis.x, pOnXAxis.y + 4);
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText(fmt1(target.y), pOnYAxis.x + 6, pOnYAxis.y);
+
+  // The point's own coordinate label picks whichever side has room, so it
+  // doesn't run under the Output/area badges pinned to the canvas's
+  // top-right corner or get clipped off the top/right edge.
+  const labelText = `(${fmt1(target.x)}, ${fmt1(target.y)})`;
+  ctx.font = 'bold 11px system-ui';
+  const textW = ctx.measureText(labelText).width;
+  const inTopRightBadgeZone = pTarget.y < 70 && pTarget.x > cvs.width - 150;
+  const tooCloseToRightEdge = pTarget.x + 10 + textW > cvs.width - 8;
+  const tooCloseToTopEdge = pTarget.y < 20;
+
+  const align = (inTopRightBadgeZone || tooCloseToRightEdge) ? 'right' : 'left';
+  const lx = align === 'right' ? pTarget.x - 12 : pTarget.x + 10;
+  const baseline = tooCloseToTopEdge ? 'top' : 'bottom';
+  const ly = tooCloseToTopEdge ? pTarget.y + 16 : pTarget.y - 10;
+
+  ctx.textAlign = align; ctx.textBaseline = baseline;
+  ctx.fillText(labelText, lx, ly);
+  ctx.restore();
 }
 
 function drawTransformationGrid(ctx, cvs, m) {
@@ -1542,7 +1694,7 @@ function handlePointer(e) {
 function setStep(step) {
   const st = window.__GAME_STATE__;
   st.inverseStep = step;
-  
+
   for (let i = 1; i <= 4; i++) {
     const btn = document.getElementById(`stBtn${i}`);
     if (btn) {
@@ -1550,6 +1702,17 @@ function setStep(step) {
       if (i === step) btn.classList.add('active');
       else if (i < step) btn.classList.add('completed');
     }
+  }
+
+  // Step 4's own mission line + intro modal already cover what the general
+  // per-level conscious-dialog box says -- hiding it here (and restoring it
+  // for steps 1-3, where it's the only guidance on screen) reclaims enough
+  // vertical space to keep Step 4's action buttons from being pushed below
+  // the fold as the trace log grows.
+  const consciousBox = document.getElementById('consciousBox');
+  if (consciousBox) {
+    const lvl = levelsData[st.currentLevelIndex];
+    consciousBox.style.display = (step === 4) ? 'none' : (lvl.consciousText ? 'flex' : 'none');
   }
 
   const badge = document.getElementById('stepBadge');
@@ -1649,35 +1812,31 @@ function renderStep4UI() {
   `).join('');
 
   if (st.step4_history.length === 0) {
-    historyRowsHTML = `<tr><td colspan="3" style="color:#94a3b8;">ยังไม่มีการบันทึก (ลองลากเวกเตอร์ดูก่อน หรือกดปุ่มคำใบ้ถ้าติดขัด)</td></tr>`;
+    historyRowsHTML = `<tr><td colspan="3" style="color:#94a3b8;">ยังไม่มีการบันทึก</td></tr>`;
   }
 
+  // Kept to one line (with the trial counter folded in) so it never pushes
+  // the action buttons below the fold -- the full explanation already lives
+  // in the Step 4 intro modal, this is just a standing reminder.
   text.innerHTML = `
-    <b>🎯 ภารกิจ:</b> ลากปลายเวกเตอร์ <b style="color:${COLOR.vectorI}">î_G (สีแดง)</b> และ <b style="color:${COLOR.vectorJ}">ĵ_G (สีม่วง)</b> ในโลกอินพุต ปรับเมทริกซ์ G จนกระทั่งรูปฝั่ง Output <b>"ตั้งฉากกันสมบูรณ์"</b> — ลองคิดดูก่อนว่าควรลากไปทางไหน ถ้าติดขัดกดปุ่ม 💡 คำใบ้ ด้านล่างได้เลย<br><br>
-    <div class="lab-box">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <b style="color:#86198f;">📋 บันทึก Log อัตโนมัติ:</b>
-        <span style="font-size:10px; font-weight:bold; color:#7e22ce;">สะสม: ${st.step4_history.length} / 3 กรณี</span>
-      </div>
-      <table class="lab-table" style="margin-top:2px;">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>เมทริกซ์ A</th>
-            <th>Adjugate Matrix (Adj) ที่พบ</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${historyRowsHTML}
-        </tbody>
-      </table>
-    </div>
+    <b>🎯 ภารกิจ:</b> ลาก <b style="color:${COLOR.vectorI}">î_G</b>/<b style="color:${COLOR.vectorJ}">ĵ_G</b> ให้ Output "ตั้งฉากกันสมบูรณ์" — สะสมแล้ว <b style="color:#7e22ce;">${st.step4_history.length}/3</b> กรณี
   `;
 
+  // Trials 1-2: guide is forced on, so there's nothing to toggle -- show a
+  // one-line status note instead of a button that would just lie about
+  // being able to hide something the learner can't actually hide right now.
+  const hintControlHTML = step4GuideIsAuto(st)
+    ? `<div class="instruction-card" style="text-align:center; font-size:10px; padding:6px 8px; color:#7d4e00; background:#fff8c5; border-color:#d4a72c;">💡 ไกด์กำลังแสดง (2 กรณีแรกเท่านั้น)</div>`
+    : `<button class="btn-hint" style="width:100%;" onclick="toggleStep4Hint()">
+        💡 ${st.step4_hintRevealed ? 'ซ่อนคำใบ้ตำแหน่งเป้าหมาย' : 'ดูคำใบ้ตำแหน่งเป้าหมาย'}
+      </button>`;
+
+  // Buttons render first (right under the mission line) and the trace log
+  // comes after, in its own height-capped/scrollable box -- so the controls
+  // a learner actually needs to act (randomize, hint, generalize) are always
+  // in view without scrolling, no matter how many rows the log has grown to.
   ctrl.innerHTML = `
-    <button class="btn-hint" style="width:100%;" onclick="toggleStep4Hint()">
-      💡 ${st.step4_hintRevealed ? 'ซ่อนคำใบ้ตำแหน่งเป้าหมาย' : 'ดูคำใบ้ตำแหน่งเป้าหมาย'}
-    </button>
+    ${hintControlHTML}
     <div style="display:flex; gap:6px; margin-top:6px;">
       <button class="btn btn-amber" style="flex:1;" onclick="randomizeStep4Matrix()">🎲 สุ่มโจทย์ A ใหม่ (กรณีถัดไป)</button>
       <button class="btn btn-green" style="flex:1;" onclick="autoSolveStep4()">🔑 เฉลยด่านนี้</button>
@@ -1685,9 +1844,30 @@ function renderStep4UI() {
     <button class="btn-purple" style="width:100%; margin-top:4px; padding:6px 10px;" onclick="openGeneralAdjModal()">
       ✨ สร้างกรณีทั่วไปของ Adj (${st.step4_history.length}/3)
     </button>
+    <div class="lab-box" style="margin-top:8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <b style="color:#86198f;">📋 บันทึก Log อัตโนมัติ</b>
+        <span style="font-size:10px; font-weight:bold; color:#7e22ce;">สะสม: ${st.step4_history.length} / 3 กรณี</span>
+      </div>
+      <div style="max-height:96px; overflow-y:auto; margin-top:2px;">
+        <table class="lab-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>เมทริกซ์ A</th>
+              <th>Adj ที่พบ</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${historyRowsHTML}
+          </tbody>
+        </table>
+      </div>
+    </div>
   `;
 
   if (outTitle) outTitle.innerText = "โลกเอาต์พุต (ผลคูณ A × G)";
+  syncStep4GuideBlink();
 }
 
 function checkStep4WinCondition() {
@@ -1732,18 +1912,38 @@ function checkStep4WinCondition() {
 
 function randomizeStep4Matrix() {
   const st = window.__GAME_STATE__;
-  const filtered = presetA_List.filter(m => m[0] !== st.step4_matrixA[0] || m[3] !== st.step4_matrixA[3]);
+  // Must exclude every matrix already *logged* in step4_history, not just
+  // the current one -- excluding only the current one let the random pick
+  // land back on an already-solved case (e.g. trial 3 re-serving trial 1's
+  // matrix), which checkStep4WinCondition() then silently treats as a
+  // duplicate and never logs, making it look like case 3 "didn't save."
+  const usedMatrices = [st.step4_matrixA, ...st.step4_history.map(h => h.A)];
+  const isUsed = m => usedMatrices.some(u => u[0] === m[0] && u[1] === m[1] && u[2] === m[2] && u[3] === m[3]);
+  let filtered = presetA_List.filter(m => !isUsed(m));
+  if (filtered.length === 0) {
+    // Fallback safety net in case every preset has somehow been used already.
+    filtered = presetA_List.filter(m => m[0] !== st.step4_matrixA[0] || m[3] !== st.step4_matrixA[3]);
+  }
   const nextA = filtered[Math.floor(Math.random() * filtered.length)];
-  
+
   st.step4_matrixA = [...nextA];
   st.step4_vecI = { x: 1, y: 0 };
   st.step4_vecJ = { x: 0, y: 1 };
   st.step4_hintRevealed = false;
   st.isLevelCleared = false;
   document.getElementById('clearBadge').style.display = 'none';
-  
+
   renderStep4UI();
   render();
+
+  // history.length === 2 here means the 2 guided trials are already logged
+  // and this new matrix is the 3rd (unguided) one -- tell the learner once,
+  // right as it starts, rather than letting them discover the guide is
+  // simply gone.
+  if (st.step4_history.length === 2 && !st.hasShownStep4NoGuideDialogue) {
+    st.hasShownStep4NoGuideDialogue = true;
+    showStep4NoGuideModal();
+  }
 }
 
 function toggleStep4Hint() {
@@ -2025,8 +2225,12 @@ function showLevel1SuccessModal() {
   modalTitle.innerText = "ทำไมจุดในสองโลกถึงอยู่ที่เดียวกัน?";
 
   const st = window.__GAME_STATE__;
-  const px = st.inputPos.x.toFixed(1);
-  const py = st.inputPos.y.toFixed(1);
+  // Whole-number positions (the common case, since Hard Snap rounds to
+  // integers) now read as "2" instead of "2.0" -- .toFixed(1) always forced
+  // a decimal point even when there was nothing after it.
+  const fmtCoord = v => (Math.round(v * 10) / 10).toString();
+  const px = fmtCoord(st.inputPos.x);
+  const py = fmtCoord(st.inputPos.y);
 
   modalBodyText.innerHTML = `
     <p>จุดใน <b>โลกอินพุต</b> กับ <b>โลกเอาต์พุต</b> อยู่ตำแหน่งเดียวกัน เพราะเมทริกซ์ที่ใช้คือ <b>เมทริกซ์เอกลักษณ์</b> ${formatMathMatrixHTML(1, 0, 0, 1)}</p>
@@ -2038,9 +2242,9 @@ function showLevel1SuccessModal() {
       <span style="color: #cccccc; font-weight: bold;">สมการเมทริกซ์:</span>
       <div style="display: flex; align-items: center; gap: 8px; font-size: 16px;">
         <span class="dark-matrix-bracket"><span style="display:inline-flex; gap:6px;"><span class="math-col"><span>1</span><span>0</span></span><span class="math-col"><span>0</span><span>1</span></span></span></span>
-        <span>${formatMathColumnVectorHTML(px, py)}</span>
+        <span>${formatMathColumnVectorHTML(px, py, "", "dark-matrix-bracket")}</span>
         <span>=</span>
-        <span>${formatMathColumnVectorHTML(px, py)}</span>
+        <span>${formatMathColumnVectorHTML(px, py, "", "dark-matrix-bracket")}</span>
       </div>
     </div>
   `;
@@ -2073,6 +2277,55 @@ function showStep4IntroModal() {
 
   modalActions.innerHTML = `
     <button class="btn-primary" onclick="closeModal()">ลองเลย 🚀</button>
+  `;
+
+  hideFeedback();
+  document.getElementById('obsModal').classList.add('active');
+}
+
+function showStep4NoGuideModal() {
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBodyText = document.getElementById('modalBodyText');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalActions = document.getElementById('modalActions');
+
+  modalIcon.innerText = "🙈";
+  modalTitle.innerText = "กรณีสุดท้าย: ไม่มีเส้นไกด์แล้ว!";
+  modalBodyText.innerHTML = `
+    <p style="font-size: 13px; color: #334155;">
+      สองกรณีแรกมีเส้นประนำทางให้ดูตลอด แต่<b>กรณีนี้ไม่มีให้แล้ว</b> — ลองใช้สิ่งที่สังเกตมาจาก 2 กรณีก่อนหน้า เดาตำแหน่งด้วยตัวเองดู
+    </p>
+    <p style="margin-top: 8px; font-size: 12px; color: #475569;">
+      ลองแล้วยังไม่ได้ก็ไม่เป็นไร — กดปุ่ม 💡 คำใบ้ ในแผงซ้ายมือ เพื่อดูตำแหน่งเป้าหมายได้เสมอ
+    </p>
+  `;
+  modalActions.innerHTML = `
+    <button class="btn-primary" onclick="closeModal()">ลองดู 🚀</button>
+  `;
+
+  hideFeedback();
+  document.getElementById('obsModal').classList.add('active');
+}
+
+function showStep4IncompleteModal() {
+  const st = window.__GAME_STATE__;
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBodyText = document.getElementById('modalBodyText');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalActions = document.getElementById('modalActions');
+
+  modalIcon.innerText = "🧪";
+  modalTitle.innerText = "ยังทำไม่ครบ 3 กรณี";
+  modalBodyText.innerHTML = `
+    <p style="font-size: 13px; color: #334155;">
+      ตอนนี้บันทึกไว้แล้ว <b>${st.step4_history.length} / 3</b> กรณี — ลองทำให้ครบ 3 กรณีก่อน จะได้เห็น Pattern ชัดพอที่จะสรุปเป็นสูตรทั่วไปในขั้นถัดไปได้
+    </p>
+    <p style="margin-top: 8px; font-size: 12px; color: #475569;">
+      กดปุ่ม <b>🎲 สุ่มโจทย์ A ใหม่ (กรณีถัดไป)</b> ในแผงซ้ายมือ แล้วลองหา Adjugate Matrix ของเคสนั้นต่อได้เลย
+    </p>
+  `;
+  modalActions.innerHTML = `
+    <button class="btn-primary" onclick="closeModal()">กลับไปลองต่อ 🔙</button>
   `;
 
   hideFeedback();
@@ -2131,6 +2384,7 @@ function loadLevel(idx) {
   }
   if (idx === 7) {
     window.__GAME_STATE__.hasShownStep4Dialogue = false;
+    window.__GAME_STATE__.hasShownStep4NoGuideDialogue = false;
     window.__GAME_STATE__.step4_hintRevealed = false;
   }
 
@@ -2238,6 +2492,13 @@ function nextLevel() {
     let nextIdx = idx + 1;
 
     if (lvl.type === "INVERSE_FLOW" && st.inverseStep === 4) {
+      // The level can't be skipped before all 3 guided/unguided trials are
+      // logged -- without at least 3 cases there isn't enough data for the
+      // "generalize the pattern" exercise to make sense.
+      if (st.step4_history.length < 3) {
+        showStep4IncompleteModal();
+        return;
+      }
       // Leaving Level 7's Adjugate lab -- show the "generalize the pattern"
       // exercise, built from the learner's own step4_history discoveries,
       // before moving on to the summary.
@@ -2494,6 +2755,7 @@ function showObservationModal(targetLevel = 1) {
     `;
 
     modalActions.innerHTML = `
+      <button class="btn-reset" onclick="closeModal()">🔙 กลับไปทดลองเพิ่ม</button>
       <button class="btn-hint" onclick="toggleHint()">💡 คำใบ้</button>
       <button class="btn-primary" onclick="verifyMatrixPatternSecret()">ตรวจคำตอบ 🔑</button>
     `;
@@ -2556,6 +2818,7 @@ function showObservationModal(targetLevel = 1) {
       </div>
     `;
     modalActions.innerHTML = `
+      <button class="btn-reset" onclick="closeModal()">🔙 กลับไปทดลองเพิ่ม</button>
       <button class="btn-hint" onclick="toggleHint()">💡 คำใบ้</button>
       <button class="btn-primary" onclick="verifyDetPatternSecret()">ยืนยันการค้นพบ 🔑</button>
     `;
