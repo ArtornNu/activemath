@@ -740,6 +740,7 @@ window.__GAME_STATE__ = {
   isLevelCleared: false,
   animating: false,
   hasShownL1Dialogue: false,
+  hasShownStep4Dialogue: false,
   labRecords: [],
   inverseStep: 1,
   selectedSummaryIndex: 0,
@@ -1591,6 +1592,10 @@ function setStep(step) {
     badge.innerText = "STEP 4 LAB";
     title.innerText = "4. กิจกรรมค้นหา Adjugate Matrix";
     renderStep4UI();
+    if (!st.hasShownStep4Dialogue) {
+      st.hasShownStep4Dialogue = true;
+      showStep4IntroModal();
+    }
   }
 
   render();
@@ -1982,6 +1987,32 @@ function showLevel1SuccessModal() {
   document.getElementById('obsModal').classList.add('active');
 }
 
+function showStep4IntroModal() {
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBodyText = document.getElementById('modalBodyText');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalActions = document.getElementById('modalActions');
+
+  modalIcon.innerText = "🧩";
+  modalTitle.innerText = "🧩 ภารกิจ: ลากให้ตั้งฉาก";
+
+  modalBodyText.innerHTML = `
+    <p style="font-size: 13px; color: #334155;">
+      ลากปลายลูกศร <b style="color:#ec4899;">î_G</b> และ <b style="color:#0284c7;">ĵ_G</b> ในโลกอินพุต ไปวางตรง <b>วงกลมเส้นประ (Hint)</b> ที่เห็นบนจอ
+    </p>
+    <p style="margin-top: 8px; font-size: 12px; color: #475569;">
+      พอวางถูกตำแหน่ง รูปฝั่งโลกเอาต์พุตจะกลายเป็นสี่เหลี่ยม<b>ตั้งฉาก</b>ทันที (ไม่เอียงอีกต่อไป) — นั่นแหละคือ Adjugate Matrix ที่ตามหา!
+    </p>
+  `;
+
+  modalActions.innerHTML = `
+    <button class="btn-primary" onclick="closeModal()">ลองเลย 🚀</button>
+  `;
+
+  hideFeedback();
+  document.getElementById('obsModal').classList.add('active');
+}
+
 function checkWinCondition() {
   const st = window.__GAME_STATE__;
   const lvl = levelsData[st.currentLevelIndex];
@@ -2031,6 +2062,9 @@ function loadLevel(idx) {
   window.__GAME_STATE__.isLevelCleared = false;
   if (idx === 1) {
     window.__GAME_STATE__.hasShownL1Dialogue = false;
+  }
+  if (idx === 7) {
+    window.__GAME_STATE__.hasShownStep4Dialogue = false;
   }
 
   document.getElementById('levelTitle').innerText = level.title;
@@ -2376,10 +2410,42 @@ function showObservationModal(targetLevel = 1) {
   else if (targetLevel === 5) {
     modalIcon.innerText = "📐";
     modalTitle.innerText = "📐 ค้นหาสูตรของดีเทอร์มิแนนต์";
+
+    // Reuse the matrices already seen in levels 1-4 (recorded via
+    // recordCurrentLabData) so the learner can look at real a,b,c,d -> det
+    // cases and spot the pattern themselves before picking an answer --
+    // same idea as the labTableHTML lookup in the Level 4 modal above.
+    // Determinant is recomputed here (signed) rather than reusing the
+    // stored r.det, which is an absolute value and would hide the sign.
+    let detTableHTML = "";
+    const st5 = window.__GAME_STATE__;
+    if (st5.labRecords.length > 0) {
+      detTableHTML = `
+        <div style="margin: 8px 0;">
+          <b style="font-size:11px; color:#0969da;">📋 ข้อมูลจากด่านก่อนหน้า ลองหา pattern ดูก่อนสิ:</b>
+          <table class="lab-table" style="margin-top:4px; background:white;">
+            <thead>
+              <tr><th>Level</th><th>เมทริกซ์ A</th><th>det(A)</th></tr>
+            </thead>
+            <tbody>
+              ${st5.labRecords.map(r => `
+                <tr>
+                  <td>L${r.level}</td>
+                  <td>${r.matrixHTML}</td>
+                  <td><b style="color:#0969da;">${getDet(r.matrix).toFixed(2)}</b></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
     modalBodyText.innerHTML = `
       <p style="font-size:13px; color:#334155;">
         <b>det (Determinant)</b> บอกว่าพื้นที่ Grid ในโลกเอาต์พุตขยายกี่เท่า! สำหรับ A = ${formatMathMatrixHTML('a', 'b', 'c', 'd')} เลือกสูตร det(A) ที่ถูกต้อง:
       </p>
+      ${detTableHTML}
       <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
         <label class="option-card">
           <input type="radio" name="detPatternOpt" value="radio1">
