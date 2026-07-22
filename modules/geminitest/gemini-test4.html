@@ -347,7 +347,7 @@
     <!-- Matrix Section -->
     <div id="matrixSection" class="matrix-section" style="display:none;">
       <div class="matrix-container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+        <div style="display:flex; justify-between; align-items:center; margin-bottom: 4px;">
           <label style="font-weight: 600; font-size: 11px; color: var(--text);">เมทริกซ์การแปลงพิกัด A:</label>
           <button class="btn-toggle-record" onclick="openPatternModalDirectly()">👁️ บันทึก Pattern</button>
         </div>
@@ -1452,10 +1452,32 @@ function openGeneralAdjModal() {
         <span>⇒ Adj(A) = </span>
         <div class="math-matrix-bracket">
           <div class="matrix-input-grid" style="grid-template-columns: 1fr 1fr; width: 140px; gap:4px;">
-            <select id="genAdj00" class="formula-select"><option value="d">d</option><option value="a">a</option><option value="-a">-a</option><option value="-d">-d</option></select>
-            <select id="genAdj01" class="formula-select"><option value="-b">-b</option><option value="b">b</option><option value="c">c</option><option value="-c">-c</option></select>
-            <select id="genAdj10" class="formula-select"><option value="-c">-c</option><option value="c">c</option><option value="b">b</option><option value="-b">-b</option></select>
-            <select id="genAdj11" class="formula-select"><option value="a">a</option><option value="d">d</option><option value="-a">-a</option><option value="-d">-d</option></select>
+            <select id="genAdj00" class="formula-select">
+              <option value="a">a</option>
+              <option value="d">d</option>
+              <option value="-a">-a</option>
+              <option value="-d">-d</option>
+            </select>
+            <select id="genAdj01" class="formula-select">
+              <option value="a">a</option>
+              <option value="-b">-b</option>
+              <option value="b">b</option>
+              <option value="c">c</option>
+              <option value="-c">-c</option>
+            </select>
+            <select id="genAdj10" class="formula-select">
+              <option value="a">a</option>
+              <option value="-c">-c</option>
+              <option value="c">c</option>
+              <option value="b">b</option>
+              <option value="-b">-b</option>
+            </select>
+            <select id="genAdj11" class="formula-select">
+              <option value="d">d</option>
+              <option value="a">a</option>
+              <option value="-a">-a</option>
+              <option value="-d">-d</option>
+            </select>
           </div>
         </div>
       </div>
@@ -1779,9 +1801,6 @@ function showObservationModal(targetLevel = 1) {
       </div>
     `;
   } else if (targetLevel === 3) {
-    // -------------------------------------------------------------
-    // DIALOGUE LEVEL 2-3 UPDATED: ตัดเรื่องเส้นขนาน เน้นการรวมกันของ x และ y
-    // -------------------------------------------------------------
     modalTitle.innerText = "📐 ชวนคิดก่อนเข้า Level 3: เมื่อแกนเป็นผลลัพธ์ของการรวมกันของ x และ y";
     modalBodyText.innerHTML = `
       <p style="font-size: 14px; font-weight: bold; color: #0969da;">"ถ้าแต่ละแกนเป็นผลลัพธ์ของ การรวมกันของ x และ y จะเกิดอะไรขึ้น?"</p>
