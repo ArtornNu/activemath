@@ -176,8 +176,8 @@
       background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 6px; padding: 6px;
       font-size: 10px; display: flex; flex-direction: column; gap: 4px;
     }
-    .lab-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 11px; }
-    .lab-table th, .lab-table td { border: 1px solid #f0abfc; padding: 4px; vertical-align: middle; }
+    .lab-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 10px; }
+    .lab-table th, .lab-table td { border: 1px solid #f0abfc; padding: 3px; vertical-align: middle; }
     .lab-table th { background: #fae8ff; color: #86198f; font-weight: bold; }
 
     .summary-card {
@@ -233,6 +233,25 @@
       background: rgba(255, 255, 255, 0.92); border: 1px solid var(--border);
       padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;
       display: flex; align-items: center; gap: 4px; backdrop-filter: blur(4px); cursor: pointer;
+    }
+
+    /* Step 4's "show guide" button / drag-instruction, floated over the
+       Input canvas instead of living in the side panel -- keeps that
+       panel space free for the log table. */
+    .step4-guide-overlay {
+      position: absolute; bottom: 10px; left: 10px; right: 10px; z-index: 10;
+      display: flex; justify-content: center; pointer-events: none;
+    }
+    .step4-guide-overlay > * { pointer-events: auto; }
+    .step4-guide-btn {
+      background: rgba(255, 248, 197, 0.95); border: 1px solid #d4a72c; color: #7d4e00;
+      padding: 6px 14px; border-radius: 14px; font-size: 11px; font-weight: 700;
+      cursor: pointer; backdrop-filter: blur(4px); box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .step4-guide-note {
+      background: rgba(255, 255, 255, 0.92); border: 1px solid var(--border); color: #475569;
+      padding: 4px 12px; border-radius: 12px; font-size: 10px; font-weight: 600;
+      backdrop-filter: blur(4px); text-align: center;
     }
 
     .output-info-label {
@@ -599,6 +618,7 @@
       <span>🧲 Hard Snap</span>
       <input type="checkbox" id="snapToggle" checked onchange="render()">
     </label>
+    <div class="step4-guide-overlay" id="step4GuideOverlay" style="display:none;"></div>
     <canvas id="canvasIn"></canvas>
   </div>
 
@@ -807,11 +827,11 @@ const levelsData = [
     level: 7, title: "Level 7: Inverse Matrix Exploration 📐", 
     desc: "<b>มโนทัศน์ทางเรขาคณิตของ Inverse Matrix:</b> สำรวจขั้นตอนการสเกลขนาดพื้นที่และการดึงแกนพิกัดกลับสู่ระบบตั้งฉาก", 
     type: "INVERSE_FLOW",
-    eq1: "A⁻¹ = (1 / det A) × Adj(A)", eq2: "Undo Transformation Flow",
+    eq1: "🔄 Undo Transformation Flow", eq2: "① ดึงให้ตั้งฉาก (Adj) → ② ย่อเหลือ Identity",
     showMatrix: false, showCramer: false, hideOutputGrid: false,
     introModal: true, recordsLabData: false,
     consciousTitle: "📐 เมทริกซ์ผกผันทำอะไรบ้าง",
-    consciousText: "<b>เมทริกซ์ผกผัน</b> ย้อนกลับ 2 ขั้น: ดึงแกนเอียงให้ตั้งฉาก (Adj) แล้วย่อพื้นที่คืน (1/det)"
+    consciousText: "<b>เมทริกซ์ผกผัน</b> คือการย้อนกลับ 2 ขั้น: <b>1)</b> ดึง space ที่บิดเบี้ยวให้กลับมาเป็นสี่เหลี่ยมตั้งฉาก (ด้วย Adj) <b>2)</b> ย่อสี่เหลี่ยมนั้นให้เหลือ 1×1 (Identity Matrix)"
   },
   {
     level: 8, title: "Level 8: สรุปภาพรวมมโนทัศน์ 🎓",
@@ -833,25 +853,31 @@ window.__GAME_STATE__ = {
   animating: false,
   hasShownL1Dialogue: false,
   hasShownStep4Dialogue: false,
-  hasShownStep4NoGuideDialogue: false,
   labRecords: [],
   inverseStep: 1,
   selectedSummaryIndex: 0,
-  
-  step4_matrixA: [2, 1, 1, 3], 
-  step4_vecI: { x: 1, y: 0 }, 
-  step4_vecJ: { x: 0, y: 1 }, 
+
+  step4_matrixA: [2, 1, 1, 3],
+  step4_vecI: { x: 1, y: 0 },
+  step4_vecJ: { x: 0, y: 1 },
   step4_draggedHandle: null,
   step4_hintRevealed: false,
-  step4_history: []
+  step4_history: [],
+  step4_generalFormulaCorrect: false
 };
 
+// Each preset's det(A) gives the side length of the "square" Output at the
+// win condition (Output = adj(A), and A x adj(A) = det(A) x I) -- picked to
+// spread across different sizes (3, 4, 5, 6, 8) instead of clustering on
+// the same det, while every entry stays a small integer so adj(A)'s
+// swap/negate pattern (and the resulting square's corners) always land on
+// whole numbers, never a fraction.
 const presetA_List = [
-  [2, 1, 1, 3],
-  [3, 2, 1, 2],
-  [3, 1, 1, 2],
-  [4, 1, 2, 3],
-  [2, 3, 1, 4]
+  [2, 1, 1, 3],   // det 5
+  [3, 2, 1, 2],   // det 4
+  [2, 3, 1, 3],   // det 3
+  [3, 3, 2, 4],   // det 6
+  [4, 4, 1, 3]    // det 8
 ];
 
 const cvsIn = document.getElementById('canvasIn');
@@ -934,6 +960,20 @@ function multiplyMatrices(A, G) {
   ];
 }
 
+function fmtCoord(v) {
+  const r = Math.round(v * 100) / 100;
+  return Object.is(r, -0) ? '0' : r.toString();
+}
+
+// Rounds to 1 decimal place, but drops the ".0" for whole numbers (4 not
+// 4.0) -- used for the Step 4 matrix-display panel, which needs finer
+// precision feedback than fmtCoord's integer-snapping while dragging.
+function fmt1(v) {
+  const r = Math.round(v * 10) / 10;
+  if (Object.is(r, -0)) return '0';
+  return Number.isInteger(r) ? r.toString() : r.toFixed(1);
+}
+
 function drawArrowhead(ctx, fromX, fromY, toX, toY, color) {
   const headlen = 8;
   const dx = toX - fromX;
@@ -948,6 +988,43 @@ function drawArrowhead(ctx, fromX, fromY, toX, toY, color) {
   ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
   ctx.closePath();
   ctx.fill();
+  ctx.restore();
+}
+
+// Shared red/purple "î, ĵ with coordinates at the tip" drawing, reused
+// anywhere a pair of basis-style vectors needs to be shown -- Level 7 Steps
+// 1-3's Input/Output canvases and Step 4's Output canvas all draw plain
+// arrows with no way to read off the exact landing point, this is what
+// adds the coordinate label at each tip. labelI/labelJ default to î/ĵ but
+// callers showing a transformed (not literally-basis) vector can pass ''
+// to just show the bare coordinates.
+function drawBasisVectorsWithLabels(ctx, cvs, vecI, vecJ, labelI = 'î', labelJ = 'ĵ') {
+  const orig = toScreen(cvs, 0, 0);
+  const pI = toScreen(cvs, vecI.x, vecI.y);
+  const pJ = toScreen(cvs, vecJ.x, vecJ.y);
+
+  ctx.save();
+
+  ctx.strokeStyle = COLOR.vectorI;
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pI.x, pI.y); ctx.stroke();
+  drawArrowhead(ctx, orig.x, orig.y, pI.x, pI.y, COLOR.vectorI);
+  ctx.fillStyle = COLOR.vectorI;
+  ctx.beginPath(); ctx.arc(pI.x, pI.y, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle = COLOR.vectorI; ctx.font = 'bold 11px system-ui';
+  ctx.fillText(`${labelI ? labelI + ' ' : ''}(${fmtCoord(vecI.x)}, ${fmtCoord(vecI.y)})`, pI.x + 8, pI.y - 6);
+
+  ctx.strokeStyle = COLOR.vectorJ;
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(orig.x, orig.y); ctx.lineTo(pJ.x, pJ.y); ctx.stroke();
+  drawArrowhead(ctx, orig.x, orig.y, pJ.x, pJ.y, COLOR.vectorJ);
+  ctx.fillStyle = COLOR.vectorJ;
+  ctx.beginPath(); ctx.arc(pJ.x, pJ.y, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle = COLOR.vectorJ; ctx.font = 'bold 11px system-ui';
+  ctx.fillText(`${labelJ ? labelJ + ' ' : ''}(${fmtCoord(vecJ.x)}, ${fmtCoord(vecJ.y)})`, pJ.x + 8, pJ.y - 6);
+
   ctx.restore();
 }
 
@@ -1234,39 +1311,48 @@ function render() {
       drawTransformationGrid(ctxOut, cvsOut, OutM);
       drawUnitAreaHighlight(ctxOut, cvsOut, OutM);
 
-      const orig = toScreen(cvsOut, 0, 0);
-      const vecOutI = toScreen(cvsOut, OutM[0], OutM[2]);
-      const vecOutJ = toScreen(cvsOut, OutM[1], OutM[3]);
-
       // Colors match vectorI/vectorJ (red/purple) -- the same convention
       // used everywhere else in the game for "first column / second
-      // column" -- instead of the separate pink/blue pair this used to
-      // use, which broke the one-color-per-meaning rule for no reason.
-      ctxOut.save();
-      ctxOut.lineWidth = 3;
-      ctxOut.strokeStyle = COLOR.vectorI;
-      ctxOut.beginPath(); ctxOut.moveTo(orig.x, orig.y); ctxOut.lineTo(vecOutI.x, vecOutI.y); ctxOut.stroke();
-      drawArrowhead(ctxOut, orig.x, orig.y, vecOutI.x, vecOutI.y, COLOR.vectorI);
-
-      ctxOut.strokeStyle = COLOR.vectorJ;
-      ctxOut.beginPath(); ctxOut.moveTo(orig.x, orig.y); ctxOut.lineTo(vecOutJ.x, vecOutJ.y); ctxOut.stroke();
-      drawArrowhead(ctxOut, orig.x, orig.y, vecOutJ.x, vecOutJ.y, COLOR.vectorJ);
-      ctxOut.restore();
+      // column". Coordinates at the tip (via the shared helper) so the
+      // exact landing point is always readable, not just the arrow's
+      // rough position.
+      drawBasisVectorsWithLabels(
+        ctxOut, cvsOut,
+        { x: OutM[0], y: OutM[2] },
+        { x: OutM[1], y: OutM[3] },
+        '', ''
+      );
 
       const dotProd = OutM[0]*OutM[1] + OutM[2]*OutM[3];
+      // "Orthogonal" alone (off-diagonal ~0, positive diagonal) only rules
+      // out a skewed rectangle -- it still allows an axis-aligned RECTANGLE
+      // with unequal side lengths, which isn't actually the adjugate
+      // direction. Requiring the two diagonal entries to also match is what
+      // pins it down to a true square, i.e. G proportional to adj(A).
       const isOrthogonal = Math.abs(OutM[1]) < 0.01 && Math.abs(OutM[2]) < 0.01 && OutM[0] > 0 && OutM[3] > 0;
-      
+      const isSquare = isOrthogonal && Math.abs(OutM[0] - OutM[3]) < 0.01;
+
+      let statusText, statusColor;
+      if (isSquare) {
+        statusText = "📐 ตั้งฉากสมบูรณ์! (Adjugate Matrix)";
+        statusColor = COLOR.pointP;
+      } else if (isOrthogonal) {
+        statusText = `ตั้งฉากแล้ว แต่ยังไม่ใช่สี่เหลี่ยมจัตุรัส (${OutM[0].toFixed(1)} ≠ ${OutM[3].toFixed(1)})`;
+        statusColor = COLOR.line2;
+      } else {
+        statusText = `มุมบิดเอียง (Dot product: ${dotProd.toFixed(1)})`;
+        statusColor = COLOR.line2;
+      }
+
       ctxOut.save();
       ctxOut.font = 'bold 11px system-ui';
-      ctxOut.fillStyle = isOrthogonal ? COLOR.pointP : COLOR.line2;
-      ctxOut.fillText(
-        isOrthogonal ? "📐 ตั้งฉากสมบูรณ์! (Adjugate Matrix)" : `มุมบิดเอียง (Dot product: ${dotProd.toFixed(1)})`,
-        10, cvsOut.height - 12
-      );
+      ctxOut.fillStyle = statusColor;
+      ctxOut.fillText(statusText, 10, cvsOut.height - 12);
       ctxOut.restore();
 
     } else {
       drawInputUnitAreaHighlight(ctxIn, cvsIn);
+      drawBasisVectorsWithLabels(ctxIn, cvsIn, { x: 1, y: 0 }, { x: 0, y: 1 });
 
       let activeMatrix = inverseStepMatrices.step1;
       if (st.inverseStep === 1) activeMatrix = inverseStepMatrices.step1;
@@ -1276,6 +1362,12 @@ function render() {
       drawGrid(ctxOut, cvsOut, true, "x", "y");
       drawTransformationGrid(ctxOut, cvsOut, activeMatrix);
       drawUnitAreaHighlight(ctxOut, cvsOut, activeMatrix);
+      drawBasisVectorsWithLabels(
+        ctxOut, cvsOut,
+        { x: activeMatrix[0], y: activeMatrix[2] },
+        { x: activeMatrix[1], y: activeMatrix[3] },
+        '', ''
+      );
     }
   }
 }
@@ -1426,12 +1518,10 @@ function drawSummaryCanvasAnimation(t) {
   ctxIn.restore();
 }
 
-// Trials 1-2 of the Step 4 lab auto-show the target guide (no hiding it
-// behind a button a learner might not find) so they can find î_G/ĵ_G's
-// destination without hunting; trial 3 is the one place the guide is
-// opt-in, since that's the point where they're meant to apply the pattern
-// themselves. step4_history.length counts *completed* trials, so "< 2"
-// means "still working on trial 1 or 2".
+// Trials 1-2 auto-show the target guide; trial 3 hides it by default so
+// the learner has to think for themselves, with a floating button over the
+// Input canvas (see renderStep4UI) to reveal it on demand. Whenever it IS
+// showing -- auto or manually revealed -- it blinks the same way.
 function step4GuideIsAuto(st) { return st.step4_history.length < 2; }
 function step4GuideVisible(st) { return step4GuideIsAuto(st) || st.step4_hintRevealed; }
 
@@ -1520,7 +1610,7 @@ function drawStep4InputCanvas(ctx, cvs, vecI, vecJ) {
   ctx.beginPath(); ctx.arc(pI.x, pI.y, 8, 0, Math.PI*2); ctx.fill();
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
   ctx.fillStyle = COLOR.vectorI; ctx.font = 'bold 11px system-ui';
-  ctx.fillText(`î_G (${vecI.x}, ${vecI.y})`, pI.x + 10, pI.y - 6);
+  ctx.fillText(`î_G (${fmtCoord(vecI.x)}, ${fmtCoord(vecI.y)})`, pI.x + 10, pI.y - 6);
 
   ctx.strokeStyle = COLOR.vectorJ;
   ctx.lineWidth = 3.5;
@@ -1531,7 +1621,7 @@ function drawStep4InputCanvas(ctx, cvs, vecI, vecJ) {
   ctx.beginPath(); ctx.arc(pJ.x, pJ.y, 8, 0, Math.PI*2); ctx.fill();
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
   ctx.fillStyle = COLOR.vectorJ; ctx.font = 'bold 11px system-ui';
-  ctx.fillText(`ĵ_G (${vecJ.x}, ${vecJ.y})`, pJ.x + 10, pJ.y - 6);
+  ctx.fillText(`ĵ_G (${fmtCoord(vecJ.x)}, ${fmtCoord(vecJ.y)})`, pJ.x + 10, pJ.y - 6);
 
   ctx.restore();
 }
@@ -1759,6 +1849,7 @@ function handlePointer(e) {
       else if (st.step4_draggedHandle === 'j') st.step4_vecJ = mPos;
 
       checkStep4WinCondition();
+      updateStep4MatrixDisplay();
       render();
     }
     return;
@@ -1798,6 +1889,11 @@ function setStep(step) {
     const lvl = levelsData[st.currentLevelIndex];
     consciousBox.style.display = (step === 4) ? 'none' : (lvl.consciousText ? 'flex' : 'none');
   }
+
+  // The floating guide button/note over the Input canvas is Step 4-only --
+  // hide it on every other sub-step (renderStep4UI turns it back on).
+  const guideOverlay = document.getElementById('step4GuideOverlay');
+  if (guideOverlay && step !== 4) guideOverlay.style.display = 'none';
 
   const badge = document.getElementById('stepBadge');
   const title = document.getElementById('stepTitle');
@@ -1865,81 +1961,125 @@ function setStep(step) {
   render();
 }
 
+// Just the "A x G" readout, factored out of renderStep4UI so the drag
+// handler can refresh it on every mousemove without also re-rendering the
+// buttons/log table (which don't change mid-drag) -- keeps live-update
+// during dragging cheap. 1 decimal place, whole numbers shown with no
+// trailing ".0" (via fmt1).
+function updateStep4MatrixDisplay() {
+  const st = window.__GAME_STATE__;
+  const display = document.getElementById('matrixDisplay');
+  if (!display) return;
+  const A = st.step4_matrixA;
+  const G = [st.step4_vecI.x, st.step4_vecJ.x, st.step4_vecI.y, st.step4_vecJ.y];
+  display.innerHTML = `
+    <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+      <span>A = ${formatMathMatrixHTML(A[0], A[1], A[2], A[3])}</span>
+      <span>× G = ${formatMathMatrixHTML(fmt1(G[0]), fmt1(G[1]), fmt1(G[2]), fmt1(G[3]))}</span>
+    </div>
+  `;
+}
+
+// Floats over the Input canvas instead of sitting in the side panel: a
+// "แสดงไกด์" button on trial 3 (before it's been revealed), or a short
+// instruction note once the guide is showing (auto on trials 1-2, or after
+// the button/เฉลย reveals it on trial 3+).
+function updateStep4GuideOverlay() {
+  const st = window.__GAME_STATE__;
+  const overlay = document.getElementById('step4GuideOverlay');
+  if (!overlay) return;
+
+  if (step4GuideVisible(st)) {
+    overlay.innerHTML = `<div class="step4-guide-note">🎯 ลาก î_G/ĵ_G ไปที่วงกลมเป้าหมายที่กระพริบ</div>`;
+  } else {
+    overlay.innerHTML = `<button class="step4-guide-btn" onclick="revealStep4Guide()">💡 แสดงไกด์</button>`;
+  }
+  overlay.style.display = 'flex';
+}
+
+function revealStep4Guide() {
+  const st = window.__GAME_STATE__;
+  st.step4_hintRevealed = true;
+  updateStep4GuideOverlay();
+  render();
+}
+
 function renderStep4UI() {
   const st = window.__GAME_STATE__;
   const badge = document.getElementById('stepBadge');
   const title = document.getElementById('stepTitle');
-  const display = document.getElementById('matrixDisplay');
   const text = document.getElementById('instructionText');
   const ctrl = document.getElementById('controlBox');
   const outTitle = document.getElementById('canvasOutTitle');
 
-  const A = st.step4_matrixA;
-  const G = [st.step4_vecI.x, st.step4_vecJ.x, st.step4_vecI.y, st.step4_vecJ.y];
-
   badge.innerText = "STEP 4 LAB";
   title.innerText = "4. กิจกรรมค้นหา Adjugate Matrix";
 
-  display.innerHTML = `
-    <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
-      <span>A = ${formatMathMatrixHTML(A[0], A[1], A[2], A[3])}</span>
-      <span>× G = ${formatMathMatrixHTML(G[0], G[1], G[2], G[3])}</span>
-    </div>
-  `;
+  updateStep4MatrixDisplay();
 
-  let historyRowsHTML = st.step4_history.map((h, i) => `
+  // Adj(A) x A always lands on det(A) x I (a diagonal matrix, off-diagonal
+  // terms cancel to 0) -- showing it alongside A and Adj(A) is what lets a
+  // learner notice *why* the adjugate pattern works, not just what it is.
+  // Shaded gray so it reads as derived/bonus info rather than a third thing
+  // to memorize.
+  let historyRowsHTML = st.step4_history.map((h, i) => {
+    const adjTimesA = multiplyMatrices(h.Adj, h.A);
+    return `
     <tr>
       <td>${i + 1}</td>
       <td>${formatMathMatrixHTML(h.A[0], h.A[1], h.A[2], h.A[3])}</td>
       <td><b style="color:#86198f;">${formatMathMatrixHTML(h.Adj[0], h.Adj[1], h.Adj[2], h.Adj[3])}</b></td>
+      <td style="background:#f1f5f9;">${formatMathMatrixHTML(fmtCoord(adjTimesA[0]), fmtCoord(adjTimesA[1]), fmtCoord(adjTimesA[2]), fmtCoord(adjTimesA[3]))}</td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 
   if (st.step4_history.length === 0) {
-    historyRowsHTML = `<tr><td colspan="3" style="color:#94a3b8;">ยังไม่มีการบันทึก</td></tr>`;
+    historyRowsHTML = `<tr><td colspan="4" style="color:#94a3b8;">ยังไม่มีการบันทึก</td></tr>`;
   }
 
   // Kept to one line (with the trial counter folded in) so it never pushes
   // the action buttons below the fold -- the full explanation already lives
-  // in the Step 4 intro modal, this is just a standing reminder.
+  // in the Step 4 intro modal, this is just a standing reminder. Font
+  // trimmed to 10px -- the guide/instruction text used to live here too but
+  // now floats over the canvas instead, so this line just needs to be a
+  // quick reminder, not carry the full instruction.
   text.innerHTML = `
-    <b>🎯 ภารกิจ:</b> ลาก <b style="color:${COLOR.vectorI}">î_G</b>/<b style="color:${COLOR.vectorJ}">ĵ_G</b> ให้ Output "ตั้งฉากกันสมบูรณ์" — สะสมแล้ว <b style="color:#7e22ce;">${st.step4_history.length}/3</b> กรณี
+    <b style="font-size:10.5px;">🎯 ภารกิจ:</b> <span style="font-size:10.5px;">ลาก <b style="color:${COLOR.vectorI}">î_G</b>/<b style="color:${COLOR.vectorJ}">ĵ_G</b> ให้ Output ตั้งฉาก — สะสม <b style="color:#7e22ce;">${st.step4_history.length}/3</b></span>
   `;
 
-  // Trials 1-2: guide is forced on, so there's nothing to toggle -- show a
-  // one-line status note instead of a button that would just lie about
-  // being able to hide something the learner can't actually hide right now.
-  const hintControlHTML = step4GuideIsAuto(st)
-    ? `<div class="instruction-card" style="text-align:center; font-size:10px; padding:6px 8px; color:#7d4e00; background:#fff8c5; border-color:#d4a72c;">💡 ไกด์กำลังแสดง (2 กรณีแรกเท่านั้น)</div>`
-    : `<button class="btn-hint" style="width:100%;" onclick="toggleStep4Hint()">
-        💡 ${st.step4_hintRevealed ? 'ซ่อนคำใบ้ตำแหน่งเป้าหมาย' : 'ดูคำใบ้ตำแหน่งเป้าหมาย'}
-      </button>`;
+  updateStep4GuideOverlay();
 
   // Buttons render first (right under the mission line) and the trace log
   // comes after, in its own height-capped/scrollable box -- so the controls
   // a learner actually needs to act (randomize, hint, generalize) are always
   // in view without scrolling, no matter how many rows the log has grown to.
+  // Buttons use tighter inline padding/line-height than the shared .btn/
+  // .btn-purple defaults so 2-line labels (e.g. "สุ่มโจทย์ A ใหม่ (กรณีถัดไป)")
+  // don't eat vertical space that the log table below could use instead.
+  // The old in-panel hint/guide control is gone entirely -- it now floats
+  // over the Input canvas (#step4GuideOverlay) so this box is pure log table.
   ctrl.innerHTML = `
-    ${hintControlHTML}
-    <div style="display:flex; gap:6px; margin-top:6px;">
-      <button class="btn btn-amber" style="flex:1;" onclick="randomizeStep4Matrix()">🎲 สุ่มโจทย์ A ใหม่ (กรณีถัดไป)</button>
-      <button class="btn btn-green" style="flex:1;" onclick="autoSolveStep4()">🔑 เฉลยด่านนี้</button>
+    <div style="display:flex; gap:5px;">
+      <button class="btn btn-amber" style="flex:1; padding:4px 6px; line-height:1.15; font-size:10px;" onclick="randomizeStep4Matrix()">🎲 สุ่มโจทย์ A ใหม่ (กรณีถัดไป)</button>
+      <button class="btn btn-green" style="flex:1; padding:4px 6px; line-height:1.15; font-size:10px;" onclick="autoSolveStep4()">🔑 เฉลยด่านนี้</button>
     </div>
-    <button class="btn-purple" style="width:100%; margin-top:4px; padding:6px 10px;" onclick="openGeneralAdjModal()">
+    <button class="btn-purple" style="width:100%; margin-top:4px; padding:4px 10px; font-size:11px; line-height:1.15;" onclick="openGeneralAdjModal()">
       ✨ สร้างกรณีทั่วไปของ Adj (${st.step4_history.length}/3)
     </button>
-    <div class="lab-box" style="margin-top:8px;">
+    <div class="lab-box" style="margin-top:5px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <b style="color:#86198f;">📋 บันทึก Log อัตโนมัติ</b>
-        <span style="font-size:10px; font-weight:bold; color:#7e22ce;">สะสม: ${st.step4_history.length} / 3 กรณี</span>
+        <b style="color:#86198f; font-size:10px;">📋 บันทึก Log อัตโนมัติ</b>
+        <span style="font-size:9px; font-weight:bold; color:#7e22ce;">สะสม: ${st.step4_history.length} / 3 กรณี</span>
       </div>
-      <div style="max-height:96px; overflow-y:auto; margin-top:2px;">
+      <div style="max-height:190px; overflow-y:auto; margin-top:2px;">
         <table class="lab-table">
           <thead>
             <tr>
               <th>#</th>
               <th>เมทริกซ์ A</th>
               <th>Adj ที่พบ</th>
+              <th style="background:#f1f5f9;">Adj×A</th>
             </tr>
           </thead>
           <tbody>
@@ -1963,14 +2103,20 @@ function checkStep4WinCondition() {
   const G = [st.step4_vecI.x, st.step4_vecJ.x, st.step4_vecI.y, st.step4_vecJ.y];
   const OutM = multiplyMatrices(A, G);
 
-  // Same tolerance as the "ตั้งฉากสมบูรณ์" indicator drawn in render() -- this
-  // used to be an exact === 0 check, which disagreed with the visual state
-  // and made the level effectively unwinnable whenever "Hard Snap" was off
-  // (a mouse drag almost never lands on exactly 0).
+  // Same tolerance as the indicator drawn in render() -- this used to be an
+  // exact === 0 check, which disagreed with the visual state and made the
+  // level effectively unwinnable whenever "Hard Snap" was off (a mouse drag
+  // almost never lands on exactly 0).
   const ORTHO_TOLERANCE = 0.01;
   const isOrthogonal = Math.abs(OutM[1]) < ORTHO_TOLERANCE && Math.abs(OutM[2]) < ORTHO_TOLERANCE && OutM[0] > 0 && OutM[3] > 0;
+  // Orthogonal alone still allows an axis-aligned RECTANGLE with unequal
+  // side lengths (G some non-adjugate-proportional value) -- that used to
+  // get logged and win the level even though it wasn't actually the
+  // adjugate direction. Require the two diagonal entries to match too, so
+  // only a true square (G proportional to adj(A)) counts.
+  const isSquare = isOrthogonal && Math.abs(OutM[0] - OutM[3]) < ORTHO_TOLERANCE;
 
-  if (isOrthogonal) {
+  if (isSquare) {
     const isAlreadyLogged = st.step4_history.some(h => 
       h.A[0] === A[0] && h.A[1] === A[1] && h.A[2] === A[2] && h.A[3] === A[3]
     );
@@ -2019,34 +2165,20 @@ function randomizeStep4Matrix() {
 
   renderStep4UI();
   render();
-
-  // history.length === 2 here means the 2 guided trials are already logged
-  // and this new matrix is the 3rd (unguided) one -- tell the learner once,
-  // right as it starts, rather than letting them discover the guide is
-  // simply gone.
-  if (st.step4_history.length === 2 && !st.hasShownStep4NoGuideDialogue) {
-    st.hasShownStep4NoGuideDialogue = true;
-    showStep4NoGuideModal();
-  }
 }
 
-function toggleStep4Hint() {
-  const st = window.__GAME_STATE__;
-  st.step4_hintRevealed = !st.step4_hintRevealed;
-  renderStep4UI();
-  render();
-}
-
+// Used to teleport î_G/ĵ_G straight to the answer, which meant the very
+// first thing a learner could see on a fresh case was already "solved"
+// with no drag on their part -- the whole point of the lab is the drag, so
+// this now only reveals the target-position guide (same effect as the hint
+// toggle) and leaves placing the vectors to the learner, every time.
 function autoSolveStep4() {
   const st = window.__GAME_STATE__;
-  const A = st.step4_matrixA;
-  st.step4_vecI = { x: A[3], y: -A[2] };
-  st.step4_vecJ = { x: -A[1], y: A[0] };
   st.step4_hintRevealed = true;
 
-  checkStep4WinCondition();
   renderStep4UI();
   render();
+  showFeedback("💡 ไกด์เปิดแล้ว — ลากปลาย î_G/ĵ_G ไปที่วงกลมเป้าหมายด้วยตัวเองได้เลย!", true);
 }
 
 let generalAdjModalAdvanceMode = false;
@@ -2062,16 +2194,20 @@ function openGeneralAdjModal(advanceOnClose = false) {
   modalIcon.innerText = "🧩";
   modalTitle.innerText = "สร้างกรณีทั่วไปของ Adjugate Matrix (Adj)";
 
-  let historyRowsHTML = st.step4_history.map((h, i) => `
+  let historyRowsHTML = st.step4_history.map((h, i) => {
+    const adjTimesA = multiplyMatrices(h.Adj, h.A);
+    return `
     <tr>
       <td><b>กรณีที่ ${i + 1}</b></td>
       <td>${formatMathMatrixHTML(h.A[0], h.A[1], h.A[2], h.A[3])}</td>
       <td><b style="color:#86198f;">${formatMathMatrixHTML(h.Adj[0], h.Adj[1], h.Adj[2], h.Adj[3])}</b></td>
+      <td style="background:#f1f5f9;">${formatMathMatrixHTML(fmtCoord(adjTimesA[0]), fmtCoord(adjTimesA[1]), fmtCoord(adjTimesA[2]), fmtCoord(adjTimesA[3]))}</td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 
   if (st.step4_history.length === 0) {
-    historyRowsHTML = `<tr><td colspan="3" style="color:#94a3b8;">ยังไม่มีการบันทึก (โปรดทำกิจกรรมใน Step 4 อย่างน้อย 3 กรณี)</td></tr>`;
+    historyRowsHTML = `<tr><td colspan="4" style="color:#94a3b8;">ยังไม่มีการบันทึก (โปรดทำกิจกรรมใน Step 4 อย่างน้อย 3 กรณี)</td></tr>`;
   }
 
   modalBodyText.innerHTML = `
@@ -2083,12 +2219,14 @@ function openGeneralAdjModal(advanceOnClose = false) {
             <th>กรณี</th>
             <th>เมทริกซ์ A</th>
             <th>Adjugate Matrix (Adj) ที่พบ</th>
+            <th style="background:#f1f5f9;">Adj×A</th>
           </tr>
         </thead>
         <tbody>
           ${historyRowsHTML}
         </tbody>
       </table>
+      <div style="font-size:11px; color:#7d4e00; margin-top:6px;">💡 สังเกตคอลัมน์สีเทา — Adj×A ออกมาเป็นเมทริกซ์ทแยงมุมเสมอ (det(A) คูณ Identity) ไม่ว่า A จะเป็นเท่าไหร่</div>
     </div>
 
     <div class="pattern-card" style="background:#faf5ff; text-align:left;">
@@ -2167,7 +2305,7 @@ function openGeneralAdjModal(advanceOnClose = false) {
 
   modalActions.innerHTML = advanceOnClose ? `
     <button class="btn-purple" onclick="verifyGeneralAdjFormula()">ตรวจคำตอบแบบรูปกรณีทั่วไป 🔑</button>
-    <button class="btn-primary" onclick="closeModalAndLoadPending()">ไปหน้าสรุป 🎓</button>
+    <button class="btn-primary" onclick="proceedToInverseFormulaModal()">กดไปดูวิธีการคำนวณ Inverse ➡️</button>
   ` : `
     <button class="btn-purple" onclick="verifyGeneralAdjFormula()">ตรวจคำตอบแบบรูปกรณีทั่วไป 🔑</button>
     <button class="btn-primary" onclick="closeModal()">ปิดหน้าต่าง</button>
@@ -2194,6 +2332,10 @@ function verifyGeneralAdjFormula() {
   [a01, a10].forEach(el => { el.classList.toggle('field-correct', antiDiagCorrect); el.classList.toggle('field-incorrect', !antiDiagCorrect); });
 
   if (mainDiagCorrect && antiDiagCorrect) {
+    // Gates the "go see how Inverse is calculated" button below -- a
+    // learner shouldn't be able to move on to the Inverse formula until
+    // they've actually derived the Adj(A) pattern themselves.
+    window.__GAME_STATE__.step4_generalFormulaCorrect = true;
     showFeedback("🎉 ถูกต้องสมบูรณ์! รูปแบบกรณีทั่วไปของ Adjugate Matrix คือ [d, -b; -c, a] สลับตำแหน่งแนวเฉียงหลัก และเปลี่ยนเครื่องหมายแนวเฉียงรอง!", true);
   } else if (mainDiagCorrect) {
     showFeedback("แนวเฉียงหลัก (สองช่องกลาง) ถูกแล้ว ✅ — แนวเฉียงรอง (สองช่องข้าง) ยังไม่ถูก ลองดูเครื่องหมายอีกครั้ง", false);
@@ -2202,6 +2344,57 @@ function verifyGeneralAdjFormula() {
   } else {
     showFeedback("❌ ยังไม่ถูกทั้งสองแนว ลองดูจากตาราง Log อีกครั้ง — สังเกตตำแหน่งแรกและตำแหน่งสุดท้าย (แนวเฉียงหลัก) แล้วสังเกตเครื่องหมายอีกสองตำแหน่ง (แนวเฉียงรอง)", false);
   }
+}
+
+// Gate on the "go see how Inverse is calculated" button in the general-Adj
+// modal -- can't proceed to the Inverse formula (and from there, the
+// summary) until the general pattern has actually been answered correctly.
+function proceedToInverseFormulaModal() {
+  const st = window.__GAME_STATE__;
+  if (!st.step4_generalFormulaCorrect) {
+    showFeedback("ยังไปต่อไม่ได้ — ลองตอบสูตรทั่วไปของ Adj(A) ให้ถูกต้องก่อน (กดปุ่ม 🔑 ตรวจคำตอบแบบรูปกรณีทั่วไป ด้านบน)", false);
+    return;
+  }
+  showInverseFormulaModal();
+}
+
+// The one place the closed-form A⁻¹ formula gets stated -- after the
+// learner has derived Adj(A) themselves, combining it with 1/det(A)
+// (already taught back in Step 2) into the full formula. This modal's own
+// button is what actually advances to the Level 8 summary, via the same
+// pendingLevelToLoad set by nextLevel() before openGeneralAdjModal(true).
+function showInverseFormulaModal() {
+  const st = window.__GAME_STATE__;
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBodyText = document.getElementById('modalBodyText');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalActions = document.getElementById('modalActions');
+
+  modalIcon.innerText = "🔑";
+  modalTitle.innerText = "วิธีการคำนวณ Inverse Matrix";
+
+  modalBodyText.innerHTML = `
+    <p style="font-size: 13px; color: #334155;">
+      ตอนนี้รู้ทั้ง 2 ชิ้นส่วนแล้ว — เอามารวมกันเป็นสูตรเดียว:
+    </p>
+    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:14px; margin-top:10px; text-align:center;">
+      <div style="font-size:16px; font-weight:bold; color:#1e40af;">A⁻¹ = (1 / det(A)) × Adj(A)</div>
+      <div style="display:flex; justify-content:center; gap:18px; margin-top:10px; font-size:11px; color:#475569; text-align:left;">
+        <span><b style="color:#86198f;">Adj(A)</b><br>ดึงแกนบิดเอียงให้กลับมาตั้งฉาก<br>(เจอเองจาก 3 กรณีที่ทำมา)</span>
+        <span><b style="color:#1e40af;">1 / det(A)</b><br>ย่อ/ยืดพื้นที่กลับสู่ 1 หน่วยมาตรฐาน<br>(เจอตั้งแต่ Step 2)</span>
+      </div>
+    </div>
+    <p style="margin-top: 10px; font-size: 12px; color: #475569;">
+      นี่คือสูตรเดียวกับที่จะใช้คำนวณ Inverse Matrix ของ A ขนาด 2×2 ใดๆ ก็ได้
+    </p>
+  `;
+
+  modalActions.innerHTML = `
+    <button class="btn-primary" onclick="closeModalAndLoadPending()">ไปหน้าสรุป 🎓</button>
+  `;
+
+  hideFeedback();
+  document.getElementById('obsModal').classList.add('active');
 }
 
 function verifyCustomAdjInput() {
@@ -2352,39 +2545,15 @@ function showStep4IntroModal() {
 
   modalBodyText.innerHTML = `
     <p style="font-size: 13px; color: #334155;">
-      ลากปลายลูกศร <b style="color:#dc2626;">î_G</b> และ <b style="color:#9333ea;">ĵ_G</b> ในโลกอินพุต ลองเดาดูก่อนว่าควรลากไปทางไหน ให้รูปฝั่งโลกเอาต์พุตกลาย<b>ตั้งฉาก</b>
+      ลากปลายลูกศร <b style="color:#dc2626;">î_G</b> และ <b style="color:#9333ea;">ĵ_G</b> ในโลกอินพุตไปยังวงกลมเป้าหมาย (เส้นไกด์กระพริบไว้ให้ดูทุกกรณี) ให้รูปฝั่งโลกเอาต์พุตกลาย<b>ตั้งฉาก</b>
     </p>
     <p style="margin-top: 8px; font-size: 12px; color: #475569;">
-      ถ้าติดขัด กดปุ่ม 💡 คำใบ้ ในแผงซ้ายมือ เพื่อดูตำแหน่งเป้าหมายได้เลย — พอวางถูก จะเจอ Adjugate Matrix ที่ตามหา!
+      วางถูกตำแหน่งเมื่อไหร่ จะเจอ Adjugate Matrix ที่ตามหา! ต้องลากเองทุกครั้งนะ — ปุ่ม 🔑 เฉลย จะแค่เปิดไกด์ให้ ไม่ได้ลากให้
     </p>
   `;
 
   modalActions.innerHTML = `
     <button class="btn-primary" onclick="closeModal()">ลองเลย 🚀</button>
-  `;
-
-  hideFeedback();
-  document.getElementById('obsModal').classList.add('active');
-}
-
-function showStep4NoGuideModal() {
-  const modalTitle = document.getElementById('modalTitle');
-  const modalBodyText = document.getElementById('modalBodyText');
-  const modalIcon = document.getElementById('modalIcon');
-  const modalActions = document.getElementById('modalActions');
-
-  modalIcon.innerText = "🙈";
-  modalTitle.innerText = "กรณีสุดท้าย: ไม่มีเส้นไกด์แล้ว!";
-  modalBodyText.innerHTML = `
-    <p style="font-size: 13px; color: #334155;">
-      สองกรณีแรกมีเส้นประนำทางให้ดูตลอด แต่<b>กรณีนี้ไม่มีให้แล้ว</b> — ลองใช้สิ่งที่สังเกตมาจาก 2 กรณีก่อนหน้า เดาตำแหน่งด้วยตัวเองดู
-    </p>
-    <p style="margin-top: 8px; font-size: 12px; color: #475569;">
-      ลองแล้วยังไม่ได้ก็ไม่เป็นไร — กดปุ่ม 💡 คำใบ้ ในแผงซ้ายมือ เพื่อดูตำแหน่งเป้าหมายได้เสมอ
-    </p>
-  `;
-  modalActions.innerHTML = `
-    <button class="btn-primary" onclick="closeModal()">ลองดู 🚀</button>
   `;
 
   hideFeedback();
@@ -2468,8 +2637,8 @@ function loadLevel(idx) {
   }
   if (idx === 7) {
     window.__GAME_STATE__.hasShownStep4Dialogue = false;
-    window.__GAME_STATE__.hasShownStep4NoGuideDialogue = false;
     window.__GAME_STATE__.step4_hintRevealed = false;
+    window.__GAME_STATE__.step4_generalFormulaCorrect = false;
   }
 
   document.getElementById('levelTitle').innerText = level.title;
@@ -2515,6 +2684,8 @@ function loadLevel(idx) {
     setStep(1);
   } else {
     invSection.style.display = 'none';
+    const guideOverlay = document.getElementById('step4GuideOverlay');
+    if (guideOverlay) guideOverlay.style.display = 'none';
   }
 
   if (level.showMatrix) {
@@ -2588,6 +2759,15 @@ function nextLevel() {
       // before moving on to the summary.
       pendingLevelToLoad = nextIdx;
       openGeneralAdjModal(true);
+      return;
+    }
+
+    // Every other level (LINE_INTERSECTION / TRANSFORMATION) -- don't allow
+    // skipping ahead until the current one is actually solved. Without this,
+    // "next" would happily jump past a level nobody had dragged the answer
+    // to yet.
+    if (!st.isLevelCleared) {
+      showFeedback("ยังไปด่านต่อไปไม่ได้ — ลากคำตอบของด่านนี้ให้ถูกก่อนนะ", false);
       return;
     }
 
