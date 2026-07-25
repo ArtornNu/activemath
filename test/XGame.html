@@ -22,7 +22,7 @@
             min-height: 100vh;
         }
 
-        .game-card {
+        .card {
             background: #ffffff;
             padding: 24px;
             border-radius: 20px;
@@ -34,6 +34,269 @@
             width: 100%;
         }
 
+        /* --- Mode Containers --- */
+        #learn-screen, #quiz-screen, #game-screen {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- Action Buttons Layout --- */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* --- Learn Screen Styling --- */
+        .learn-title {
+            font-size: 26px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .learn-subtitle {
+            font-size: 16px;
+            color: #64748b;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .btn-group-learn {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-learn {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-learn:hover, .btn-learn.active {
+            background-color: #1d4ed8;
+            transform: scale(1.05);
+        }
+
+        .array-box {
+            background: #f8fafc;
+            border: 3px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            min-height: 220px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .array-grid {
+            display: grid;
+            gap: 4px;
+            margin-bottom: 15px;
+            background-color: #e2e8f0;
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .array-cell {
+            width: 32px;
+            height: 32px;
+            background-color: #60a5fa;
+            border-radius: 4px;
+            border: 1px solid #2563eb;
+            transition: all 0.3s;
+        }
+
+        .explain-text {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e293b;
+            background: #e0f2fe;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-align: center;
+        }
+
+        .btn-ready {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-ready:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-skip {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 2px solid #cbd5e1;
+            padding: 12px 20px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-skip:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
+            border-color: #94a3b8;
+        }
+
+        /* --- Quiz Screen Styling & Highlighting --- */
+        .quiz-input-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-label {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .label-rows { color: #ec4899; }
+        .label-cols { color: #0284c7; }
+
+        .quiz-input {
+            width: 80px;
+            height: 50px;
+            font-size: 24px;
+            text-align: center;
+            border-radius: 12px;
+            outline: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        /* กำหนดสีแยกเฉพาะตามความหมายของ แถว และ หลัก */
+        .quiz-input.input-rows {
+            border: 3px solid #ec4899;
+            background-color: #fdf2f8;
+            color: #be185d;
+        }
+
+        .quiz-input.input-cols {
+            border: 3px solid #0284c7;
+            background-color: #f0f9ff;
+            color: #0369a1;
+        }
+
+        .quiz-multiply-sign {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            padding-bottom: 6px;
+        }
+
+        .btn-submit {
+            background-color: #f59e0b;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            height: 50px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background-color: #d97706;
+        }
+
+        /* Quiz Guide Badges & Highlights */
+        .header-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 6px;
+        }
+
+        .badge-row {
+            background-color: #fbcfe8;
+            color: #be185d;
+            border: 1px solid #ec4899;
+            width: 26px;
+            height: 32px;
+        }
+
+        .badge-col {
+            background-color: #bae6fd;
+            color: #0369a1;
+            border: 1px solid #0284c7;
+            width: 32px;
+            height: 26px;
+        }
+
+        .quiz-guide-box {
+            margin-top: 15px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background-color: #fffbebf5;
+            border: 2px dashed #f59e0b;
+            color: #92400e;
+            font-size: 15px;
+            text-align: center;
+            width: 100%;
+            display: none;
+            line-height: 1.6;
+        }
+
+        .quiz-guide-box.show {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Main Game Header & Grid --- */
         .header {
             width: 100%;
             display: flex;
@@ -43,26 +306,25 @@
         }
 
         .title {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
             color: #2c3e50;
         }
 
         .stats {
             display: flex;
-            gap: 15px;
-            font-size: 16px;
+            gap: 10px;
+            font-size: 15px;
             font-weight: 600;
         }
 
         .stat-box {
             background: #eef2f5;
-            padding: 8px 16px;
-            border-radius: 12px;
+            padding: 6px 12px;
+            border-radius: 10px;
             color: #34495e;
         }
 
-        /* Game Board Grid */
         #grid-container {
             display: grid;
             gap: 2px;
@@ -71,12 +333,12 @@
             border-radius: 8px;
             padding: 2px;
             position: relative;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .cell {
-            width: 45px;
-            height: 45px;
+            width: 42px;
+            height: 42px;
             background-color: #ffffff;
             display: flex;
             align-items: center;
@@ -86,7 +348,6 @@
             color: #2c3e50;
             cursor: pointer;
             transition: all 0.15s ease;
-            position: relative;
         }
 
         .cell.clue {
@@ -106,7 +367,6 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
         }
 
-        /* Controls & Options */
         .controls-panel {
             width: 100%;
             min-height: 80px;
@@ -140,25 +400,25 @@
             border: none;
             padding: 8px 16px;
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.1s, background-color 0.2s;
         }
 
-        .btn-choice:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
-        }
+        .btn-choice:hover { background-color: #2563eb; }
 
-        .btn-choice:active {
-            transform: translateY(0);
-        }
-
-        .btn-clear {
-            background-color: #ef4444;
-        }
+        .btn-clear { background-color: #ef4444; }
         .btn-clear:hover { background-color: #dc2626; }
+
+        .btn-learn-mode {
+            background-color: #64748b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
 
         /* Toast Feedback */
         #toast {
@@ -174,7 +434,6 @@
             bottom: 30px;
             font-size: 16px;
             font-weight: bold;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             opacity: 0;
             transition: opacity 0.3s, visibility 0.3s;
         }
@@ -218,22 +477,82 @@
 </head>
 <body>
 
-<div class="game-card">
-    <div class="header">
-        <div class="title">🧩 ตารางสร้างพื้นที่ผลคูณ</div>
-        <div class="stats">
-            <div class="stat-box" id="level-display">ด่าน: 1</div>
-            <div class="stat-box" id="score-display">คะแนน: 0</div>
+<div class="card">
+    <!-- 1. LEARN MODE -->
+    <div id="learn-screen">
+        <div class="learn-title">📚 โหมดเรียนรู้การคูณ</div>
+        <div class="learn-subtitle">ลองกดปุ่มด้านล่างเพื่อดูรูปตารางการคูณนะ</div>
+
+        <div class="btn-group-learn" id="learn-buttons"></div>
+
+        <div class="array-box">
+            <div id="learn-array-grid" class="array-grid"></div>
+            <div id="learn-explain-text" class="explain-text">คลิกปุ่มด้านบนได้เลย!</div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-ready" onclick="goToQuiz()">เข้าใจแล้ว ลองทดสอบ ➔</button>
+            <button class="btn-skip" onclick="skipToGame()">⏩ ข้ามไปเล่นเกม</button>
         </div>
     </div>
 
-    <!-- Grid Canvas -->
-    <div id="grid-container"></div>
+    <!-- 2. QUIZ MODE -->
+    <div id="quiz-screen" class="hidden">
+        <div class="learn-title">🎯 ลองทดสอบก่อนเล่น</div>
+        <div class="learn-subtitle">ตารางนี้เขียนแสดงการคูณได้อย่างไร? (ตัวหน้าคือแถว × ตัวหลังคือหลัก)</div>
 
-    <!-- Controls / Shape Selector -->
-    <div class="controls-panel" id="controls">
-        <div class="options-title" id="control-hint">👈 คลิกที่ตัวเลขบนตารางเพื่อเริ่มสร้างสี่เหลี่ยม</div>
-        <div class="options-group" id="options-group"></div>
+        <div class="array-box">
+            <!-- Grid Wrapper Supporting Headers -->
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div id="quiz-col-headers" style="display: flex; gap: 4px; margin-bottom: 4px; padding-left: 32px;" class="hidden"></div>
+                <div style="display: flex; align-items: center;">
+                    <div id="quiz-row-headers" style="display: flex; flex-direction: column; gap: 4px; margin-right: 6px;" class="hidden"></div>
+                    <div id="quiz-array-grid" class="array-grid"></div>
+                </div>
+            </div>
+
+            <!-- Inputs with Rows & Cols Highlighting Colors -->
+            <div class="quiz-input-group">
+                <div class="input-wrapper">
+                    <span class="input-label label-rows">จำนวนแถว</span>
+                    <input type="number" id="quiz-rows" class="quiz-input input-rows" placeholder="แถว" autofocus />
+                </div>
+                <span class="quiz-multiply-sign">×</span>
+                <div class="input-wrapper">
+                    <span class="input-label label-cols">จำนวนหลัก</span>
+                    <input type="number" id="quiz-cols" class="quiz-input input-cols" placeholder="หลัก" />
+                </div>
+                <button class="btn-submit" onclick="checkQuizAnswer()">ตอบ</button>
+            </div>
+
+            <!-- Guide Box for Hints -->
+            <div id="quiz-guide-msg" class="quiz-guide-box"></div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-skip" onclick="skipToGame()">⏩ ข้ามไปเล่นเกมเลย</button>
+        </div>
+    </div>
+
+    <!-- 3. MAIN GAME MODE -->
+    <div id="game-screen" class="hidden">
+        <div class="header">
+            <div class="title">🧩 ตารางสร้างพื้นที่ผลคูณ</div>
+            <div class="stats">
+                <div class="stat-box" id="level-display">ด่าน: 1</div>
+                <div class="stat-box" id="score-display">คะแนน: 0</div>
+                <button class="btn-learn-mode" onclick="showLearnScreen()">📚 โหมดเรียนรู้</button>
+            </div>
+        </div>
+
+        <!-- Grid Canvas -->
+        <div id="grid-container"></div>
+
+        <!-- Controls / Shape Selector -->
+        <div class="controls-panel" id="controls">
+            <div class="options-title" id="control-hint">👈 คลิกที่ตัวเลขบนตารางเพื่อเริ่มสร้างสี่เหลี่ยม</div>
+            <div class="options-group" id="options-group"></div>
+        </div>
     </div>
 </div>
 
@@ -249,17 +568,197 @@
 </div>
 
 <script>
-    // Colorful pastel palette for placed shapes
     const COLORS = [
         '#f87171', '#fb923c', '#fbbf24', '#a3e635', 
         '#34d399', '#22d3ee', '#818cf8', '#c084fc', '#f472b6'
     ];
 
-    // Levels Configuration
+    const LEARN_EXAMPLES = [
+        { r: 1, c: 12, label: '1 × 12' },
+        { r: 12, c: 1, label: '12 × 1' },
+        { r: 2, c: 6, label: '2 × 6' },
+        { r: 6, c: 2, label: '6 × 2' },
+        { r: 3, c: 4, label: '3 × 4' },
+        { r: 4, c: 3, label: '4 × 3' }
+    ];
+
+    const QUIZ_QUESTIONS = [
+        { r: 2, c: 5, ans: 10 },
+        { r: 2, c: 4, ans: 8 },
+        { r: 3, c: 3, ans: 9 },
+        { r: 3, c: 4, ans: 12 },
+        { r: 4, c: 2, ans: 8 }
+    ];
+
+    let currentQuiz = null;
+    let gameInitialized = false;
+
+    // --- Learn Screen Logic ---
+    function initLearnScreen() {
+        const container = document.getElementById('learn-buttons');
+        container.innerHTML = '';
+
+        LEARN_EXAMPLES.forEach((ex, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-learn';
+            btn.innerText = ex.label;
+            btn.onclick = () => {
+                document.querySelectorAll('.btn-learn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderLearnArray(ex.r, ex.c);
+            };
+            container.appendChild(btn);
+        });
+
+        renderLearnArray(2, 6);
+        container.children[2].classList.add('active');
+    }
+
+    function renderLearnArray(r, c) {
+        const grid = document.getElementById('learn-array-grid');
+        grid.style.gridTemplateRows = `repeat(${r}, 24px)`;
+        grid.style.gridTemplateColumns = `repeat(${c}, 24px)`;
+        grid.innerHTML = '';
+
+        for (let i = 0; i < r * c; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            grid.appendChild(cell);
+        }
+
+        document.getElementById('learn-explain-text').innerHTML = 
+            `<b>${r} แถว × ${c} หลัก</b> เขียนได้เป็น <b>${r} × ${c} = ${r * c}</b>`;
+    }
+
+    // --- Quiz Mode Logic & Guidance ---
+    function goToQuiz() {
+        document.getElementById('learn-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+
+        currentQuiz = QUIZ_QUESTIONS[Math.floor(Math.random() * QUIZ_QUESTIONS.length)];
+        
+        // Reset Guide Elements
+        document.getElementById('quiz-guide-msg').classList.remove('show');
+        document.getElementById('quiz-col-headers').classList.add('hidden');
+        document.getElementById('quiz-row-headers').classList.add('hidden');
+
+        renderStandardQuizGrid();
+
+        document.getElementById('quiz-rows').value = '';
+        document.getElementById('quiz-cols').value = '';
+        document.getElementById('quiz-rows').focus();
+    }
+
+    function renderStandardQuizGrid() {
+        const grid = document.getElementById('quiz-array-grid');
+        grid.style.gridTemplateRows = `repeat(${currentQuiz.r}, 32px)`;
+        grid.style.gridTemplateColumns = `repeat(${currentQuiz.c}, 32px)`;
+        grid.innerHTML = '';
+
+        for (let i = 0; i < currentQuiz.ans; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            cell.style.backgroundColor = '#f59e0b';
+            cell.style.borderColor = '#d97706';
+            grid.appendChild(cell);
+        }
+    }
+
+    function checkQuizAnswer() {
+        const valR = parseInt(document.getElementById('quiz-rows').value);
+        const valC = parseInt(document.getElementById('quiz-cols').value);
+
+        // กฎ: ตัวหน้า = แถว (currentQuiz.r), ตัวคูณ = หลัก (currentQuiz.c)
+        const isCorrect = (valR === currentQuiz.r && valC === currentQuiz.c);
+
+        if (isCorrect) {
+            showToast('🎉 ถูกต้องแล้ว! เข้าสู่เกมกันเลย');
+            setTimeout(() => {
+                skipToGame();
+            }, 800);
+        } else {
+            showToast('❌ ยังไม่ถูกต้อง ลองดูคำแนะนำด้านล่างนี้นะ!');
+            showQuizGuide();
+        }
+    }
+
+    function showQuizGuide() {
+        const grid = document.getElementById('quiz-array-grid');
+        grid.innerHTML = '';
+
+        // แสดงไฮไลต์สีสลับแถวและกรอบของหลักบนตาราง
+        for (let i = 0; i < currentQuiz.r; i++) {
+            for (let j = 0; j < currentQuiz.c; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                
+                // แถวสลับสีชมพูเพื่อแยกแถวแนวนอนให้เห็นชัด
+                cell.style.backgroundColor = (i % 2 === 0) ? '#fce7f3' : '#fbcfe8';
+                cell.style.borderColor = '#ec4899';
+                
+                // เส้นขอบสีฟ้าเพื่อเน้นแนวตั้ง (หลัก)
+                cell.style.boxShadow = 'inset 0 0 0 2px #0284c7';
+                grid.appendChild(cell);
+            }
+        }
+
+        // ตัวเลขบอกจำนวนหลัก (ด้านบน - สีฟ้า)
+        const colHeaders = document.getElementById('quiz-col-headers');
+        colHeaders.innerHTML = '';
+        colHeaders.classList.remove('hidden');
+
+        for (let j = 1; j <= currentQuiz.c; j++) {
+            const badge = document.createElement('div');
+            badge.className = 'header-badge badge-col';
+            badge.innerText = j;
+            colHeaders.appendChild(badge);
+        }
+
+        // ตัวเลขบอกจำนวนแถว (ด้านซ้าย - สีชมพู)
+        const rowHeaders = document.getElementById('quiz-row-headers');
+        rowHeaders.innerHTML = '';
+        rowHeaders.classList.remove('hidden');
+
+        for (let i = 1; i <= currentQuiz.r; i++) {
+            const badge = document.createElement('div');
+            badge.className = 'header-badge badge-row';
+            badge.innerText = i;
+            rowHeaders.appendChild(badge);
+        }
+
+        // ข้อความคำแนะนำ (Guide Box)
+        const guideMsg = document.getElementById('quiz-guide-msg');
+        guideMsg.innerHTML = `
+            💡 <b>คำแนะนำ:</b> รูปการคูณต้องเป็น <b>จำนวนแถว × จำนวนหลัก</b><br>
+            • แนวนอนมี <b style="color:#ec4899;">${currentQuiz.r} แถว</b> ➔ เติมเลข <b>${currentQuiz.r}</b> ในช่องสีชมพู<br>
+            • แนวตั้งมี <b style="color:#0284c7;">${currentQuiz.c} หลัก</b> ➔ เติมเลข <b>${currentQuiz.c}</b> ในช่องสีฟ้า
+        `;
+        guideMsg.classList.add('show');
+    }
+
+    // --- Skip Direct to Game ---
+    function skipToGame() {
+        document.getElementById('learn-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+
+        if (!gameInitialized) {
+            initGame();
+            gameInitialized = true;
+        }
+    }
+
+    function showLearnScreen() {
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('learn-screen').classList.remove('hidden');
+    }
+
+    // --- Main Game Logic ---
     const LEVELS = [
-        { rows: 5, cols: 6, maxArea: 8 },   // ด่าน 1: เล็ก ง่าย
-        { rows: 7, cols: 10, maxArea: 12 }, // ด่าน 2: 7x10 มาตรฐาน
-        { rows: 7, cols: 10, maxArea: 20 }  // ด่าน 3: ซับซ้อน ผลคูณโตขึ้น
+        { rows: 5, cols: 6, maxArea: 8 },   
+        { rows: 7, cols: 10, maxArea: 12 }, 
+        { rows: 7, cols: 10, maxArea: 20 }  
     ];
 
     let currentLevelIdx = 0;
@@ -267,12 +766,11 @@
     let gridCols = 10;
     let currentScore = 0;
     
-    let gridSolution = []; // Target rects generated
-    let clueCells = [];    // {r, c, area, color, id}
-    let placedRects = {};  // clueId -> {r, c, rows, cols}
+    let gridSolution = [];
+    let clueCells = [];
+    let placedRects = {};
     let selectedClue = null;
 
-    // --- Initialization ---
     function initGame() {
         const config = LEVELS[Math.min(currentLevelIdx, LEVELS.length - 1)];
         gridRows = config.rows;
@@ -286,14 +784,12 @@
         resetControls();
     }
 
-    // --- Puzzle Generator (Guaranteed Solvable Partitioning) ---
     function generatePuzzle(maxArea) {
         gridSolution = [];
         clueCells = [];
         placedRects = {};
         selectedClue = null;
 
-        // Helper to recursively split the grid into smaller rectangles
         function splitRect(r, c, h, w) {
             const area = h * w;
             if (area <= maxArea || (h <= 2 && w <= 2 && Math.random() > 0.3)) {
@@ -318,7 +814,6 @@
 
         splitRect(0, 0, gridRows, gridCols);
 
-        // Place a clue (number) inside each sliced rectangle
         gridSolution.forEach((rect, idx) => {
             const clueR = rect.r + Math.floor(Math.random() * rect.h);
             const clueC = rect.c + Math.floor(Math.random() * rect.w);
@@ -334,14 +829,12 @@
         });
     }
 
-    // --- Grid Rendering ---
     function renderGrid() {
         const container = document.getElementById('grid-container');
-        container.style.gridTemplateRows = `repeat(${gridRows}, 45px)`;
-        container.style.gridTemplateColumns = `repeat(${gridCols}, 45px)`;
+        container.style.gridTemplateRows = `repeat(${gridRows}, 42px)`;
+        container.style.gridTemplateColumns = `repeat(${gridCols}, 42px)`;
         container.innerHTML = '';
 
-        // Build 2D occupancy map
         let occupancy = Array(gridRows).fill(null).map(() => Array(gridCols).fill(null));
         
         Object.keys(placedRects).forEach(clueId => {
@@ -361,7 +854,6 @@
                 cellEl.dataset.r = r;
                 cellEl.dataset.c = c;
 
-                // Check if this cell contains a Clue
                 const clue = clueCells.find(cl => cl.r === r && cl.c === c);
                 if (clue) {
                     cellEl.classList.add('clue');
@@ -371,7 +863,6 @@
                     }
                 }
 
-                // Check if this cell is filled by a user rectangle
                 if (occupancy[r][c]) {
                     cellEl.classList.add('filled');
                     cellEl.style.backgroundColor = occupancy[r][c].color;
@@ -383,9 +874,7 @@
         }
     }
 
-    // --- User Interaction ---
     function handleCellClick(r, c) {
-        // Find clue at clicked position
         const clue = clueCells.find(cl => cl.r === r && cl.c === c);
         
         if (clue) {
@@ -393,7 +882,6 @@
             renderGrid();
             showShapeOptions(clue);
         } else {
-            // Check if user clicked inside an already placed rectangle to select its clue
             for (let clueId in placedRects) {
                 const p = placedRects[clueId];
                 if (r >= p.r && r < p.r + p.rows && c >= p.c && c < p.c + p.cols) {
@@ -411,9 +899,8 @@
         const groupEl = document.getElementById('options-group');
         groupEl.innerHTML = '';
 
-        hintEl.innerText = `เลือกขนาดสี่เหลี่ยมสำหรับผลคูณ ${clue.area} (แถว x หลัก):`;
+        hintEl.innerText = `เลือกขนาดสี่เหลี่ยมสำหรับผลคูณ ${clue.area}:`;
 
-        // Calculate all factor pairs (Rows x Cols = Area)
         const factors = [];
         for (let i = 1; i <= clue.area; i++) {
             if (clue.area % i === 0) {
@@ -429,7 +916,6 @@
             groupEl.appendChild(btn);
         });
 
-        // Add clear button if shape is currently placed
         if (placedRects[clue.id]) {
             const clearBtn = document.createElement('button');
             clearBtn.className = 'btn-choice btn-clear';
@@ -445,12 +931,9 @@
         selectedClue = null;
     }
 
-    // --- Placement Logic & Validation ---
     function tryPlaceShape(clue, reqRows, reqCols) {
-        // Find a valid position offset so the rectangle covers the clue cell
         let validPos = null;
 
-        // Iterate all possible top-left corners (tr, tc) that encompass the clue cell
         for (let tr = clue.r - reqRows + 1; tr <= clue.r; tr++) {
             for (let tc = clue.c - reqCols + 1; tc <= clue.c; tc++) {
                 if (isValidPlacement(clue.id, tr, tc, reqRows, reqCols)) {
@@ -470,7 +953,7 @@
             };
             updateScore();
             renderGrid();
-            showShapeOptions(clue); // refresh controls
+            showShapeOptions(clue);
             checkWinCondition();
         } else {
             showToast('⚠️ วางไม่ได้เพราะซ้อนทับกัน หรือตกขอบตาราง!');
@@ -478,24 +961,20 @@
     }
 
     function isValidPlacement(currentClueId, r, c, rows, cols) {
-        // Boundary check
         if (r < 0 || c < 0 || r + rows > gridRows || c + cols > gridCols) {
             return false;
         }
 
-        // Check overlapping with other placed rectangles & clues
         for (let tr = r; tr < r + rows; tr++) {
             for (let tc = c; tc < c + cols; tc++) {
-                // Check collision with other placed shapes
                 for (let otherId in placedRects) {
-                    if (otherId == currentClueId) continue; // Ignore own old placement
+                    if (otherId == currentClueId) continue;
                     const p = placedRects[otherId];
                     if (tr >= p.r && tr < p.r + p.rows && tc >= p.c && tc < p.c + p.cols) {
                         return false;
                     }
                 }
 
-                // Check collision with OTHER clue numbers (cannot cover another clue cell)
                 const otherClue = clueCells.find(cl => cl.r === tr && cl.c === tc);
                 if (otherClue && otherClue.id !== currentClueId) {
                     return false;
@@ -514,7 +993,6 @@
         }
     }
 
-    // --- Scoring & Win Logic ---
     function updateScore() {
         let score = 0;
         Object.keys(placedRects).forEach(id => {
@@ -526,7 +1004,6 @@
     }
 
     function checkWinCondition() {
-        // Win when all clues are placed AND total area fills the board
         const allCluesPlaced = clueCells.length === Object.keys(placedRects).length;
         
         let totalPlacedArea = 0;
@@ -551,11 +1028,16 @@
         const toast = document.getElementById('toast');
         toast.innerText = msg;
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2500);
+        setTimeout(() => toast.classList.remove('show'), 2200);
     }
 
-    // Start Game
-    window.onload = initGame;
+    ['quiz-rows', 'quiz-cols'].forEach(id => {
+        document.getElementById(id).addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkQuizAnswer();
+        });
+    });
+
+    window.onload = initLearnScreen;
 </script>
 </body>
 </html>
