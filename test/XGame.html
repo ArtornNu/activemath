@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมผจญภัยตารางคูณ (Math Grid Explorer)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Kanit', 'Sarabun', Tahoma, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .game-card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 650px;
+            width: 100%;
+        }
+
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .stat-box {
+            background: #eef2f5;
+            padding: 8px 16px;
+            border-radius: 12px;
+            color: #34495e;
+        }
+
+        /* Game Board Grid */
+        #grid-container {
+            display: grid;
+            gap: 2px;
+            background-color: #bdc3c7;
+            border: 4px solid #34495e;
+            border-radius: 8px;
+            padding: 2px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            width: 45px;
+            height: 45px;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .cell.clue {
+            font-size: 20px;
+            color: #2980b9;
+            background-color: #ebf5fb;
+        }
+
+        .cell.selected-clue {
+            outline: 4px solid #f1c40f;
+            z-index: 10;
+            background-color: #fef9e7 !important;
+        }
+
+        .cell.filled {
+            color: #ffffff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+        }
+
+        /* Controls & Options */
+        .controls-panel {
+            width: 100%;
+            min-height: 80px;
+            background: #f8f9fa;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .options-title {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .options-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn-choice {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .btn-choice:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-choice:active {
+            transform: translateY(0);
+        }
+
+        .btn-clear {
+            background-color: #ef4444;
+        }
+        .btn-clear:hover { background-color: #dc2626; }
+
+        /* Toast Feedback */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #e74c3c;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 12px;
+            position: fixed;
+            z-index: 100;
+            bottom: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Victory Popup */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .btn-next {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-card">
+    <div class="header">
+        <div class="title">🧩 ตารางสร้างพื้นที่ผลคูณ</div>
+        <div class="stats">
+            <div class="stat-box" id="level-display">ด่าน: 1</div>
+            <div class="stat-box" id="score-display">คะแนน: 0</div>
+        </div>
+    </div>
+
+    <!-- Grid Canvas -->
+    <div id="grid-container"></div>
+
+    <!-- Controls / Shape Selector -->
+    <div class="controls-panel" id="controls">
+        <div class="options-title" id="control-hint">👈 คลิกที่ตัวเลขบนตารางเพื่อเริ่มสร้างสี่เหลี่ยม</div>
+        <div class="options-group" id="options-group"></div>
+    </div>
+</div>
+
+<div id="toast">วางไม่ได้เพราะซ้อนทับกัน!</div>
+
+<!-- Level Complete Modal -->
+<div class="modal" id="victory-modal">
+    <div class="modal-content">
+        <h2>🎉 เก่งมากทำสำเร็จแล้ว!</h2>
+        <p id="victory-desc">คุณเติมพื้นที่ได้ครบถ้วนถูกต้อง</p>
+        <button class="btn-next" onclick="nextLevel()">ไปด่านถัดไป ➔</button>
+    </div>
+</div>
+
+<script>
+    // Colorful pastel palette for placed shapes
+    const COLORS = [
+        '#f87171', '#fb923c', '#fbbf24', '#a3e635', 
+        '#34d399', '#22d3ee', '#818cf8', '#c084fc', '#f472b6'
+    ];
+
+    // Levels Configuration
+    const LEVELS = [
+        { rows: 5, cols: 6, maxArea: 8 },   // ด่าน 1: เล็ก ง่าย
+        { rows: 7, cols: 10, maxArea: 12 }, // ด่าน 2: 7x10 มาตรฐาน
+        { rows: 7, cols: 10, maxArea: 20 }  // ด่าน 3: ซับซ้อน ผลคูณโตขึ้น
+    ];
+
+    let currentLevelIdx = 0;
+    let gridRows = 7;
+    let gridCols = 10;
+    let currentScore = 0;
+    
+    let gridSolution = []; // Target rects generated
+    let clueCells = [];    // {r, c, area, color, id}
+    let placedRects = {};  // clueId -> {r, c, rows, cols}
+    let selectedClue = null;
+
+    // --- Initialization ---
+    function initGame() {
+        const config = LEVELS[Math.min(currentLevelIdx, LEVELS.length - 1)];
+        gridRows = config.rows;
+        gridCols = config.cols;
+
+        document.getElementById('level-display').innerText = `ด่าน: ${currentLevelIdx + 1}`;
+        document.getElementById('score-display').innerText = `คะแนน: ${currentScore}`;
+
+        generatePuzzle(config.maxArea);
+        renderGrid();
+        resetControls();
+    }
+
+    // --- Puzzle Generator (Guaranteed Solvable Partitioning) ---
+    function generatePuzzle(maxArea) {
+        gridSolution = [];
+        clueCells = [];
+        placedRects = {};
+        selectedClue = null;
+
+        // Helper to recursively split the grid into smaller rectangles
+        function splitRect(r, c, h, w) {
+            const area = h * w;
+            if (area <= maxArea || (h <= 2 && w <= 2 && Math.random() > 0.3)) {
+                gridSolution.push({ r, c, h, w, area });
+                return;
+            }
+
+            let splitVertically = Math.random() > 0.5;
+            if (w <= 2) splitVertically = false;
+            if (h <= 2) splitVertically = true;
+
+            if (splitVertically) {
+                let cut = Math.floor(Math.random() * (w - 2)) + 1;
+                splitRect(r, c, h, cut);
+                splitRect(r, c + cut, h, w - cut);
+            } else {
+                let cut = Math.floor(Math.random() * (h - 2)) + 1;
+                splitRect(r, c, cut, w);
+                splitRect(r + cut, c, h - cut, w);
+            }
+        }
+
+        splitRect(0, 0, gridRows, gridCols);
+
+        // Place a clue (number) inside each sliced rectangle
+        gridSolution.forEach((rect, idx) => {
+            const clueR = rect.r + Math.floor(Math.random() * rect.h);
+            const clueC = rect.c + Math.floor(Math.random() * rect.w);
+            const color = COLORS[idx % COLORS.length];
+
+            clueCells.push({
+                id: idx,
+                r: clueR,
+                c: clueC,
+                area: rect.area,
+                color: color
+            });
+        });
+    }
+
+    // --- Grid Rendering ---
+    function renderGrid() {
+        const container = document.getElementById('grid-container');
+        container.style.gridTemplateRows = `repeat(${gridRows}, 45px)`;
+        container.style.gridTemplateColumns = `repeat(${gridCols}, 45px)`;
+        container.innerHTML = '';
+
+        // Build 2D occupancy map
+        let occupancy = Array(gridRows).fill(null).map(() => Array(gridCols).fill(null));
+        
+        Object.keys(placedRects).forEach(clueId => {
+            const p = placedRects[clueId];
+            const clue = clueCells.find(c => c.id == clueId);
+            for (let r = p.r; r < p.r + p.rows; r++) {
+                for (let c = p.c; c < p.c + p.cols; c++) {
+                    occupancy[r][c] = { color: clue.color, id: clueId };
+                }
+            }
+        });
+
+        for (let r = 0; r < gridRows; r++) {
+            for (let c = 0; c < gridCols; c++) {
+                const cellEl = document.createElement('div');
+                cellEl.classList.add('cell');
+                cellEl.dataset.r = r;
+                cellEl.dataset.c = c;
+
+                // Check if this cell contains a Clue
+                const clue = clueCells.find(cl => cl.r === r && cl.c === c);
+                if (clue) {
+                    cellEl.classList.add('clue');
+                    cellEl.innerText = clue.area;
+                    if (selectedClue && selectedClue.id === clue.id) {
+                        cellEl.classList.add('selected-clue');
+                    }
+                }
+
+                // Check if this cell is filled by a user rectangle
+                if (occupancy[r][c]) {
+                    cellEl.classList.add('filled');
+                    cellEl.style.backgroundColor = occupancy[r][c].color;
+                }
+
+                cellEl.addEventListener('click', () => handleCellClick(r, c));
+                container.appendChild(cellEl);
+            }
+        }
+    }
+
+    // --- User Interaction ---
+    function handleCellClick(r, c) {
+        // Find clue at clicked position
+        const clue = clueCells.find(cl => cl.r === r && cl.c === c);
+        
+        if (clue) {
+            selectedClue = clue;
+            renderGrid();
+            showShapeOptions(clue);
+        } else {
+            // Check if user clicked inside an already placed rectangle to select its clue
+            for (let clueId in placedRects) {
+                const p = placedRects[clueId];
+                if (r >= p.r && r < p.r + p.rows && c >= p.c && c < p.c + p.cols) {
+                    selectedClue = clueCells.find(cl => cl.id == clueId);
+                    renderGrid();
+                    showShapeOptions(selectedClue);
+                    return;
+                }
+            }
+        }
+    }
+
+    function showShapeOptions(clue) {
+        const hintEl = document.getElementById('control-hint');
+        const groupEl = document.getElementById('options-group');
+        groupEl.innerHTML = '';
+
+        hintEl.innerText = `เลือกขนาดสี่เหลี่ยมสำหรับผลคูณ ${clue.area} (แถว x หลัก):`;
+
+        // Calculate all factor pairs (Rows x Cols = Area)
+        const factors = [];
+        for (let i = 1; i <= clue.area; i++) {
+            if (clue.area % i === 0) {
+                factors.push({ rows: i, cols: clue.area / i });
+            }
+        }
+
+        factors.forEach(pair => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-choice';
+            btn.innerText = `${pair.rows} × ${pair.cols}`;
+            btn.onclick = () => tryPlaceShape(clue, pair.rows, pair.cols);
+            groupEl.appendChild(btn);
+        });
+
+        // Add clear button if shape is currently placed
+        if (placedRects[clue.id]) {
+            const clearBtn = document.createElement('button');
+            clearBtn.className = 'btn-choice btn-clear';
+            clearBtn.innerText = '🗑️ ยกเลิกรูปร่างนี้';
+            clearBtn.onclick = () => removeShape(clue.id);
+            groupEl.appendChild(clearBtn);
+        }
+    }
+
+    function resetControls() {
+        document.getElementById('control-hint').innerText = '👈 คลิกที่ตัวเลขบนตารางเพื่อเริ่มสร้างสี่เหลี่ยม';
+        document.getElementById('options-group').innerHTML = '';
+        selectedClue = null;
+    }
+
+    // --- Placement Logic & Validation ---
+    function tryPlaceShape(clue, reqRows, reqCols) {
+        // Find a valid position offset so the rectangle covers the clue cell
+        let validPos = null;
+
+        // Iterate all possible top-left corners (tr, tc) that encompass the clue cell
+        for (let tr = clue.r - reqRows + 1; tr <= clue.r; tr++) {
+            for (let tc = clue.c - reqCols + 1; tc <= clue.c; tc++) {
+                if (isValidPlacement(clue.id, tr, tc, reqRows, reqCols)) {
+                    validPos = { r: tr, c: tc };
+                    break;
+                }
+            }
+            if (validPos) break;
+        }
+
+        if (validPos) {
+            placedRects[clue.id] = {
+                r: validPos.r,
+                c: validPos.c,
+                rows: reqRows,
+                cols: reqCols
+            };
+            updateScore();
+            renderGrid();
+            showShapeOptions(clue); // refresh controls
+            checkWinCondition();
+        } else {
+            showToast('⚠️ วางไม่ได้เพราะซ้อนทับกัน หรือตกขอบตาราง!');
+        }
+    }
+
+    function isValidPlacement(currentClueId, r, c, rows, cols) {
+        // Boundary check
+        if (r < 0 || c < 0 || r + rows > gridRows || c + cols > gridCols) {
+            return false;
+        }
+
+        // Check overlapping with other placed rectangles & clues
+        for (let tr = r; tr < r + rows; tr++) {
+            for (let tc = c; tc < c + cols; tc++) {
+                // Check collision with other placed shapes
+                for (let otherId in placedRects) {
+                    if (otherId == currentClueId) continue; // Ignore own old placement
+                    const p = placedRects[otherId];
+                    if (tr >= p.r && tr < p.r + p.rows && tc >= p.c && tc < p.c + p.cols) {
+                        return false;
+                    }
+                }
+
+                // Check collision with OTHER clue numbers (cannot cover another clue cell)
+                const otherClue = clueCells.find(cl => cl.r === tr && cl.c === tc);
+                if (otherClue && otherClue.id !== currentClueId) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    function removeShape(clueId) {
+        delete placedRects[clueId];
+        updateScore();
+        renderGrid();
+        if (selectedClue && selectedClue.id === clueId) {
+            showShapeOptions(selectedClue);
+        }
+    }
+
+    // --- Scoring & Win Logic ---
+    function updateScore() {
+        let score = 0;
+        Object.keys(placedRects).forEach(id => {
+            const p = placedRects[id];
+            score += (p.rows * p.cols);
+        });
+        currentScore = score;
+        document.getElementById('score-display').innerText = `คะแนน: ${currentScore}`;
+    }
+
+    function checkWinCondition() {
+        // Win when all clues are placed AND total area fills the board
+        const allCluesPlaced = clueCells.length === Object.keys(placedRects).length;
+        
+        let totalPlacedArea = 0;
+        Object.values(placedRects).forEach(p => totalPlacedArea += (p.rows * p.cols));
+        const boardFilled = totalPlacedArea === (gridRows * gridCols);
+
+        if (allCluesPlaced && boardFilled) {
+            setTimeout(() => {
+                document.getElementById('victory-desc').innerText = `คุณสร้างตารางครบถ้วน ได้คะแนนสะสม ${currentScore} คะแนน`;
+                document.getElementById('victory-modal').style.display = 'flex';
+            }, 300);
+        }
+    }
+
+    function nextLevel() {
+        document.getElementById('victory-modal').style.display = 'none';
+        currentLevelIdx++;
+        initGame();
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // Start Game
+    window.onload = initGame;
+</script>
+</body>
+</html>
