@@ -6,6 +6,16 @@
 <title>Ethical Priority Mathematics — Interactive Learning Site</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- MathJax v3 does NOT enable single-$ inline math by default (only \(...\)) — the AI chat's
+     $d$-style inline math was rendering as raw literal text until this config was added. -->
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    }
+  };
+</script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <style>
@@ -188,15 +198,29 @@
         </div>
         <div id="value-pool-list" class="space-y-2"></div>
       </div>
-      <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="space-y-1 text-center md:text-left">
-          <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider block">Target Equation for Analysis</span>
-          <span id="ai-formula-source-label" class="text-[10px] text-slate-400 block"></span>
-          <div id="ai-active-formula" class="text-base font-serif italic font-bold"></div>
+      <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="space-y-1 text-center md:text-left flex-1">
+            <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider block">Target Equation for Analysis</span>
+            <span id="ai-formula-source-label" class="text-[10px] text-slate-400 block"></span>
+            <div id="ai-active-formula" class="text-base font-serif italic font-bold"></div>
+          </div>
+          <div class="flex gap-2 w-full md:w-auto">
+            <button onclick="toggleEditEquation()" class="bg-white hover:bg-slate-100 text-slate-600 border border-slate-300 px-4 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shrink-0 transition-all">
+              <i class="fa-solid fa-pen"></i><span>Edit</span>
+            </button>
+            <button onclick="triggerGeminiCritique()" class="flex-1 md:flex-none bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-200 shrink-0 transition-all">
+              <i class="fa-solid fa-wand-magic-sparkles"></i><span>Analyze with AI</span>
+            </button>
+          </div>
         </div>
-        <button onclick="triggerGeminiCritique()" class="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-200 shrink-0 transition-all">
-          <i class="fa-solid fa-wand-magic-sparkles"></i><span>Analyze with AI</span>
-        </button>
+        <div id="edit-equation-box" class="hidden flex flex-col sm:flex-row gap-2 pt-2 border-t border-slate-200">
+          <input id="edit-equation-input" type="text" class="flex-1 p-2.5 border border-slate-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="e.g., (12*B + 6*E) / d">
+          <div class="flex gap-2">
+            <button onclick="saveEditedEquation()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold px-4 rounded-lg transition-all">Save</button>
+            <button onclick="toggleEditEquation()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold px-4 rounded-lg transition-all">Cancel</button>
+          </div>
+        </div>
       </div>
       <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50 shadow-sm">
         <div class="p-3.5 bg-slate-100 border-b border-slate-200 text-xs font-bold text-slate-700 flex items-center justify-between">
@@ -284,6 +308,16 @@
 
 <script>
 /* ================= SHARED DATA & MATH ENGINE ================= */
+/* The MathJax config script (in <head>) sets window.MathJax = {tex:{...}} immediately, so
+   `if(window.MathJax)` is truthy even before the actual MathJax library (loaded async, may
+   still be in flight) has attached typesetPromise — calling it too early throws and silently
+   aborts whatever init function was running. Every typeset call in this file goes through this
+   guarded helper instead of checking window.MathJax directly. */
+function safeTypeset(elements){
+  if(window.MathJax && typeof MathJax.typesetPromise === 'function'){
+    MathJax.typesetPromise(elements);
+  }
+}
 const HQ = {x:2, y:2};
 function dist(p1,p2){ return Math.sqrt((p2.x-p1.x)**2 + (p2.y-p1.y)**2); }
 
@@ -396,7 +430,7 @@ function openFormulaChoiceModal(){
   body.innerHTML = html;
   document.getElementById('formula-choice-error').classList.add('hidden');
   document.getElementById('formula-choice-modal').classList.remove('hidden');
-  if(window.MathJax) MathJax.typesetPromise([body]);
+  safeTypeset([body]);
 }
 function closeFormulaChoiceModal(){
   document.getElementById('formula-choice-modal').classList.add('hidden');
@@ -415,7 +449,10 @@ function confirmFormulaChoice(){
     const m = guidedModels.find(x => x.id === id);
     selectedFormulaSource = source;
     selectedFormulaText = m.plain(m._state);
-    selectedFormulaLatex = m.formulaAdapted(m._state);
+    // formulaAdapted() returns a string already wrapped in its own $$...$$ delimiters.
+    // Strip them here so callers can wrap it in $$...$$ themselves without double-nesting
+    // (double-nested $$ is invalid LaTeX and MathJax silently falls back to showing raw text).
+    selectedFormulaLatex = m.formulaAdapted(m._state).replace(/^\$\$|\$\$$/g, '');
     selectedFormulaLabel = `Source: Model ${m.id} — ${m.name}`;
   }
   document.getElementById('formula-choice-modal').classList.add('hidden');
@@ -563,7 +600,7 @@ function validateAndRenderMath(){
     statusEl.className = "mt-2 text-xs font-semibold text-slate-400 flex items-center gap-1.5";
     statusEl.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>Enter a formula to evaluate...</span>`;
     preview.innerHTML = `$$\\text{Priority Score} = \\text{[your formula will appear here]}$$`;
-    if(window.MathJax) MathJax.typesetPromise([preview]);
+    safeTypeset([preview]);
     return;
   }
   if(checkParentheses(val) && checkSyntaxValidity(val)){
@@ -575,7 +612,7 @@ function validateAndRenderMath(){
     statusEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i><span>Invalid syntax — check parentheses/operators</span>`;
     preview.innerHTML = `$$\\text{Priority Score} = \\text{\\color{red}{Syntax Error}}$$`;
   }
-  if(window.MathJax) MathJax.typesetPromise([preview]);
+  safeTypeset([preview]);
 }
 function evaluateTab3Model(){
   const formulaStr = document.getElementById('formula-input').value.trim();
@@ -672,11 +709,11 @@ function renderModelCards(){
         <i class="fa-solid fa-chevron-${isOpen ? 'up' : 'down'} text-slate-400"></i>
       </div>
       <div class="acc-body ${isOpen ? 'open' : ''} px-4 pb-4 space-y-4" id="model-body-${m.id}">
-        <div class="bg-white p-3 rounded-lg border border-slate-200 text-xs space-y-1.5">
+        <div class="bg-white p-4 rounded-lg border border-slate-200 space-y-2">
           <div class="text-[10px] font-bold uppercase text-slate-400">Recall: d = distance between two points</div>
-          <div id="model-formula-base-${m.id}" class="text-center py-1">${m.formulaBase}</div>
+          <div id="model-formula-base-${m.id}" class="text-center py-2 text-base md:text-lg overflow-x-auto">${m.formulaBase}</div>
           <div class="text-[10px] font-bold uppercase text-slate-400 pt-1">This model reuses that same d, here:</div>
-          <div id="model-formula-adapted-${m.id}" class="text-center py-1"></div>
+          <div id="model-formula-adapted-${m.id}" class="text-center py-2 text-lg md:text-xl font-semibold overflow-x-auto"></div>
         </div>
         <div class="grid sm:grid-cols-3 gap-3">
           ${m.params.map(p => `
@@ -711,7 +748,7 @@ function renderModelCards(){
     </div>`;
   }).join('');
   guidedModels.forEach(m => { if(!m._state){ m._state = {}; m.params.forEach(p => m._state[p.key] = p.val); } renderModelFormula(m); renderModelTable(m); });
-  if(window.MathJax) MathJax.typesetPromise();
+  safeTypeset();
 }
 function toggleModel(id){ expandedModelId = (expandedModelId === id) ? null : id; renderModelCards(); }
 function updateModelParam(modelId, key, value){
@@ -721,7 +758,7 @@ function updateModelParam(modelId, key, value){
   document.getElementById(`param-val-${modelId}-${key}`).innerText = num;
   renderModelFormula(m);
   renderModelTable(m);
-  if(window.MathJax) MathJax.typesetPromise([document.getElementById(`model-formula-adapted-${modelId}`)]);
+  safeTypeset([document.getElementById(`model-formula-adapted-${modelId}`)]);
 }
 function renderModelFormula(m){
   const el = document.getElementById(`model-formula-adapted-${m.id}`);
@@ -738,11 +775,11 @@ function renderModelTable(m){
 /* ================= TAB 5: AI CO-CREATION ================= */
 function renderValuePool(){
   const values = [
-    {id:'Equity', th:'ความเท่าเทียม (Equity)', desc:'Reduce inequality; give vulnerable groups a fair chance.'},
-    {id:'Efficiency', th:'ความคุ้มค่าทางเศรษฐกิจ (Efficiency)', desc:'Speed, resource savings, maximum output.'},
-    {id:'Sustainability', th:'ความยั่งยืน (Sustainability)', desc:'Long-term and environmental impact.'},
-    {id:'Safety', th:'ความปลอดภัย (Safety)', desc:'Protect life; manage acute risk.'},
-    {id:'Community', th:'ชุมชน/ภูมิปัญญา (Community)', desc:'Local participation and context.'}
+    {id:'Equity', th:'Equity', desc:'Reduce inequality; give vulnerable groups a fair chance.'},
+    {id:'Efficiency', th:'Efficiency', desc:'Speed, resource savings, maximum output.'},
+    {id:'Sustainability', th:'Sustainability', desc:'Long-term and environmental impact.'},
+    {id:'Safety', th:'Safety', desc:'Protect life; manage acute risk.'},
+    {id:'Community', th:'Community', desc:'Local participation and context.'}
   ];
   document.getElementById('value-pool-list').innerHTML = values.map((v,i)=>`
     <div data-value-id="${v.id}" class="value-item bg-white border border-slate-200 p-3 rounded-xl shadow-sm flex items-center justify-between gap-3 hover:border-purple-300 transition-all">
@@ -782,54 +819,142 @@ function syncTab5FormulaDisplay(){
     el.innerHTML = `$$\\text{Priority Score} = ${convertToLatex(formula)}$$`;
     labelEl.innerText = '';
   }
-  if(window.MathJax) MathJax.typesetPromise([el]);
+  safeTypeset([el]);
 }
 
-const BACKEND_API_ENDPOINT = "/api/chat-gemini"; // Configure this on your server; the Gemini API key must live server-side only.
+function toggleEditEquation(){
+  const box = document.getElementById('edit-equation-box');
+  const isHidden = box.classList.contains('hidden');
+  if(isHidden){
+    document.getElementById('edit-equation-input').value = selectedFormulaText || document.getElementById('formula-input').value.trim() || '';
+    box.classList.remove('hidden');
+    document.getElementById('edit-equation-input').focus();
+  } else {
+    box.classList.add('hidden');
+  }
+}
+function saveEditedEquation(){
+  const val = document.getElementById('edit-equation-input').value.trim();
+  if(!val){ alert('Please enter a formula.'); return; }
+  if(!checkParentheses(val) || !checkSyntaxValidity(val)){ alert('That formula has invalid syntax — check parentheses and operators.'); return; }
+  selectedFormulaSource = 'edited';
+  selectedFormulaText = val;
+  selectedFormulaLatex = convertToLatex(val);
+  selectedFormulaLabel = 'Source: Edited by you';
+  document.getElementById('edit-equation-box').classList.add('hidden');
+  syncTab5FormulaDisplay();
+}
 
-async function triggerGeminiCritique(){
-  const valuesRanked = getUserValueRanking();
-  const userFormula = selectedFormulaText || document.getElementById('formula-input').value.trim() || "(no formula entered)";
+/* ⚠️ SECURITY NOTE: this key is embedded directly in client-side code so the app can call
+   Gemini with zero backend/build step, per explicit request. Anyone who views this page's
+   source can read and reuse this key. Do not use a key with billing/high quota attached to
+   a real account for a file that will be shared widely — rotate or restrict this key
+   (HTTP referrer restriction in Google AI Studio) if this file leaves a trusted classroom. */
+const GEMINI_API_KEY = "AQ.Ab8RN6KCmzOjadL-mPcwCV3Oh6f3oHdOs64wn56w62gYCvBe9g";
+// gemini-3.6-flash is a real, current, Stable model (verified against ai.google.dev/gemini-api/docs/models).
+const GEMINI_MODEL = "gemini-3.6-flash";
+// Google's now-GA "Interactions API" replaces the older generateContent REST endpoint this file
+// used previously. Verified live against ai.google.dev/gemini-api/docs/api-key on 2026-08-05:
+// POST /v1beta/interactions, auth via the `x-goog-api-key` header (not a `?key=` query param),
+// body is simply {model, input}. The key format "AQ...." (not "AIzaSy...") is expected — it's a
+// newer "auth key" bound to a service account, which AI Studio now issues by default.
+const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/interactions`;
+
+/* Shared AI-call helper: calls the Gemini API directly, and falls back to a locally-generated
+   Socratic reply if the call fails (network issue, invalid/expired key, quota, etc.) so the
+   activity never dead-ends even if Gemini is unreachable. Both the initial critique and every
+   chat follow-up route through this one function. */
+async function callAI(systemInstruction, userPrompt, mockReplyFn){
   const loadingEl = document.getElementById('ai-loading-indicator');
   loadingEl.classList.remove('hidden');
-
-  const systemInstruction = `Role & Tone: You are a mathematics and Critical Mathematics Consciousness mentor. Critique the learner's formula in a warm, Socratic tone.
-Goal:
-1. Analyze how well the submitted formula reflects the learner's ranked values.
-2. Point out gaps — but NEVER give away the correct formula.
-3. Ask guiding questions so the learner revises the formula themselves.`;
-  const userPrompt = `Value ranking (highest first): ${valuesRanked.map((v,i)=>`${i+1}. ${v}`).join(', ')}
-Learner's formula: Priority Score = ${userFormula}
-Please critique per the system instruction.`;
-
   try{
-    const response = await fetch(BACKEND_API_ENDPOINT, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({systemInstruction, prompt: userPrompt})
+    const response = await fetch(GEMINI_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY},
+      body: JSON.stringify({
+        model: GEMINI_MODEL,
+        // The Interactions API takes one combined input string rather than separate
+        // systemInstruction/contents fields, so we fold the system instruction in as a prefix.
+        input: `${systemInstruction}\n\n${userPrompt}`
+      })
     });
+    if(!response.ok){
+      const errBody = await response.text().catch(()=> '');
+      throw new Error(`Gemini API responded with ${response.status}: ${errBody}`);
+    }
     const data = await response.json();
-    appendAiMessage(data.reply || "Something went wrong connecting to the AI.");
+    // Interactions API response shape: { steps: [ { type: 'model_output', content: [ {type:'text', text:'...'} ] }, ... ] }
+    const modelStep = (data.steps || []).find(s => s.type === 'model_output');
+    const reply = modelStep?.content?.filter(c => c.type === 'text').map(c => c.text).join('').trim();
+    appendAiMessage(reply || "Gemini didn't return any text — please try again.", 'gemini');
   }catch(err){
-    console.warn('Backend endpoint not found — using local simulation for demo purposes.');
-    setTimeout(()=>{
-      const mock = `Interesting first step turning your idea into math! Looking at $$\\text{Priority} = ${convertToLatex(userFormula)}$$ through the lens of your top value, <strong>${valuesRanked[0]}</strong> — does the formula's biggest driver actually match that value?<br><br>Also, what happened to <strong>${valuesRanked[1]}</strong> and <strong>${valuesRanked[2]}</strong>? Do you see them represented anywhere in the formula, or did they get left out?<br><br>Try this: which variable or weight could you add or adjust so those values show up more clearly?`;
-      appendAiMessage(mock);
-    }, 1200);
+    console.warn('Gemini API call failed — using local simulation instead.', err);
+    await new Promise(r => setTimeout(r, 900));
+    appendAiMessage(mockReplyFn(), 'mock');
   }finally{
     loadingEl.classList.add('hidden');
   }
 }
-function appendAiMessage(text){
+
+async function triggerGeminiCritique(){
+  const valuesRanked = getUserValueRanking();
+  const userFormula = selectedFormulaText || document.getElementById('formula-input').value.trim() || "(no formula entered)";
+
+  const systemInstruction = `Role & Tone: You are a mathematics and Critical Mathematics Consciousness mentor. Critique the learner's formula in a warm, Socratic tone.
+Language: Always respond in English, unless the learner explicitly asks you to respond in Thai.
+Goal:
+1. Go value by value through the learner's ranking (highest first) and say plainly, for each one, whether the formula's terms actually represent it, under-weight it, or leave it out entirely.
+2. Critical lens (this is the heart of the critique — always include it): distance d is not a neutral number. Using d in a priority formula silently encodes the assumption "physically closer to HQ = more urgent," which is a value judgment, not a fact of geometry. Name this assumption explicitly, then ask whether it actually serves the learner's #1 ranked value or quietly works against it — e.g. does raw distance reward or penalize the same people repeatedly? Does it treat all groups' distance the same way, or should some groups' distance matter more/less/differently given what the learner says they value?
+3. Give ONE concrete, specific suggestion for how the learner could rework the d term in light of that critique: e.g. invert d, square d, multiply/combine d with another variable or with the waiting-time weight t, apply d differently per case type. Name the specific operation, not a vague hint.
+4. NEVER write out the learner's corrected formula for them — describe the move, let them do the algebra.
+5. End with one short guiding question that points them back to Step 2/3 to try it.
+Length & format: About 150 words total. Do NOT use markdown headers (#, ##, ###) or horizontal rules (---). You may use **bold** for the value names and the one operation you suggest. Write any math using single-dollar LaTeX like $d$ or $1/d^2$, never double-dollar $$...$$.`;
+  const userPrompt = `Value ranking (highest first): ${valuesRanked.map((v,i)=>`${i+1}. ${v}`).join(', ')}
+Learner's formula: Priority Score = ${userFormula}
+Please critique per the system instruction.`;
+
+  await callAI(systemInstruction, userPrompt, () => {
+    return `Interesting first step turning your idea into math! Looking at $$\\text{Priority} = ${convertToLatex(userFormula)}$$ through the lens of your top value, <strong>${valuesRanked[0]}</strong> — does the formula's biggest driver actually match that value?<br><br>Also, what happened to <strong>${valuesRanked[1]}</strong> and <strong>${valuesRanked[2]}</strong>? Do you see them represented anywhere in the formula, or did they get left out?<br><br>Try this: which variable or weight could you add or adjust so those values show up more clearly?`;
+  });
+}
+
+/* Real Gemini replies come back as plain-text Markdown (**bold**, ### headers, - bullets, --- rules).
+   Chat bubbles need actual HTML, not raw markdown tags sitting on screen, so convert before inserting.
+   Mock/simulated replies already hand-write their own <strong>/<br> HTML and skip this conversion. */
+function markdownToHtml(md){
+  let html = md;
+  html = html.replace(/^#{1,6}\s+(.*)$/gm, '<div class="font-bold text-slate-800 mt-1.5 mb-0.5">$1</div>');
+  html = html.replace(/^---+$/gm, '<hr class="my-2 border-slate-200">');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/(^\d+\.\s.*(?:\n\d+\.\s.*)*)/gm, block => {
+    const items = block.split('\n').map(l => l.replace(/^\d+\.\s/, '').trim()).filter(Boolean);
+    return '<ol class="list-decimal ml-4 space-y-0.5">' + items.map(i => `<li>${i}</li>`).join('') + '</ol>';
+  });
+  html = html.replace(/(^[*-]\s.*(?:\n[*-]\s.*)*)/gm, block => {
+    const items = block.split('\n').map(l => l.replace(/^[*-]\s/, '').trim()).filter(Boolean);
+    return '<ul class="list-disc ml-4 space-y-0.5">' + items.map(i => `<li>${i}</li>`).join('') + '</ul>';
+  });
+  html = html.replace(/\n{2,}/g, '<br><br>').replace(/\n/g, '<br>');
+  return html;
+}
+function appendAiMessage(text, source){
   const container = document.getElementById('chat-messages');
   const bubble = document.createElement('div');
   bubble.className = "flex gap-3 max-w-[90%]";
+  const badge = source === 'gemini'
+    ? '<span class="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 mb-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Live Gemini response</span>'
+    : source === 'mock'
+      ? '<span class="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 mb-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Simulated (Gemini unreachable)</span>'
+      : '';
+  const renderedText = source === 'gemini' ? markdownToHtml(text) : text;
   bubble.innerHTML = `<div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 font-bold text-xs shadow-md">AI</div>
-    <div class="bg-white p-3.5 rounded-2xl rounded-tl-none border border-slate-200 text-slate-700 shadow-sm space-y-2 leading-relaxed">${text}</div>`;
+    <div class="bg-white p-3.5 rounded-2xl rounded-tl-none border border-slate-200 text-slate-700 shadow-sm space-y-2 leading-relaxed">${badge ? `<div>${badge}</div>` : ''}<div>${renderedText}</div></div>`;
   container.appendChild(bubble);
   container.scrollTop = container.scrollHeight;
-  if(window.MathJax) MathJax.typesetPromise([bubble]);
+  safeTypeset([bubble]);
 }
-function sendChatMessage(){
+
+async function sendChatMessage(){
   const input = document.getElementById('chat-input');
   const text = input.value.trim();
   if(!text) return;
@@ -841,6 +966,24 @@ function sendChatMessage(){
   container.appendChild(bubble);
   input.value = '';
   container.scrollTop = container.scrollHeight;
+
+  // Follow-up questions now actually get a reply instead of dead-ending.
+  const valuesRanked = getUserValueRanking();
+  const userFormula = selectedFormulaText || document.getElementById('formula-input').value.trim() || "(no formula entered)";
+  const systemInstruction = `Role & Tone: You are a mathematics and Critical Mathematics Consciousness mentor, continuing a Socratic dialogue with a learner about their priority-score formula.
+Language: Always respond in English, unless the learner explicitly asks you to respond in Thai.
+Goal: Answer the learner's follow-up question helpfully, checking it against their ranked values again if relevant.
+Critical lens: keep returning to the idea that distance d is not neutral — using it as a priority driver assumes "closer = more urgent," which is a value judgment. When relevant to the question, name that assumption and ask whether it helps or works against the learner's top-ranked value.
+Then steer toward concrete, specific ways to rework d (invert it, square it, multiply/combine it with another variable or with t, apply it differently per case, etc.) rather than vague advice — that's the core skill this activity teaches. Stay Socratic — ask a guiding question back rather than just handing over a finished formula.
+Length & format: About 150 words total. Do NOT use markdown headers (#, ##, ###) or horizontal rules (---). You may use **bold** for key terms. Write any math using single-dollar LaTeX like $d$ or $1/d^2$, never double-dollar $$...$$.`;
+  const userPrompt = `Value ranking (highest first): ${valuesRanked.map((v,i)=>`${i+1}. ${v}`).join(', ')}
+Learner's formula: Priority Score = ${userFormula}
+Learner's follow-up question: "${text}"
+Please respond per the system instruction.`;
+
+  await callAI(systemInstruction, userPrompt, () => {
+    return `That's worth sitting with. Thinking about "${text}" — which of your ranked values (<strong>${valuesRanked[0]}</strong>, <strong>${valuesRanked[1]}</strong>, <strong>${valuesRanked[2]}</strong>...) does that idea push you toward strengthening in the formula? Try changing one weight or adding one variable, then see how the ranking shifts in Step 2/3.`;
+  });
 }
 
 /* ================= STARS (Tab 3 satisfaction) ================= */
