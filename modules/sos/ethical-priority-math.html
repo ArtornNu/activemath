@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ethical Priority Mathematics — Interactive Learning Site</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<style>
+  body{font-family:'Inter',system-ui,sans-serif;}
+  .sortable-ghost{opacity:.4;background:#e2e8f0;}
+  .grid-vertex{cursor:pointer;}
+  .grid-vertex:hover circle{fill:#3b82f6;r:5;}
+  .tab-btn[disabled]{cursor:not-allowed;}
+  .model-card.expanded{border-color:#4f46e5;background:#eef2ff;}
+  /* NOTE: intentionally NOT named .collapse — Tailwind ships a built-in .collapse (visibility:collapse)
+     utility that silently overrides a custom class of the same name and breaks the accordion. */
+  .acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .acc-body.open{max-height:3000px;}
+</style>
+</head>
+<body class="bg-slate-100 min-h-screen p-4 md:p-8 text-slate-800">
+
+<div class="max-w-6xl mx-auto">
+
+  <!-- HEADER -->
+  <div class="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div>
+      <h1 class="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center gap-2">
+        <i class="fa-solid fa-scale-balanced text-indigo-600"></i>
+        Ethical Priority Mathematics
+      </h1>
+      <p class="text-xs text-slate-500 mt-1">An interactive math journey from Pythagorean distance to human-centered priority models — Grade 10-12</p>
+    </div>
+  </div>
+
+  <!-- NAV TABS -->
+  <!-- NOTE: internal ids/indices (tab-btn-2, switchTab(2), etc.) intentionally still start at 2 —
+       the distance review that used to be "Tab 1" here now lives in the SOS_V1.html poster instead.
+       Renumbering every internal id would be high-risk for no user-visible benefit; only the
+       *displayed* step numbers below were renumbered so nothing shown to students is confusing. -->
+  <div class="flex flex-wrap md:flex-nowrap gap-1 bg-slate-200/80 p-1.5 rounded-xl mb-4 border border-slate-300">
+    <button id="tab-btn-2" onclick="switchTab(2)" class="tab-btn flex-1 py-2.5 px-2 rounded-lg text-xs md:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm border border-slate-200">
+      <span>1. Priority Intent</span><i id="lock-icon-2" class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>
+    </button>
+    <button id="tab-btn-3" onclick="switchTab(3)" disabled class="tab-btn flex-1 py-2.5 px-2 rounded-lg text-xs md:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 text-slate-400 cursor-not-allowed opacity-60">
+      <span>2. Formula</span><i id="lock-icon-3" class="fa-solid fa-lock text-slate-400 text-xs"></i>
+    </button>
+    <button id="tab-btn-4" onclick="switchTab(4)" disabled class="tab-btn flex-1 py-2.5 px-2 rounded-lg text-xs md:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 text-slate-400 cursor-not-allowed opacity-60">
+      <span>3. Guided Models</span><i id="lock-icon-4" class="fa-solid fa-lock text-slate-400 text-xs"></i>
+    </button>
+    <button id="tab-btn-5" onclick="switchTab(5)" disabled class="tab-btn flex-1 py-2.5 px-2 rounded-lg text-xs md:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 text-slate-400 cursor-not-allowed opacity-60">
+      <span>4. AI Co-creation</span><i id="lock-icon-5" class="fa-solid fa-lock text-slate-400 text-xs"></i>
+    </button>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div class="bg-white rounded-2xl border border-slate-200 p-5 md:p-6 shadow-sm">
+
+    <!-- ============ PRIORITY INTENT (Step 1) ============ -->
+    <div id="tab-content-2" class="tab-content space-y-5">
+      <div class="border-b border-slate-100 pb-3">
+        <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-heart-pulse text-rose-500"></i>Step 1: Human Intent & Priority</h2>
+        <p class="text-xs text-slate-500 mt-1">Headquarters (HQ) is fixed at (2, 2). Hover any node for its coordinates and distance from HQ, then rank what matters most on the right.</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-600"><i class="fa-solid fa-map-location-dot text-blue-500 mr-1"></i>Spatial Map</span>
+            <span class="text-[10px] text-slate-400">Hover a node for coordinates & distance</span>
+          </div>
+          <div class="relative bg-slate-900 rounded-xl border border-slate-700 overflow-hidden">
+            <svg id="t2-map-svg" viewBox="0 0 360 360" class="w-full"></svg>
+            <div id="t2-tooltip" class="hidden absolute text-[11px] bg-slate-800 text-white px-2.5 py-1.5 rounded-lg border border-slate-600 pointer-events-none z-30 shadow-lg"></div>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <span class="text-xs font-semibold text-slate-500"><i class="fa-solid fa-arrows-up-down-left-right mr-1"></i>Drag to Rank Priorities (Highest First)</span>
+          <div id="priority-list" class="space-y-2"></div>
+        </div>
+      </div>
+      <div class="flex justify-end pt-2 border-t border-slate-100">
+        <button onclick="submitTab(2)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-6 py-2.5 rounded-lg flex items-center gap-2 shadow-sm transition-all">
+          <span>Confirm Priorities & Proceed</span><i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ============ MANUAL MATH & FORMATTER (Step 2) ============ -->
+    <div id="tab-content-3" class="tab-content hidden space-y-5">
+      <div class="border-b border-slate-100 pb-3 flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-pen-ruler text-sky-600"></i>Step 2: Translate Intent to Formula</h2>
+          <p class="text-xs text-slate-500 mt-1">Write your own formula using the variables below. No example is pre-filled — this is your idea.</p>
+        </div>
+        <button onclick="openVariableModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm transition-all">
+          <i class="fa-solid fa-plus"></i><span>New Variable</span>
+        </button>
+      </div>
+      <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/80">
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5"><i class="fa-solid fa-cubes text-blue-500 mr-1.5"></i>Available Variables (click to insert)</div>
+        <div id="variable-chips-container" class="flex flex-wrap gap-2"></div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Formula Input:</label>
+        <input type="text" id="formula-input" value="" placeholder="e.g., (B * 10 + E * 5 + C * 2) / (d + t)" oninput="validateAndRenderMath()" class="w-full p-3 border border-slate-300 rounded-xl font-mono focus:ring-2 focus:ring-blue-500 outline-none shadow-inner text-sm md:text-base">
+        <div id="syntax-status" class="mt-2 text-xs font-semibold text-slate-400 flex items-center gap-1.5"><i class="fa-solid fa-circle-info"></i><span>Enter a formula to evaluate...</span></div>
+      </div>
+      <div class="space-y-1.5">
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Live Preview (LaTeX)</label>
+        <div class="p-6 border-2 border-dashed border-sky-300 bg-sky-50/30 rounded-xl flex items-center justify-center min-h-[100px]">
+          <div id="math-preview" class="text-lg font-serif italic text-slate-400">$$\text{Priority Score} = \text{[your formula will appear here]}$$</div>
+        </div>
+      </div>
+      <div class="flex flex-wrap justify-end gap-2">
+        <div class="flex items-center gap-1 mr-auto text-xs text-slate-500">
+          <span>Satisfaction:</span>
+          <span id="t3-stars" class="text-amber-400 cursor-pointer text-lg"></span>
+        </div>
+        <button onclick="evaluateTab3Model()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-6 py-2.5 rounded-lg flex items-center gap-2 shadow-sm transition-all">
+          <i class="fa-solid fa-calculator"></i><span>Calculate Ranking</span>
+        </button>
+      </div>
+      <div id="tab3-comparison-section" class="hidden space-y-4 pt-4 border-t border-slate-200">
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+            <h3 class="text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-code-compare text-blue-600"></i>Expected vs. Calculated Ranking</h3>
+            <span id="tab3-match-summary" class="text-[11px] font-bold px-2.5 py-1 rounded-full"></span>
+          </div>
+          <p class="text-[10px] text-slate-400 mb-2">Same row color on both sides = that rank position matches.</p>
+          <div class="grid md:grid-cols-2 gap-3">
+            <div>
+              <div class="text-[10px] font-bold uppercase text-slate-500 mb-1 flex items-center gap-1"><i class="fa-solid fa-flag text-slate-400"></i>Expected (from Step 1)</div>
+              <table class="w-full text-xs text-left border-collapse">
+                <thead><tr class="bg-slate-200 text-slate-700"><th class="p-1.5 border border-slate-300">Rank</th><th class="p-1.5 border border-slate-300">Node</th></tr></thead>
+                <tbody id="tab3-expected-body"></tbody>
+              </table>
+            </div>
+            <div>
+              <div class="text-[10px] font-bold uppercase text-slate-500 mb-1 flex items-center gap-1"><i class="fa-solid fa-calculator text-slate-400"></i>Calculated (your formula)</div>
+              <table class="w-full text-xs text-left border-collapse">
+                <thead><tr class="bg-slate-200 text-slate-700"><th class="p-1.5 border border-slate-300">Rank</th><th class="p-1.5 border border-slate-300">Node</th><th class="p-1.5 border border-slate-300">Score</th><th class="p-1.5 border border-slate-300 text-center">Match?</th></tr></thead>
+                <tbody id="tab3-calculated-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row justify-end gap-3">
+          <button onclick="editTab3Formula()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-sm px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all">
+            <i class="fa-solid fa-pen"></i><span>Edit Formula / Model</span>
+          </button>
+          <button onclick="submitTab(3)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all">
+            <span>I'm satisfied — Continue</span><i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ GUIDED MATH MODELS (Step 3) ============ -->
+    <div id="tab-content-4" class="tab-content hidden space-y-6">
+      <div class="border-b border-slate-100 pb-3">
+        <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-indigo-600"></i>Step 3: Guided Math Models</h2>
+        <p class="text-xs text-slate-500 mt-1">Model 1 is open below — every model reuses <strong>d</strong>, the same point-to-point distance you reviewed before starting. Adjust the sliders and watch the ranking update live. Click a different card title to compare models.</p>
+      </div>
+      <div id="t4-model-cards" class="space-y-4"></div>
+      <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2 border-t border-slate-100">
+        <button onclick="switchTab(4)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-sm px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all">
+          <i class="fa-solid fa-pen"></i><span>Keep Exploring Models</span>
+        </button>
+        <button onclick="openFormulaChoiceModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all">
+          <span>I'm satisfied — Continue</span><i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ============ AI CO-CREATION (Step 4) ============ -->
+    <div id="tab-content-5" class="tab-content hidden space-y-6">
+      <div class="border-b border-slate-100 pb-3">
+        <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-robot text-purple-600"></i>Step 4: AI Co-creation & Critical Reflection</h2>
+        <p class="text-xs text-slate-500 mt-1">Rank the ethical values you hold, then send your equation for a Socratic critique — the AI will not hand you the answer.</p>
+      </div>
+      <div class="bg-purple-50/50 border border-purple-200 rounded-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <h3 class="text-sm font-bold text-purple-900 flex items-center gap-2"><i class="fa-solid fa-layer-group text-purple-600"></i>Ethical Value Ranking</h3>
+          <span class="text-[10px] bg-purple-100 text-purple-800 px-2.5 py-1 rounded-full font-bold uppercase border border-purple-300">Value Pool</span>
+        </div>
+        <div id="value-pool-list" class="space-y-2"></div>
+      </div>
+      <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="space-y-1 text-center md:text-left">
+          <span class="text-[10px] font-bold text-purple-600 uppercase tracking-wider block">Target Equation for Analysis</span>
+          <span id="ai-formula-source-label" class="text-[10px] text-slate-400 block"></span>
+          <div id="ai-active-formula" class="text-base font-serif italic font-bold"></div>
+        </div>
+        <button onclick="triggerGeminiCritique()" class="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-200 shrink-0 transition-all">
+          <i class="fa-solid fa-wand-magic-sparkles"></i><span>Analyze with AI</span>
+        </button>
+      </div>
+      <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50 shadow-sm">
+        <div class="p-3.5 bg-slate-100 border-b border-slate-200 text-xs font-bold text-slate-700 flex items-center justify-between">
+          <span><i class="fa-solid fa-comments text-purple-600 mr-1.5"></i>Ethical Reflection Dialogue</span>
+          <span class="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-mono font-bold">Socratic Method</span>
+        </div>
+        <div id="chat-messages" class="p-4 h-72 overflow-y-auto space-y-4 text-xs">
+          <div class="flex gap-3 max-w-[90%]">
+            <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 font-bold text-xs shadow-md">AI</div>
+            <div class="bg-white p-3.5 rounded-2xl rounded-tl-none border border-slate-200 text-slate-700 shadow-sm leading-relaxed">
+              Hi! Once you've ranked your values above, press <strong>"Analyze with AI"</strong> and I'll reflect on how well your formula matches what you say you value.
+            </div>
+          </div>
+        </div>
+        <div id="ai-loading-indicator" class="hidden p-3 bg-purple-50/80 border-t border-purple-100 text-xs text-purple-700 font-semibold flex items-center justify-center gap-2">
+          <i class="fa-solid fa-circle-notch fa-spin"></i><span>Thinking through your values...</span>
+        </div>
+        <div class="p-3 bg-white border-t border-slate-200 flex gap-2">
+          <input type="text" id="chat-input" placeholder="Ask a follow-up question..." class="flex-1 px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-purple-500 outline-none" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+          <button onclick="sendChatMessage()" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all"><span>Send</span><i class="fa-solid fa-paper-plane text-[10px]"></i></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- VARIABLE MODAL -->
+<div id="variable-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 w-full max-w-md shadow-2xl space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <h3 class="text-base font-bold flex items-center gap-2"><i class="fa-solid fa-sliders text-indigo-600"></i>New Variable</h3>
+      <button onclick="closeVariableModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Name <span class="text-rose-500">(max 2 characters, e.g. x, a1, B)</span></label>
+        <input type="text" id="new-var-name" maxlength="2" placeholder="e.g. x" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-indigo-500 outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Initial Value</label>
+        <input type="number" id="new-var-val" value="1" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-indigo-500 outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Description (optional)</label>
+        <input type="text" id="new-var-desc" placeholder="e.g. number of critical patients" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <button onclick="closeVariableModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+      <button onclick="confirmCreateVariable()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5"><i class="fa-solid fa-check"></i>Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4 GATE MODAL -->
+<div id="gate-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 w-full max-w-sm shadow-2xl space-y-4 text-center">
+    <i class="fa-solid fa-lock text-3xl text-indigo-600"></i>
+    <h3 class="text-base font-bold">Before you continue...</h3>
+    <p class="text-xs text-slate-500">Guided models are just <em>one way</em> to think about this. Make sure you've genuinely tried your own formula in Step 2 first. Ask your teacher for the code to unlock this step.</p>
+    <input id="gate-code-input" type="text" placeholder="Enter code" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm text-center font-mono focus:ring-2 focus:ring-indigo-500 outline-none" onkeypress="if(event.key==='Enter') checkGateCode()">
+    <div id="gate-error" class="hidden text-xs text-rose-500 font-semibold">Incorrect code — ask your teacher.</div>
+    <button onclick="checkGateCode()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-all">Unlock Step 3</button>
+    <button onclick="closeGateModal()" class="w-full text-xs text-slate-400 hover:text-slate-600">Not yet, go back</button>
+  </div>
+</div>
+
+<!-- FORMULA CHOICE MODAL (before Tab 5) -->
+<div id="formula-choice-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+  <div class="bg-white rounded-2xl border border-slate-200 p-6 w-full max-w-lg shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+    <div class="text-center">
+      <i class="fa-solid fa-code-branch text-2xl text-indigo-600"></i>
+      <h3 class="text-base font-bold mt-1">Which formula do you want to discuss with the AI?</h3>
+      <p class="text-xs text-slate-500 mt-1">Pick your own idea from Step 2, or one of the guided models from Step 3. Only the one you choose goes to Step 4.</p>
+    </div>
+    <div id="formula-choice-body" class="space-y-2"></div>
+    <div id="formula-choice-error" class="hidden text-xs text-rose-500 font-semibold text-center">Please select one option first.</div>
+    <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <button onclick="closeFormulaChoiceModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+      <button onclick="confirmFormulaChoice()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5"><i class="fa-solid fa-check"></i>Confirm & Continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= SHARED DATA & MATH ENGINE ================= */
+const HQ = {x:2, y:2};
+function dist(p1,p2){ return Math.sqrt((p2.x-p1.x)**2 + (p2.y-p1.y)**2); }
+
+/* NOTE: node ids are B/E/C/V — kept deliberately distinct from the formula variable "t"
+   (waiting time weight, see below) so a node's own identity never collides with a variable name. */
+const nodeData = {
+  B: {id:'B', label:'Bedridden Patient (B)',    x:1, y:6, B:1, E:0, C:0, V:0, t:10, color:'#3b82f6', bg:'bg-blue-100', text:'text-blue-800'},
+  E: {id:'E', label:'Elderly Group (E)',        x:8, y:7, B:0, E:1, C:0, V:0, t:15, color:'#10b981', bg:'bg-emerald-100', text:'text-emerald-800'},
+  C: {id:'C', label:'Child (C)',                x:3, y:1, B:0, E:0, C:1, V:0, t:5,  color:'#a855f7', bg:'bg-purple-100', text:'text-purple-800'},
+  V: {id:'V', label:'Visually Impaired (V)',    x:9, y:1, B:0, E:0, C:0, V:1, t:25, color:'#f43f5e', bg:'bg-rose-100', text:'text-rose-800'}
+};
+Object.values(nodeData).forEach(n => n.d = dist(HQ, n));
+const customVariables = {};
+
+/* ---- generic SVG grid renderer (shared engine, reused by Tab1 + Tab2) ---- */
+function gridLinesSVG(range, scale){
+  let s = '';
+  for(let i=0;i<=range;i++){
+    s += `<line x1="0" y1="${i*scale}" x2="${range*scale}" y2="${i*scale}" stroke="#334155" stroke-width="1"/>`;
+    s += `<line x1="${i*scale}" y1="0" x2="${i*scale}" y2="${range*scale}" stroke="#334155" stroke-width="1"/>`;
+  }
+  return s;
+}
+function toScreen(x,y,scale,range){ return {sx:x*scale, sy:(range*scale)-(y*scale)}; }
+
+/* ================= TAB SWITCHING ================= */
+/* Internal indices still run 2-5 (see nav bar note above) — index 1 is retired. */
+const unlockedTabs = {2:true,3:false,4:false,5:false};
+let currentTab = 2;
+let tab4CodeEntered = false;
+const TAB4_CODE = 'ok';
+
+function switchTab(tabIndex){
+  if(!unlockedTabs[tabIndex]) return;
+  if(tabIndex === 4 && !tab4CodeEntered){
+    document.getElementById('gate-modal').classList.remove('hidden');
+    document.getElementById('gate-code-input').focus();
+    return;
+  }
+  currentTab = tabIndex;
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.getElementById(`tab-content-${tabIndex}`).classList.remove('hidden');
+  for(let i=2;i<=5;i++){
+    const btn = document.getElementById(`tab-btn-${i}`);
+    if(i === tabIndex){
+      btn.className = "tab-btn flex-1 py-2.5 px-2 rounded-lg text-xs md:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 bg-white text-blue-600 shadow-sm border border-slate-200";
+    } else if(unlockedTabs[i]){
+      btn.className = "tab-btn flex-1 py-2.5 px-2 rounded-lg text-xs md:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 bg-slate-100 text-slate-700 hover:bg-white";
+    } else {
+      btn.className = "tab-btn flex-1 py-2.5 px-2 rounded-lg text-xs md:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 text-slate-400 cursor-not-allowed opacity-60";
+    }
+  }
+  if(tabIndex === 5) syncTab5FormulaDisplay();
+}
+
+function submitTab(completedTabIndex){
+  const icon = document.getElementById(`lock-icon-${completedTabIndex}`);
+  if(icon) icon.className = "fa-solid fa-circle-check text-emerald-500 text-xs";
+  const nextTab = completedTabIndex + 1;
+  if(nextTab <= 5){
+    unlockedTabs[nextTab] = true;
+    const nextBtn = document.getElementById(`tab-btn-${nextTab}`);
+    nextBtn.removeAttribute('disabled');
+    const nextIcon = document.getElementById(`lock-icon-${nextTab}`);
+    if(nextIcon) nextIcon.className = "fa-solid fa-unlock text-amber-500 text-xs";
+    switchTab(nextTab);
+  }
+}
+
+function checkGateCode(){
+  const val = document.getElementById('gate-code-input').value.trim().toLowerCase();
+  if(val === TAB4_CODE){
+    tab4CodeEntered = true;
+    document.getElementById('gate-modal').classList.add('hidden');
+    document.getElementById('gate-error').classList.add('hidden');
+    switchTab(4);
+  } else {
+    document.getElementById('gate-error').classList.remove('hidden');
+  }
+}
+function closeGateModal(){
+  document.getElementById('gate-modal').classList.add('hidden');
+}
+
+/* ================= FORMULA CHOICE (Tab 4 -> Tab 5) ================= */
+let selectedFormulaSource = null;   // 'tab3' | 'model1' | 'model2' | 'model3'
+let selectedFormulaLabel = '';
+let selectedFormulaText = '';       // plain-text version, sent to the AI
+let selectedFormulaLatex = '';      // LaTeX version, shown on screen
+
+function openFormulaChoiceModal(){
+  const body = document.getElementById('formula-choice-body');
+  const tab3Formula = document.getElementById('formula-input').value.trim();
+  let html = `<label class="flex items-start gap-3 p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50 transition-all">
+      <input type="radio" name="formula-choice" value="tab3" class="mt-1" ${!tab3Formula ? 'disabled' : ''}>
+      <div>
+        <div class="text-xs font-bold text-slate-800">My Own Formula (Step 2)</div>
+        <div class="text-xs font-mono text-slate-500 mt-1">${tab3Formula ? 'Priority Score = ' + tab3Formula : '(no formula was entered in Step 2)'}</div>
+      </div>
+    </label>`;
+  guidedModels.forEach(m => {
+    html += `<label class="flex items-start gap-3 p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-indigo-400 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50 transition-all">
+      <input type="radio" name="formula-choice" value="model${m.id}" class="mt-1">
+      <div>
+        <div class="text-xs font-bold text-slate-800">Model ${m.id}: ${m.name}</div>
+        <div class="text-xs text-slate-500 mt-1">${m.formulaAdapted(m._state)}</div>
+      </div>
+    </label>`;
+  });
+  body.innerHTML = html;
+  document.getElementById('formula-choice-error').classList.add('hidden');
+  document.getElementById('formula-choice-modal').classList.remove('hidden');
+  if(window.MathJax) MathJax.typesetPromise([body]);
+}
+function closeFormulaChoiceModal(){
+  document.getElementById('formula-choice-modal').classList.add('hidden');
+}
+function confirmFormulaChoice(){
+  const checked = document.querySelector('input[name="formula-choice"]:checked');
+  if(!checked){ document.getElementById('formula-choice-error').classList.remove('hidden'); return; }
+  const source = checked.value;
+  if(source === 'tab3'){
+    selectedFormulaSource = 'tab3';
+    selectedFormulaText = document.getElementById('formula-input').value.trim();
+    selectedFormulaLatex = convertToLatex(selectedFormulaText);
+    selectedFormulaLabel = 'Source: My Own Formula (Step 2)';
+  } else {
+    const id = parseInt(source.replace('model',''), 10);
+    const m = guidedModels.find(x => x.id === id);
+    selectedFormulaSource = source;
+    selectedFormulaText = m.plain(m._state);
+    selectedFormulaLatex = m.formulaAdapted(m._state);
+    selectedFormulaLabel = `Source: Model ${m.id} — ${m.name}`;
+  }
+  document.getElementById('formula-choice-modal').classList.add('hidden');
+  submitTab(4);
+}
+
+/* ================= PRIORITY INTENT MAP ================= */
+const nodeIcons = {B:'🛏️', E:'👵', C:'🧒', V:'🦯'};
+function renderT2Map(){
+  const svg = document.getElementById('t2-map-svg');
+  const scale = 36, range = 9;
+  let s = gridLinesSVG(range, scale);
+  const hq = toScreen(HQ.x, HQ.y, scale, range);
+  Object.values(nodeData).forEach(n=>{
+    const p = toScreen(n.x, n.y, scale, range);
+    const mid = {sx:(hq.sx+p.sx)/2, sy:(hq.sy+p.sy)/2};
+    s += `<line x1="${hq.sx}" y1="${hq.sy}" x2="${p.sx}" y2="${p.sy}" stroke="${n.color}" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.85"/>`;
+    s += `<text x="${mid.sx}" y="${mid.sy-4}" fill="${n.color}" font-size="10" font-weight="bold" text-anchor="middle" style="paint-order:stroke;stroke:#0f172a;stroke-width:3px;">${n.d.toFixed(2)}</text>`;
+  });
+  s += `<g><circle cx="${hq.sx}" cy="${hq.sy}" r="9" fill="#0f172a" stroke="#fbbf24" stroke-width="2"/><text x="${hq.sx}" y="${hq.sy+4}" fill="#fbbf24" font-size="9" text-anchor="middle" font-weight="bold">HQ</text></g>`;
+  Object.values(nodeData).forEach(n=>{
+    const p = toScreen(n.x, n.y, scale, range);
+    s += `<g onmousemove="showT2Tooltip(event,'${n.id}')" onmouseleave="hideT2Tooltip()" style="cursor:pointer;">
+      <circle cx="${p.sx}" cy="${p.sy}" r="13" fill="${n.color}22" stroke="${n.color}" stroke-width="2"/>
+      <text x="${p.sx}" y="${p.sy+5}" font-size="14" text-anchor="middle">${nodeIcons[n.id]}</text>
+    </g>`;
+  });
+  svg.innerHTML = s;
+}
+function showT2Tooltip(evt, nodeId){
+  const n = nodeData[nodeId];
+  const tip = document.getElementById('t2-tooltip');
+  const wrap = evt.currentTarget.closest('.relative').getBoundingClientRect();
+  tip.innerHTML = `<strong>${n.label}</strong><br>Coordinates: (${n.x}, ${n.y})<br>Distance from HQ: ${n.d.toFixed(2)} units`;
+  tip.style.left = (evt.clientX - wrap.left + 12) + 'px';
+  tip.style.top = (evt.clientY - wrap.top + 12) + 'px';
+  tip.classList.remove('hidden');
+}
+function hideT2Tooltip(){ document.getElementById('t2-tooltip').classList.add('hidden'); }
+
+function renderPriorityList(){
+  const container = document.getElementById('priority-list');
+  container.innerHTML = Object.values(nodeData).map((n,i)=>`
+    <div data-node="${n.id}" class="priority-item p-3 bg-white border border-slate-200 rounded-lg shadow-sm flex items-center justify-between gap-2 cursor-grab active:cursor-grabbing hover:border-blue-300 transition-all">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-grip-vertical text-slate-400"></i>
+        <span class="w-8 h-8 rounded-lg ${n.bg} ${n.text} font-bold text-base flex items-center justify-center">${nodeIcons[n.id]}</span>
+        <div>
+          <div class="text-xs font-medium text-slate-700">${n.label}</div>
+          <div class="text-[10px] text-slate-400 font-mono">Distance from HQ: <span class="font-bold" style="color:${n.color}">${n.d.toFixed(2)} units</span></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <span class="rank-badge text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-medium">Priority ${i+1}</span>
+        <div class="flex flex-col gap-0.5">
+          <button onclick="movePriorityItem(this,'up')" class="w-6 h-5 bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-700 rounded text-[10px] flex items-center justify-center"><i class="fa-solid fa-caret-up"></i></button>
+          <button onclick="movePriorityItem(this,'down')" class="w-6 h-5 bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-700 rounded text-[10px] flex items-center justify-center"><i class="fa-solid fa-caret-down"></i></button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function updateExpectedRankBadges(){
+  document.querySelectorAll('#priority-list .priority-item').forEach((item,i)=>{
+    const b = item.querySelector('.rank-badge');
+    if(b) b.innerText = `Priority ${i+1}`;
+  });
+}
+function movePriorityItem(btn, dir){
+  const item = btn.closest('.priority-item');
+  const container = document.getElementById('priority-list');
+  if(dir==='up' && item.previousElementSibling) container.insertBefore(item, item.previousElementSibling);
+  else if(dir==='down' && item.nextElementSibling) container.insertBefore(item.nextElementSibling, item);
+  updateExpectedRankBadges();
+}
+function getExpectedRanking(){
+  return Array.from(document.querySelectorAll('#priority-list .priority-item')).map(el=>el.getAttribute('data-node'));
+}
+
+/* ================= TAB 3: MANUAL FORMULA ================= */
+function renderVariableChips(){
+  const container = document.getElementById('variable-chips-container');
+  const base = [
+    {k:'B', label:'Bedridden', cls:'blue'}, {k:'E', label:'Elderly', cls:'emerald'},
+    {k:'C', label:'Child', cls:'purple'}, {k:'V', label:'Visually Impaired', cls:'rose'},
+    {k:'d', label:'Distance from HQ', cls:'amber'}, {k:'t', label:'Waiting Time Weight', cls:'cyan'}
+  ];
+  container.innerHTML = base.map(v=>`
+    <button type="button" onclick="insertVariable('${v.k}')" class="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-${v.cls}-50 border border-${v.cls}-200 hover:bg-${v.cls}-600 hover:border-${v.cls}-600 transition-all shadow-sm">
+      <span class="font-bold text-${v.cls}-700 group-hover:text-white font-mono text-sm">${v.k}</span>
+      <span class="text-xs text-${v.cls}-900 group-hover:text-${v.cls}-100">(${v.label})</span>
+    </button>`).join('');
+}
+function openVariableModal(){ document.getElementById('variable-modal').classList.remove('hidden'); document.getElementById('new-var-name').focus(); }
+function closeVariableModal(){
+  document.getElementById('variable-modal').classList.add('hidden');
+  document.getElementById('new-var-name').value=''; document.getElementById('new-var-desc').value=''; document.getElementById('new-var-val').value='1';
+}
+const RESERVED_VAR_NAMES = ['x','y','id','label','color','bg','text'];
+function confirmCreateVariable(){
+  const name = document.getElementById('new-var-name').value.trim();
+  const val = parseFloat(document.getElementById('new-var-val').value) || 0;
+  const desc = document.getElementById('new-var-desc').value.trim() || name;
+  if(!name){ alert('Please enter a variable name'); return; }
+  if(name.length > 2){ alert('Variable name must be 2 characters or fewer'); return; }
+  if(RESERVED_VAR_NAMES.includes(name)){ alert(`"${name}" is a reserved name used internally for node position. Please pick a different name.`); return; }
+  customVariables[name] = val;
+  Object.keys(nodeData).forEach(k => nodeData[k][name] = val);
+  const container = document.getElementById('variable-chips-container');
+  const chip = document.createElement('button');
+  chip.type = 'button';
+  chip.onclick = () => insertVariable(name);
+  chip.className = 'group flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 hover:bg-indigo-600 hover:border-indigo-600 transition-all shadow-sm';
+  chip.innerHTML = `<span class="font-bold text-indigo-700 group-hover:text-white font-mono text-sm">${name}</span><span class="text-xs text-indigo-900 group-hover:text-indigo-100">(${desc})</span>`;
+  container.appendChild(chip);
+  closeVariableModal();
+  validateAndRenderMath();
+}
+function insertVariable(name){
+  const input = document.getElementById('formula-input');
+  const start = input.selectionStart, end = input.selectionEnd, text = input.value;
+  input.value = text.substring(0,start) + name + text.substring(end);
+  input.focus();
+  validateAndRenderMath();
+}
+function checkParentheses(str){
+  let count = 0;
+  for(const ch of str){ if(ch==='(') count++; if(ch===')') count--; if(count<0) return false; }
+  return count === 0;
+}
+function checkSyntaxValidity(str){
+  try{
+    let test = str;
+    Object.keys(nodeData.B).forEach(k=>{ if(!RESERVED_VAR_NAMES.includes(k)){ test = test.replace(new RegExp(`\\b${k}\\b`,'g'), '1'); } });
+    Object.keys(customVariables).forEach(v=>{ test = test.replace(new RegExp(`\\b${v}\\b`,'g'), '1'); });
+    new Function(`return (${test})`);
+    return true;
+  }catch(e){ return false; }
+}
+function convertToLatex(expr){ return expr.replace(/\*/g,' \\cdot ').replace(/\//g,' / '); }
+function validateAndRenderMath(){
+  const val = document.getElementById('formula-input').value.trim();
+  const statusEl = document.getElementById('syntax-status');
+  const preview = document.getElementById('math-preview');
+  if(!val){
+    statusEl.className = "mt-2 text-xs font-semibold text-slate-400 flex items-center gap-1.5";
+    statusEl.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>Enter a formula to evaluate...</span>`;
+    preview.innerHTML = `$$\\text{Priority Score} = \\text{[your formula will appear here]}$$`;
+    if(window.MathJax) MathJax.typesetPromise([preview]);
+    return;
+  }
+  if(checkParentheses(val) && checkSyntaxValidity(val)){
+    statusEl.className = "mt-2 text-xs font-semibold text-emerald-600 flex items-center gap-1.5";
+    statusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i><span>Valid syntax</span>`;
+    preview.innerHTML = `$$\\text{Priority Score} = ${convertToLatex(val)}$$`;
+  } else {
+    statusEl.className = "mt-2 text-xs font-semibold text-rose-500 flex items-center gap-1.5";
+    statusEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i><span>Invalid syntax — check parentheses/operators</span>`;
+    preview.innerHTML = `$$\\text{Priority Score} = \\text{\\color{red}{Syntax Error}}$$`;
+  }
+  if(window.MathJax) MathJax.typesetPromise([preview]);
+}
+function evaluateTab3Model(){
+  const formulaStr = document.getElementById('formula-input').value.trim();
+  if(!formulaStr || !checkParentheses(formulaStr) || !checkSyntaxValidity(formulaStr)){ alert('Please enter a valid formula before calculating.'); return; }
+  const scores = computeScoresForFormula(formulaStr);
+  renderSideBySideComparison(scores, 'tab3-expected-body', 'tab3-calculated-body', 'tab3-match-summary');
+  document.getElementById('tab3-comparison-section').classList.remove('hidden');
+}
+function editTab3Formula(){
+  document.getElementById('tab3-comparison-section').classList.add('hidden');
+  document.getElementById('formula-input').focus();
+}
+function computeScoresForFormula(formulaStr){
+  const scores = Object.keys(nodeData).map(k=>{
+    const data = nodeData[k];
+    let expr = formulaStr;
+    Object.keys(data).forEach(vk=>{
+      if(typeof data[vk] === 'number' && !RESERVED_VAR_NAMES.includes(vk)){ expr = expr.replace(new RegExp(`\\b${vk}\\b`,'g'), data[vk]); }
+    });
+    let score;
+    try{ score = new Function(`return (${expr})`)(); }catch(e){ score = -999; }
+    return {node:k, score, label:data.label};
+  });
+  scores.sort((a,b)=>b.score-a.score);
+  return scores;
+}
+/* Shared: render two side-by-side tables (Expected | Calculated) aligned by rank, color-matched rows, + summary badge */
+function renderSideBySideComparison(scoresSorted, expectedBodyId, calcBodyId, summaryId){
+  const expected = getExpectedRanking();
+  const expTbody = document.getElementById(expectedBodyId);
+  const calcTbody = document.getElementById(calcBodyId);
+  let expHtml = '', calcHtml = '', matchCount = 0;
+  expected.forEach((expKey, idx)=>{
+    const calcItem = scoresSorted[idx];
+    const match = calcItem.node === expKey;
+    if(match) matchCount++;
+    const rowClass = match ? 'bg-emerald-50' : 'bg-amber-50';
+    expHtml += `<tr class="${rowClass} border-b border-slate-200"><td class="p-1.5 font-bold border border-slate-200">${idx+1}</td><td class="p-1.5 border border-slate-200">${nodeIcons[expKey]} ${nodeData[expKey].label}</td></tr>`;
+    calcHtml += `<tr class="${rowClass} border-b border-slate-200"><td class="p-1.5 font-bold border border-slate-200">${idx+1}</td><td class="p-1.5 border border-slate-200">${nodeIcons[calcItem.node]} ${calcItem.label}</td><td class="p-1.5 font-mono border border-slate-200">${calcItem.score.toFixed(2)}</td><td class="p-1.5 text-center border border-slate-200">${match?'<i class="fa-solid fa-check text-emerald-600"></i>':'<i class="fa-solid fa-xmark text-amber-600"></i>'}</td></tr>`;
+  });
+  expTbody.innerHTML = expHtml;
+  calcTbody.innerHTML = calcHtml;
+  if(summaryId){
+    const summaryEl = document.getElementById(summaryId);
+    const total = expected.length;
+    summaryEl.className = matchCount===total ? "text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800" : "text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800";
+    summaryEl.innerText = `${matchCount}/${total} ranks match`;
+  }
+  return matchCount;
+}
+
+/* ================= TAB 4: GUIDED MODELS ================= */
+const guidedModels = [
+  {
+    id:1, name:'Weighted Risk Score', short:'Weight vulnerable groups more heavily than raw distance.',
+    params:[{key:'w1',label:'Bedridden weight (w₁)',min:0,max:20,val:10},{key:'w2',label:'Elderly weight (w₂)',min:0,max:20,val:5},{key:'w3',label:'Child weight (w₃)',min:0,max:20,val:2}],
+    formulaBase: `$$d=\\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}$$`,
+    formulaAdapted: p => `$$P=\\dfrac{${p.w1}B + ${p.w2}E + ${p.w3}C}{d}$$`,
+    plain: p => `(${p.w1}*B + ${p.w2}*E + ${p.w3}*C) / d`,
+    compute:(n,p)=> (p.w1*n.B + p.w2*n.E + p.w3*n.C) / (n.d || 0.0001)
+  },
+  {
+    id:2, name:'Piecewise Priority Threshold', short:'Critical cases skip the queue entirely, regardless of distance.',
+    params:[{key:'m',label:'Critical case score (M)',min:50,max:200,val:100},{key:'k',label:'Base score constant (k)',min:10,max:100,val:50}],
+    formulaBase: `$$d=\\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}$$`,
+    formulaAdapted: p => `$$P=\\begin{cases}${p.m}, & B=1\\\\ \\dfrac{${p.k}}{d}, & \\text{otherwise}\\end{cases}$$`,
+    plain: p => `if B=1 then P=${p.m}, otherwise P=${p.k}/d`,
+    compute:(n,p)=> n.B === 1 ? p.m : p.k / (n.d || 0.0001)
+  },
+  {
+    id:3, name:'Dynamic Waiting Time Decay', short:'The longer someone waits, the more their priority rises — d is replaced by accumulated time.',
+    params:[{key:'w1',label:'Bedridden weight (w₁)',min:0,max:20,val:8},{key:'w2',label:'Elderly weight (w₂)',min:0,max:20,val:4},{key:'a',label:'Decay rate (α)',min:0,max:1,step:0.01,val:0.1}],
+    formulaBase: `$$d=\\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}\\quad\\text{(here, } d \\text{ is replaced by waiting time } t\\text{)}$$`,
+    formulaAdapted: p => `$$P=(${p.w1}B + ${p.w2}E)\\cdot(1+${p.a}\\cdot t)$$`,
+    plain: p => `(${p.w1}*B + ${p.w2}*E) * (1 + ${p.a}*t)`,
+    compute:(n,p)=> (p.w1*n.B + p.w2*n.E) * (1 + p.a*n.t)
+  }
+];
+let expandedModelId = 1;
+
+function renderModelCards(){
+  const container = document.getElementById('t4-model-cards');
+  container.innerHTML = guidedModels.map(m => {
+    const isOpen = expandedModelId === m.id;
+    const paramState = {}; m.params.forEach(p => paramState[p.key] = p.val);
+    return `
+    <div class="model-card border-2 ${isOpen ? 'border-indigo-500 bg-indigo-50/30' : 'border-slate-200 bg-slate-50/50'} rounded-xl transition-all">
+      <div class="p-4 cursor-pointer flex items-center justify-between" onclick="toggleModel(${m.id})">
+        <div>
+          <span class="text-xs font-bold text-indigo-600 uppercase tracking-wide">Model ${m.id}</span>
+          <h3 class="font-bold text-sm text-slate-800">${m.name}</h3>
+          <p class="text-xs text-slate-500 mt-0.5">${m.short}</p>
+        </div>
+        <i class="fa-solid fa-chevron-${isOpen ? 'up' : 'down'} text-slate-400"></i>
+      </div>
+      <div class="acc-body ${isOpen ? 'open' : ''} px-4 pb-4 space-y-4" id="model-body-${m.id}">
+        <div class="bg-white p-3 rounded-lg border border-slate-200 text-xs space-y-1.5">
+          <div class="text-[10px] font-bold uppercase text-slate-400">Recall: d = distance between two points</div>
+          <div id="model-formula-base-${m.id}" class="text-center py-1">${m.formulaBase}</div>
+          <div class="text-[10px] font-bold uppercase text-slate-400 pt-1">This model reuses that same d, here:</div>
+          <div id="model-formula-adapted-${m.id}" class="text-center py-1"></div>
+        </div>
+        <div class="grid sm:grid-cols-3 gap-3">
+          ${m.params.map(p => `
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-600 mb-1">${p.label}: <span id="param-val-${m.id}-${p.key}" class="font-mono text-indigo-600">${p.val}</span></label>
+              <input type="range" min="${p.min}" max="${p.max}" step="${p.step||1}" value="${p.val}" oninput="updateModelParam(${m.id}, '${p.key}', this.value)" class="w-full accent-indigo-600">
+            </div>`).join('')}
+        </div>
+        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+            <h4 class="text-[11px] font-bold text-slate-700 flex items-center gap-1.5"><i class="fa-solid fa-code-compare"></i>Live Ranking Comparison</h4>
+            <span id="model-match-summary-${m.id}" class="text-[10px] font-bold px-2 py-0.5 rounded-full"></span>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div>
+              <div class="text-[9px] font-bold uppercase text-slate-400 mb-1">Expected (Step 1)</div>
+              <table class="w-full text-[11px] text-left border-collapse">
+                <thead><tr class="bg-slate-200 text-slate-700"><th class="p-1.5 border border-slate-300">Rank</th><th class="p-1.5 border border-slate-300">Node</th></tr></thead>
+                <tbody id="model-expected-${m.id}"></tbody>
+              </table>
+            </div>
+            <div>
+              <div class="text-[9px] font-bold uppercase text-slate-400 mb-1">Calculated (this model)</div>
+              <table class="w-full text-[11px] text-left border-collapse">
+                <thead><tr class="bg-slate-200 text-slate-700"><th class="p-1.5 border border-slate-300">Rank</th><th class="p-1.5 border border-slate-300">Node</th><th class="p-1.5 border border-slate-300">Score</th></tr></thead>
+                <tbody id="model-calculated-${m.id}"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  guidedModels.forEach(m => { if(!m._state){ m._state = {}; m.params.forEach(p => m._state[p.key] = p.val); } renderModelFormula(m); renderModelTable(m); });
+  if(window.MathJax) MathJax.typesetPromise();
+}
+function toggleModel(id){ expandedModelId = (expandedModelId === id) ? null : id; renderModelCards(); }
+function updateModelParam(modelId, key, value){
+  const m = guidedModels.find(x=>x.id===modelId);
+  const num = parseFloat(value);
+  m._state[key] = num;
+  document.getElementById(`param-val-${modelId}-${key}`).innerText = num;
+  renderModelFormula(m);
+  renderModelTable(m);
+  if(window.MathJax) MathJax.typesetPromise([document.getElementById(`model-formula-adapted-${modelId}`)]);
+}
+function renderModelFormula(m){
+  const el = document.getElementById(`model-formula-adapted-${m.id}`);
+  if(el) el.innerHTML = m.formulaAdapted(m._state);
+}
+function renderModelTable(m){
+  const expTbody = document.getElementById(`model-expected-${m.id}`);
+  if(!expTbody) return; // card is collapsed / not yet rendered — table only exists while expanded
+  const scores = Object.values(nodeData).map(n => ({node:n.id, label:n.label, score:m.compute(n, m._state)}));
+  scores.sort((a,b)=>b.score-a.score);
+  renderSideBySideComparison(scores, `model-expected-${m.id}`, `model-calculated-${m.id}`, `model-match-summary-${m.id}`);
+}
+
+/* ================= TAB 5: AI CO-CREATION ================= */
+function renderValuePool(){
+  const values = [
+    {id:'Equity', th:'ความเท่าเทียม (Equity)', desc:'Reduce inequality; give vulnerable groups a fair chance.'},
+    {id:'Efficiency', th:'ความคุ้มค่าทางเศรษฐกิจ (Efficiency)', desc:'Speed, resource savings, maximum output.'},
+    {id:'Sustainability', th:'ความยั่งยืน (Sustainability)', desc:'Long-term and environmental impact.'},
+    {id:'Safety', th:'ความปลอดภัย (Safety)', desc:'Protect life; manage acute risk.'},
+    {id:'Community', th:'ชุมชน/ภูมิปัญญา (Community)', desc:'Local participation and context.'}
+  ];
+  document.getElementById('value-pool-list').innerHTML = values.map((v,i)=>`
+    <div data-value-id="${v.id}" class="value-item bg-white border border-slate-200 p-3 rounded-xl shadow-sm flex items-center justify-between gap-3 hover:border-purple-300 transition-all">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-grip-vertical text-slate-300 text-sm cursor-grab active:cursor-grabbing"></i>
+        <span class="val-rank-badge w-6 h-6 rounded-lg bg-purple-600 text-white font-bold text-xs flex items-center justify-center shrink-0">${i+1}</span>
+        <div><div class="text-xs font-bold text-slate-800">${v.th}</div><div class="text-[10px] text-slate-400">${v.desc}</div></div>
+      </div>
+      <div class="flex items-center gap-1">
+        <button onclick="moveValueItem(this,'up')" class="w-7 h-7 bg-slate-100 hover:bg-purple-100 text-slate-600 hover:text-purple-700 rounded-lg text-xs flex items-center justify-center"><i class="fa-solid fa-arrow-up"></i></button>
+        <button onclick="moveValueItem(this,'down')" class="w-7 h-7 bg-slate-100 hover:bg-purple-100 text-slate-600 hover:text-purple-700 rounded-lg text-xs flex items-center justify-center"><i class="fa-solid fa-arrow-down"></i></button>
+      </div>
+    </div>`).join('');
+}
+function updateValuePoolBadges(){
+  document.querySelectorAll('#value-pool-list .value-item').forEach((item,i)=>{
+    const b = item.querySelector('.val-rank-badge'); if(b) b.innerText = i+1;
+  });
+}
+function moveValueItem(btn, dir){
+  const item = btn.closest('.value-item');
+  const container = document.getElementById('value-pool-list');
+  if(dir==='up' && item.previousElementSibling) container.insertBefore(item, item.previousElementSibling);
+  else if(dir==='down' && item.nextElementSibling) container.insertBefore(item.nextElementSibling, item);
+  updateValuePoolBadges();
+}
+function getUserValueRanking(){ return Array.from(document.querySelectorAll('#value-pool-list .value-item')).map(el=>el.getAttribute('data-value-id')); }
+
+function syncTab5FormulaDisplay(){
+  const el = document.getElementById('ai-active-formula');
+  const labelEl = document.getElementById('ai-formula-source-label');
+  if(selectedFormulaSource){
+    el.innerHTML = `$$\\text{Priority Score} = ${selectedFormulaLatex}$$`;
+    labelEl.innerText = selectedFormulaLabel;
+  } else {
+    const formula = document.getElementById('formula-input').value.trim() || "(no formula entered in Step 2)";
+    el.innerHTML = `$$\\text{Priority Score} = ${convertToLatex(formula)}$$`;
+    labelEl.innerText = '';
+  }
+  if(window.MathJax) MathJax.typesetPromise([el]);
+}
+
+const BACKEND_API_ENDPOINT = "/api/chat-gemini"; // Configure this on your server; the Gemini API key must live server-side only.
+
+async function triggerGeminiCritique(){
+  const valuesRanked = getUserValueRanking();
+  const userFormula = selectedFormulaText || document.getElementById('formula-input').value.trim() || "(no formula entered)";
+  const loadingEl = document.getElementById('ai-loading-indicator');
+  loadingEl.classList.remove('hidden');
+
+  const systemInstruction = `Role & Tone: You are a mathematics and Critical Mathematics Consciousness mentor. Critique the learner's formula in a warm, Socratic tone.
+Goal:
+1. Analyze how well the submitted formula reflects the learner's ranked values.
+2. Point out gaps — but NEVER give away the correct formula.
+3. Ask guiding questions so the learner revises the formula themselves.`;
+  const userPrompt = `Value ranking (highest first): ${valuesRanked.map((v,i)=>`${i+1}. ${v}`).join(', ')}
+Learner's formula: Priority Score = ${userFormula}
+Please critique per the system instruction.`;
+
+  try{
+    const response = await fetch(BACKEND_API_ENDPOINT, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({systemInstruction, prompt: userPrompt})
+    });
+    const data = await response.json();
+    appendAiMessage(data.reply || "Something went wrong connecting to the AI.");
+  }catch(err){
+    console.warn('Backend endpoint not found — using local simulation for demo purposes.');
+    setTimeout(()=>{
+      const mock = `Interesting first step turning your idea into math! Looking at $$\\text{Priority} = ${convertToLatex(userFormula)}$$ through the lens of your top value, <strong>${valuesRanked[0]}</strong> — does the formula's biggest driver actually match that value?<br><br>Also, what happened to <strong>${valuesRanked[1]}</strong> and <strong>${valuesRanked[2]}</strong>? Do you see them represented anywhere in the formula, or did they get left out?<br><br>Try this: which variable or weight could you add or adjust so those values show up more clearly?`;
+      appendAiMessage(mock);
+    }, 1200);
+  }finally{
+    loadingEl.classList.add('hidden');
+  }
+}
+function appendAiMessage(text){
+  const container = document.getElementById('chat-messages');
+  const bubble = document.createElement('div');
+  bubble.className = "flex gap-3 max-w-[90%]";
+  bubble.innerHTML = `<div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 font-bold text-xs shadow-md">AI</div>
+    <div class="bg-white p-3.5 rounded-2xl rounded-tl-none border border-slate-200 text-slate-700 shadow-sm space-y-2 leading-relaxed">${text}</div>`;
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+  if(window.MathJax) MathJax.typesetPromise([bubble]);
+}
+function sendChatMessage(){
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  const container = document.getElementById('chat-messages');
+  const bubble = document.createElement('div');
+  bubble.className = "flex gap-2.5 max-w-[85%] ml-auto flex-row-reverse";
+  bubble.innerHTML = `<div class="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center shrink-0 font-bold text-xs shadow-md">You</div>
+    <div class="bg-purple-600 text-white p-3 rounded-2xl rounded-tr-none text-xs shadow-sm">${text}</div>`;
+  container.appendChild(bubble);
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+}
+
+/* ================= STARS (Tab 3 satisfaction) ================= */
+function renderStars(){
+  const el = document.getElementById('t3-stars');
+  let rating = 0;
+  function draw(){ el.innerHTML = [1,2,3,4,5].map(i=>`<i class="fa-${i<=rating?'solid':'regular'} fa-star" onclick="setStar(${i})" style="cursor:pointer;"></i>`).join(''); }
+  window.setStar = (i)=>{ rating = i; draw(); };
+  draw();
+}
+
+/* ================= INIT ================= */
+document.addEventListener('DOMContentLoaded', () => {
+  renderPriorityList();
+  renderT2Map();
+  renderVariableChips();
+  renderModelCards();
+  renderValuePool();
+  renderStars();
+
+  Sortable.create(document.getElementById('priority-list'), {animation:150, ghostClass:'sortable-ghost', onEnd:updateExpectedRankBadges});
+  Sortable.create(document.getElementById('value-pool-list'), {animation:150, ghostClass:'sortable-ghost', onEnd:updateValuePoolBadges});
+});
+</script>
+</body>
+</html>

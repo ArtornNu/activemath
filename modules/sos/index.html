@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethical Emergency SOS Assistance Center</title>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --accent: #16a34a;
+            --danger: #dc2626;
+            --bg-slate: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-slate);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding-bottom: 60px;
+        }
+
+        /* Ethical Banners */
+        .top-banner {
+            background: linear-gradient(135deg, #0284c7, #1e3a8a);
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 15px;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--bg-slate);
+            padding-bottom: 8px;
+        }
+
+        /* Numbered Step Styling */
+        .step-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .step-number {
+            background-color: var(--primary);
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .coord-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .vulnerability-section {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .vulnerable-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .v-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .v-item label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            transition: background 0.2s;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Canvas Wrapper & Tooltip */
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        #mapCanvas {
+            width: 100%;
+            height: 380px;
+            background-color: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: crosshair;
+            display: block;
+        }
+
+        .map-tooltip {
+            position: absolute;
+            display: none;
+            background: rgba(15, 23, 42, 0.9);
+            color: #ffffff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            pointer-events: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            z-index: 10;
+            white-space: nowrap;
+            transform: translate(-50%, -120%);
+        }
+
+        .map-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px 5px 0;
+            border-style: solid;
+            border-color: rgba(15, 23, 42, 0.9) transparent;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Queue Table & Highlighting */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: var(--bg-slate);
+            font-weight: 600;
+        }
+
+        tr.highlight-new {
+            background-color: #fef9c3 !important;
+            font-weight: bold;
+        }
+
+        .badge-priority {
+            background-color: #fef2f2;
+            color: var(--danger);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .badge-new {
+            background-color: #eab308;
+            color: #ffffff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 5px;
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Footer & Teacher Button */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        .star-rating {
+            font-size: 1.5rem;
+            color: #cbd5e1;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .star-rating .star.active {
+            color: #f59e0b;
+        }
+
+        .btn-teacher {
+            background: none;
+            border: 1px dashed var(--text-muted);
+            color: var(--text-muted);
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 15px;
+        }
+
+        .btn-teacher:hover {
+            border-color: var(--text-main);
+            color: var(--text-main);
+        }
+
+        /* Teacher Mode Panel */
+        #teacherPanel {
+            display: none;
+            background-color: #fff1f2;
+            border: 2px solid #f43f5e;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 30px;
+        }
+
+        #teacherPanel h2 {
+            color: #be123c;
+            margin-bottom: 10px;
+        }
+
+        .math-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffe4e6;
+            margin: 15px 0;
+        }
+
+        .reflection-box {
+            background-color: #fefce8;
+            border-left: 4px solid #eab308;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .reflection-box h4 {
+            color: #713f12;
+            margin-bottom: 5px;
+        }
+
+        /* Flood Emergency Poster / Intro Dialogue */
+        #posterOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            background: radial-gradient(circle at 50% 0%, #0369a1 0%, #082f49 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .poster-card {
+            background: #ffffff;
+            border-radius: 20px;
+            max-width: 560px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        .poster-hero {
+            background: linear-gradient(135deg, #0284c7, #1e3a8a);
+            color: #ffffff;
+            padding: 36px 28px 44px;
+            position: relative;
+        }
+
+        .poster-hero .poster-icon {
+            font-size: 3rem;
+            margin-bottom: 8px;
+        }
+
+        .poster-hero h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .poster-hero .poster-tagline {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #e0f2fe;
+        }
+
+        .poster-wave {
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            line-height: 0;
+        }
+
+        .poster-body {
+            padding: 28px 28px 32px;
+        }
+
+        .poster-body p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 18px;
+        }
+
+        .poster-badges {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .poster-badges span {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            color: var(--primary-dark);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .poster-cta {
+            background-color: var(--danger);
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .poster-cta:hover {
+            background-color: #b91c1c;
+        }
+
+        .poster-note {
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        /* Review Knowledge Modal */
+        #reviewOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.85);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 30px 16px;
+            overflow-y: auto;
+        }
+
+        .review-card {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 640px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .review-header {
+            background: linear-gradient(135deg, #0284c7, #1e3a8a);
+            color: #ffffff;
+            padding: 18px 22px;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .review-header h2 {
+            font-size: 1.05rem;
+        }
+
+        .review-close-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: #ffffff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .review-body {
+            padding: 22px;
+        }
+
+        .review-svg-wrap {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .review-feedback {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .review-feedback.neutral { background: #f1f5f9; color: #475569; }
+        .review-feedback.success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        .review-feedback.warn { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+
+        .review-btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .review-btn-sm {
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            color: #ffffff;
+        }
+
+        .review-btn-primary { background: var(--primary); }
+        .review-btn-success { background: var(--accent); }
+        .review-btn-warn { background: #d97706; }
+
+        .review-input {
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: monospace;
+        }
+
+        .review-pyth-box {
+            background: #fffbeb;
+            border: 2px solid #fde68a;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Flood Emergency Poster / Intro Dialogue -->
+    <div id="posterOverlay">
+        <div class="poster-card">
+            <div class="poster-hero">
+                <div class="poster-icon">🌊🚨</div>
+                <h1>FLOOD EMERGENCY?<br>WE'RE HERE TO HELP.</h1>
+                <p class="poster-tagline">Report Easily. Get Help Fast.<br>Vulnerable Groups Come First.</p>
+                <div class="poster-wave">
+                    <svg viewBox="0 0 500 40" preserveAspectRatio="none" style="width:100%;height:32px;display:block;">
+                        <path d="M0,20 C125,45 375,-5 500,20 L500,40 L0,40 Z" fill="#ffffff"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="poster-body">
+                <p>When flood waters rise, every minute counts. Simply share your location and who's with you — our Emergency SOS Center connects you to responders in seconds. No paperwork. No delay. Just help when you need it most.</p>
+                <div class="poster-badges">
+                    <span>♥ Powered by AI Human-Centric Ethics</span>
+                    <span>🛡 Prioritizing Vulnerable Groups First</span>
+                    <span>⚖ Humanitarian Aid Protocol v4.0</span>
+                </div>
+                <button class="poster-cta" onclick="document.getElementById('posterOverlay').style.display='none';">🚨 Report My Situation Now</button>
+                <button class="poster-cta" style="background-color: var(--primary); margin-top: 10px;" onclick="openReviewModal()">📘 Review Knowledge First</button>
+                <p class="poster-note">By continuing, you'll be taken to the Emergency SOS request form.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Knowledge Modal: Distance Between Two Points (warm-up before the SOS form) -->
+    <div id="reviewOverlay">
+        <div class="review-card">
+            <div class="review-header">
+                <h2>📏 Review: Distance Between Two Points</h2>
+                <button class="review-close-btn" onclick="closeReviewModal()" aria-label="Close">✕</button>
+            </div>
+            <div class="review-body">
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">Draw a segment of length 5 in the direction shown, then test what you found using coordinates.</p>
+
+                <div id="revDrawSection">
+                    <div class="review-feedback neutral" id="revRoundBanner">Round 1 of 3 — Draw a segment of length 5 along the horizontal (x) direction. Click a start point, then an end point.</div>
+                    <div class="review-svg-wrap" style="margin-top: 10px;">
+                        <svg id="revGridSvg" viewBox="0 0 288 288" style="width: 100%; max-width: 288px;"></svg>
+                    </div>
+                    <div class="review-feedback neutral" id="revFeedback">Click two grid points to draw your line.</div>
+                    <div class="review-btn-row">
+                        <button class="review-btn-sm" style="background: #64748b;" onclick="revResetRound()">↺ Clear line</button>
+                    </div>
+                </div>
+
+                <div id="revPythagoras" class="review-pyth-box" style="display: none;">
+                    <strong style="color: #92400e;">💡 You just used the Pythagorean Theorem!</strong>
+                    <p style="font-size: 0.85rem; margin: 8px 0; color: #78350f;">Your diagonal line moved 3 units one way and 4 units the other — yet its length was exactly 5. That's because:</p>
+                    <div style="text-align: center; padding: 8px 0; font-weight: 700; color: #92400e;">a² + b² = c² &nbsp;→&nbsp; 3² + 4² = 9 + 16 = 25 = 5² &nbsp;→&nbsp; c = 5</div>
+                    <p style="font-size: 0.85rem; color: #78350f;">Any two points define a right triangle: the horizontal gap (Δx), the vertical gap (Δy), and the direct distance as the hypotenuse.</p>
+                    <button class="review-btn-sm review-btn-warn" style="margin-top: 8px;" onclick="revStartQuiz()">Continue → Try it with coordinates</button>
+                </div>
+
+                <div id="revQuizSection" style="display: none;">
+                    <div class="review-feedback neutral" id="revQuizTitle" style="background: #eef2ff; color: #3730a3;">Question 1 of 3</div>
+                    <div class="review-svg-wrap" style="margin-top: 10px;">
+                        <svg id="revQuizSvg" viewBox="0 0 200 200" style="width: 100%; max-width: 200px;"></svg>
+                    </div>
+                    <p id="revQuizQuestion" style="font-size: 0.9rem; margin: 10px 0;"></p>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <input id="revQuizInput" type="number" step="0.01" placeholder="your answer (units)" class="review-input" style="flex: 1; min-width: 140px;">
+                        <button class="review-btn-sm review-btn-primary" onclick="revCheckQuiz()">Check</button>
+                        <button class="review-btn-sm" style="background: #d97706;" onclick="revToggleHint()">💡 Hint</button>
+                    </div>
+                    <div class="review-feedback neutral" id="revQuizFeedback" style="margin-top: 10px;">Find Δx and Δy first, or tap Hint to see the right triangle.</div>
+                </div>
+
+                <div id="revDoneSection" style="display: none; text-align: center; padding: 20px 0;">
+                    <div style="font-size: 2rem;">✅</div>
+                    <p style="font-weight: 700; color: #15803d; margin-top: 8px;">Great work — you can now find distance from any two coordinates!</p>
+                    <button class="review-btn-sm review-btn-success" style="margin-top: 12px;" onclick="closeReviewModal()">Close & Return</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ethical Banners -->
+    <header class="top-banner">
+        <h1>Emergency SOS Assistance Center</h1>
+        <p>Rapid Humanitarian Response & Vulnerability Prioritization</p>
+        <div class="badges">
+            <span class="badge">♥ Powered by AI Human-Centric Ethics</span>
+            <span class="badge">🛡 Prioritizing Vulnerable Groups First</span>
+            <span class="badge">⚖ Humanitarian Aid Protocol v4.0</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Form Section with Clear Numbered Steps -->
+        <div class="card">
+            <h2>Request Emergency Assistance</h2>
+            <form id="sosForm">
+                
+                <!-- STEP 1: Requester Name -->
+                <div class="form-group">
+                    <div class="step-label">
+                        <span class="step-number">1</span>
+                        <span>Enter Requester Name <span style="color: var(--danger);">*</span></span>
+                    </div>
+                    <input type="text" id="reqName" maxlength="4" placeholder="Max 4 letters (e.g. AON, TEAM)" required>
+                </div>
+
+                <!-- STEP 2: Coordinates Input / Selection -->
+                <div class="form-group">
+                    <div class="step-label">
+                        <span class="step-number">2</span>
+                        <span>Enter or Select Location Coordinates <span style="color: var(--danger);">*</span></span>
+                    </div>
+                    <div class="coord-inputs">
+                        <input type="number" id="coordX" placeholder="X Coordinate (-12 to 12)" step="0.1" min="-12" max="12" required>
+                        <input type="number" id="coordY" placeholder="Y Coordinate (-12 to 12)" step="0.1" min="-12" max="12" required>
+                    </div>
+                    <small style="color: var(--text-muted); display: block; margin-top: 4px;">
+                        💡 Tip: Click directly on the map grid (right) to auto-select coordinates.
+                    </small>
+                </div>
+
+                <!-- STEP 3: Vulnerability Breakdown -->
+                <div class="vulnerability-section">
+                    <div class="step-label" style="margin-bottom: 2px;">
+                        <span class="step-number">3</span>
+                        <span>Indicate Victim Counts & Vulnerability Types <span style="color: var(--danger);">*</span></span>
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">
+                        Our ethical AI prioritizes high-risk victims. <strong>Total victims must be at least 1.</strong>
+                    </p>
+                    <div class="vulnerable-grid">
+                        <div class="v-item">
+                            <label for="vBedridden">Bedridden Patients</label>
+                            <input type="number" id="vBedridden" min="0" value="0">
+                        </div>
+                        <div class="v-item">
+                            <label for="vElderly">Elderly Persons</label>
+                            <input type="number" id="vElderly" min="0" value="0">
+                        </div>
+                        <div class="v-item">
+                            <label for="vChildren">Children/Infants</label>
+                            <input type="number" id="vChildren" min="0" value="0">
+                        </div>
+                        <div class="v-item">
+                            <label for="vVisuallyImpaired">Visually Impaired</label>
+                            <input type="number" id="vVisuallyImpaired" min="0" value="0">
+                        </div>
+                        <div class="v-item" style="grid-column: 1 / -1;">
+                            <label for="vGeneral">General Public</label>
+                            <input type="number" id="vGeneral" min="0" value="1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4: Review & Submit -->
+                <div style="margin-top: 15px;">
+                    <div class="step-label">
+                        <span class="step-number">4</span>
+                        <span>Review Data & Submit Request</span>
+                    </div>
+                    <button type="submit" class="btn">
+                        <span>Submit Emergency SOS Request</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Canvas Map Section -->
+        <div class="card">
+            <h2>Live Disaster Map (Grid)</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
+                Center at <strong style="color: var(--primary-dark);">(2, 2)</strong>. Hover over dots to view coordinate balloons.
+            </p>
+            <div class="canvas-wrapper">
+                <canvas id="mapCanvas" width="400" height="380"></canvas>
+                <div id="mapTooltip" class="map-tooltip"></div>
+            </div>
+        </div>
+
+        <!-- STEP 5: Await Assistance & Priority Queue Display -->
+        <div class="card full-width">
+            <div class="step-label" style="font-size: 1.1rem; margin-bottom: 10px;">
+                <span class="step-number" style="width: 26px; height: 26px; font-size: 0.9rem;">5</span>
+                <span>Await Assistance & Check Assigned Queue Rank</span>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="queueTable">
+                    <thead>
+                        <tr>
+                            <th>Queue Rank</th>
+                            <th>Requester Name</th>
+                            <th>Coordinates (X, Y)</th>
+                            <th>Vulnerability Breakdown</th>
+                            <th>Distance to Center</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Teacher Inspector Panel (Hidden by default) -->
+        <div class="card full-width" id="teacherPanel">
+            <h2>🔓 Teacher / Inspector Mode: Algorithm Transparency Unlocked</h2>
+            <p><strong>De-masking the Black Box:</strong> The UI claims to use vulnerability counts to prioritize victims ethically. However, the underlying algorithm completely discards human factors and computes priority using only spatial distance.</p>
+
+            <div class="math-box">
+                <h3>1. Hidden Mathematical Formula Used:</h3>
+                <p style="font-size: 1.1rem; font-weight: bold; margin: 10px 0; color: #be123c;">
+                    Distance (d) = √[ (x₂ - x₁)² + (y₂ - y₁)² ]
+                </p>
+                <p><small>*Where Assistance Center coordinates (x₁, y₁) = (2, 2)</small></p>
+            </div>
+
+            <div class="math-box">
+                <h3>2. Factor Weight Breakdown</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Input Factor Category</th>
+                            <th>Advertised Weight (UI Claim)</th>
+                            <th>Actual Algorithm Weight</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Geographic Distance</strong></td>
+                            <td>Secondary Factor</td>
+                            <td><strong style="color: red;">100% (Exclusive Driver)</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bedridden / Elderly / Vulnerable Counts</strong></td>
+                            <td>High Priority Factor</td>
+                            <td><strong style="color: red;">0% (Completely Ignored)</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="math-box">
+                <h3>3. Live Step-by-Step Distance Computations</h3>
+                <div id="mathBreakdown">
+                    <!-- Dynamic calculation steps -->
+                </div>
+            </div>
+
+            <div class="reflection-box">
+                <h4>💡 Class Discussion & Critical Thinking Prompt:</h4>
+                <p><em>"Compare the assigned queue order with the ethical commitments advertised in the top banner. How does hiding the true algorithm create a deceptive 'ethical illusion'? What are the dangers of blindly trusting systems labeled as 'AI Ethics'?"</em></p>
+            </div>
+
+            <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px dashed #f43f5e;">
+                <p style="font-weight: 600; margin-bottom: 12px; color: var(--text-main);">Now that you've exposed the hidden algorithm...</p>
+                <a href="ethical-priority-math.html" style="display: inline-flex; align-items: center; gap: 8px; background-color: var(--accent); color: #ffffff; padding: 12px 24px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 1rem;">
+                    ⚖ Let's go build a fairer model together →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer & Rating -->
+    <footer>
+        <p style="font-weight: 600; font-size: 0.9rem;">Rate our Ethical Disaster Center Response System:</p>
+        <div class="star-rating" id="starRating">
+            <span class="star" data-rating="1">★</span>
+            <span class="star" data-rating="2">★</span>
+            <span class="star" data-rating="3">★</span>
+            <span class="star" data-rating="4">★</span>
+            <span class="star" data-rating="5">★</span>
+        </div>
+
+        <button class="btn-teacher" id="btnTeacher">Teacher / Inspector Mode</button>
+    </footer>
+
+    <script>
+        // ============ Review Knowledge Modal: Distance Between Two Points ============
+        // Namespaced with "rev" so nothing here collides with the SOS app's own state below.
+        const REV_RANGE = 8, REV_SCALE = 36;
+        let revRoundIndex = 0;
+        let revPoints = [];
+        let revRoundLocked = false;
+        const revRounds = [
+            { dir: 'horizontal', label: 'horizontal (x) direction', check: (dx, dy) => dy === 0 && Math.abs(dx) === 5 },
+            { dir: 'vertical', label: 'vertical (y) direction', check: (dx, dy) => dx === 0 && Math.abs(dy) === 5 },
+            { dir: 'diagonal', label: 'diagonal direction (hint: think 3 and 4!)', check: (dx, dy) => dx !== 0 && dy !== 0 && Math.abs(dx) * Math.abs(dx) + Math.abs(dy) * Math.abs(dy) === 25 }
+        ];
+
+        function revToScreen(x, y) { return { sx: x * REV_SCALE, sy: (REV_RANGE * REV_SCALE) - (y * REV_SCALE) }; }
+        function revGridLines(range, scale) {
+            let s = '';
+            for (let i = 0; i <= range; i++) {
+                s += `<line x1="0" y1="${i*scale}" x2="${range*scale}" y2="${i*scale}" stroke="#e2e8f0" stroke-width="1"/>`;
+                s += `<line x1="${i*scale}" y1="0" x2="${i*scale}" y2="${range*scale}" stroke="#e2e8f0" stroke-width="1"/>`;
+            }
+            return s;
+        }
+
+        function openReviewModal() {
+            document.getElementById('reviewOverlay').style.display = 'flex';
+            revRenderGrid();
+        }
+        function closeReviewModal() {
+            document.getElementById('reviewOverlay').style.display = 'none';
+        }
+
+        function revRenderGrid() {
+            const svg = document.getElementById('revGridSvg');
+            let s = revGridLines(REV_RANGE, REV_SCALE);
+            for (let x = 0; x <= REV_RANGE; x++) {
+                for (let y = 0; y <= REV_RANGE; y++) {
+                    const p = revToScreen(x, y);
+                    s += `<g onclick="revClick(${x},${y})" style="cursor:pointer;"><circle cx="${p.sx}" cy="${p.sy}" r="8" fill="transparent"/><circle cx="${p.sx}" cy="${p.sy}" r="2.5" fill="#94a3b8"/></g>`;
+                }
+            }
+            if (revPoints.length >= 1) {
+                const p0 = revToScreen(revPoints[0].x, revPoints[0].y);
+                s += `<circle cx="${p0.sx}" cy="${p0.sy}" r="6" fill="#0284c7"/><text x="${p0.sx+9}" y="${p0.sy-9}" fill="#0369a1" font-size="11" font-weight="bold">(${revPoints[0].x}, ${revPoints[0].y})</text>`;
+            }
+            if (revPoints.length === 2) {
+                const p0 = revToScreen(revPoints[0].x, revPoints[0].y);
+                const p1 = revToScreen(revPoints[1].x, revPoints[1].y);
+                s += `<line x1="${p0.sx}" y1="${p0.sy}" x2="${p1.sx}" y2="${p1.sy}" stroke="#0284c7" stroke-width="3"/>`;
+                s += `<circle cx="${p1.sx}" cy="${p1.sy}" r="6" fill="#0284c7"/><text x="${p1.sx+9}" y="${p1.sy-9}" fill="#0369a1" font-size="11" font-weight="bold">(${revPoints[1].x}, ${revPoints[1].y})</text>`;
+            }
+            svg.innerHTML = s;
+        }
+
+        function revClick(x, y) {
+            if (revRoundLocked) return;
+            if (revPoints.length >= 2) revPoints = [];
+            revPoints.push({ x, y });
+            revRenderGrid();
+            if (revPoints.length === 2) revEvaluateRound();
+        }
+
+        function revResetRound() {
+            revRoundLocked = false;
+            revPoints = [];
+            revRenderGrid();
+            const fb = document.getElementById('revFeedback');
+            fb.className = 'review-feedback neutral';
+            fb.innerText = 'Click two grid points to draw your line.';
+        }
+
+        function revEvaluateRound() {
+            const dx = revPoints[1].x - revPoints[0].x;
+            const dy = revPoints[1].y - revPoints[0].y;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            const round = revRounds[revRoundIndex];
+            const fb = document.getElementById('revFeedback');
+            revRoundLocked = true;
+            if (round.check(dx, dy)) {
+                fb.className = 'review-feedback success';
+                fb.innerHTML = `Correct! Length = ${len.toFixed(2)} units in the ${round.dir} direction.<br><button class="review-btn-sm review-btn-success" style="margin-top:8px;" onclick="revAdvanceRound()">Next →</button>`;
+            } else {
+                fb.className = 'review-feedback warn';
+                fb.innerHTML = `Not quite — your line is ${len.toFixed(2)} units long. You need a length-5 line in the ${round.label}.<br><button class="review-btn-sm review-btn-warn" style="margin-top:8px;" onclick="revResetRound()">Try Again ↺</button>`;
+            }
+        }
+
+        function revAdvanceRound() {
+            revRoundLocked = false;
+            revRoundIndex++;
+            revPoints = [];
+            if (revRoundIndex < revRounds.length) {
+                document.getElementById('revRoundBanner').innerText = `Round ${revRoundIndex + 1} of 3 — Draw a segment of length 5 along the ${revRounds[revRoundIndex].label}. Click a start point, then an end point.`;
+                revRenderGrid();
+                revResetRound();
+            } else {
+                document.getElementById('revDrawSection').style.display = 'none';
+                document.getElementById('revPythagoras').style.display = 'block';
+            }
+        }
+
+        const revQuiz = [
+            { a: { x: 1, y: 2 }, b: { x: 6, y: 2 }, hint: 'This one only moves along x — a horizontal gap.' },
+            { a: { x: 3, y: 1 }, b: { x: 3, y: 7 }, hint: 'This one only moves along y — a vertical gap.' },
+            { a: { x: 2, y: 2 }, b: { x: 5, y: 6 }, hint: 'Find Δx and Δy separately, then apply a² + b² = c².' }
+        ];
+        let revQuizIndex = 0;
+        let revHintShown = false;
+        let revQuizLocked = false;
+
+        function revStartQuiz() {
+            document.getElementById('revPythagoras').style.display = 'none';
+            document.getElementById('revQuizSection').style.display = 'block';
+            revRenderQuizQuestion();
+        }
+
+        function revToggleHint() {
+            revHintShown = !revHintShown;
+            revRenderQuizSvg();
+        }
+
+        function revRenderQuizSvg() {
+            const q = revQuiz[revQuizIndex];
+            const svg = document.getElementById('revQuizSvg');
+            const scale = 20, range = 8;
+            const rts = (x, y) => ({ sx: x * scale, sy: (range * scale) - (y * scale) });
+            let s = revGridLines(range, scale);
+            const pa = rts(q.a.x, q.a.y), pb = rts(q.b.x, q.b.y);
+            if (revHintShown) {
+                const corner = rts(q.b.x, q.a.y);
+                const aLen = Math.abs(q.b.x - q.a.x), bLen = Math.abs(q.b.y - q.a.y);
+                s += `<line x1="${pa.sx}" y1="${pa.sy}" x2="${corner.sx}" y2="${corner.sy}" stroke="#d97706" stroke-width="2" stroke-dasharray="3,3"/>`;
+                s += `<line x1="${corner.sx}" y1="${corner.sy}" x2="${pb.sx}" y2="${pb.sy}" stroke="#d97706" stroke-width="2" stroke-dasharray="3,3"/>`;
+                s += `<text x="${(pa.sx+corner.sx)/2}" y="${Math.max(pa.sy,corner.sy)+14}" fill="#b45309" font-size="11" font-weight="bold" text-anchor="middle">a = ${aLen}</text>`;
+                s += `<text x="${corner.sx + (pb.sx > corner.sx ? 6 : -34)}" y="${(corner.sy+pb.sy)/2}" fill="#b45309" font-size="11" font-weight="bold">b = ${bLen}</text>`;
+            }
+            s += `<line x1="${pa.sx}" y1="${pa.sy}" x2="${pb.sx}" y2="${pb.sy}" stroke="#64748b" stroke-width="2" stroke-dasharray="4,3"/>`;
+            s += `<circle cx="${pa.sx}" cy="${pa.sy}" r="6" fill="#0284c7"/><text x="${pa.sx+8}" y="${pa.sy-8}" fill="#0369a1" font-size="11" font-weight="bold">A (${q.a.x}, ${q.a.y})</text>`;
+            s += `<circle cx="${pb.sx}" cy="${pb.sy}" r="6" fill="#dc2626"/><text x="${pb.sx+8}" y="${pb.sy-8}" fill="#b91c1c" font-size="11" font-weight="bold">B (${q.b.x}, ${q.b.y})</text>`;
+            svg.innerHTML = s;
+        }
+
+        function revRenderQuizQuestion() {
+            revQuizLocked = false;
+            revHintShown = false;
+            const q = revQuiz[revQuizIndex];
+            document.getElementById('revQuizTitle').innerText = `Question ${revQuizIndex + 1} of 3`;
+            document.getElementById('revQuizQuestion').innerHTML = `Point A is at <strong>(${q.a.x}, ${q.a.y})</strong> and point B is at <strong>(${q.b.x}, ${q.b.y})</strong>. What is the distance between A and B?`;
+            document.getElementById('revQuizInput').value = '';
+            const fb = document.getElementById('revQuizFeedback');
+            fb.className = 'review-feedback neutral';
+            fb.innerText = q.hint;
+            revRenderQuizSvg();
+        }
+
+        function revCheckQuiz() {
+            if (revQuizLocked) return;
+            const q = revQuiz[revQuizIndex];
+            const correct = Math.sqrt(Math.pow(q.b.x - q.a.x, 2) + Math.pow(q.b.y - q.a.y, 2));
+            const val = parseFloat(document.getElementById('revQuizInput').value);
+            const fb = document.getElementById('revQuizFeedback');
+            if (isNaN(val)) { fb.innerText = 'Type a number first.'; return; }
+            const dx = q.b.x - q.a.x, dy = q.b.y - q.a.y;
+            if (Math.abs(val - correct) < 0.05) {
+                revQuizLocked = true;
+                fb.className = 'review-feedback success';
+                fb.innerHTML = `Correct! Δx = ${dx}, Δy = ${dy}, so d = √(${dx}² + ${dy}²) = √${dx*dx+dy*dy} = ${correct.toFixed(2)}.<br><button class="review-btn-sm review-btn-success" style="margin-top:8px;" onclick="revAdvanceQuiz()">Next →</button>`;
+            } else {
+                fb.className = 'review-feedback warn';
+                fb.innerHTML = `Not yet — first find Δx = x_B − x_A and Δy = y_B − y_A, then compute √(Δx² + Δy²). Try the Hint button if you're stuck, then try again!`;
+            }
+        }
+
+        function revAdvanceQuiz() {
+            revQuizIndex++;
+            if (revQuizIndex < revQuiz.length) {
+                revRenderQuizQuestion();
+            } else {
+                document.getElementById('revQuizSection').style.display = 'none';
+                document.getElementById('revDoneSection').style.display = 'block';
+            }
+        }
+
+        // State Management & LocalStorage Persistence
+        const CENTER = { x: 2, y: 2 };
+        let requests = JSON.parse(localStorage.getItem('sos_requests')) || [
+            { id: 'SOS-101', name: 'HELP', x: 3, y: 5, bedridden: 2, elderly: 1, children: 3, visuallyImpaired: 0, general: 1 },
+            { id: 'SOS-102', name: 'AON', x: -3, y: 4, bedridden: 0, elderly: 0, children: 0, visuallyImpaired: 1, general: 2 }
+        ];
+        let lastAddedId = null;
+        let starRating = parseInt(localStorage.getItem('sos_rating')) || 0;
+        let isTeacherUnlocked = false;
+
+        // Canvas & Tooltip Setup
+        const canvas = document.getElementById('mapCanvas');
+        const ctx = canvas.getContext('2d');
+        const tooltip = document.getElementById('mapTooltip');
+
+        function saveState() {
+            localStorage.setItem('sos_requests', JSON.stringify(requests));
+            localStorage.setItem('sos_rating', starRating.toString());
+        }
+
+        // Distance Formula: d = sqrt((x2 - x1)^2 + (y2 - y1)^2)
+        function calculateDistance(x, y) {
+            return Math.sqrt(Math.pow(x - CENTER.x, 2) + Math.pow(y - CENTER.y, 2));
+        }
+
+        // Sorting Logic (Purely Distance-Based)
+        function getSortedRequests() {
+            return [...requests].map(req => {
+                const distance = calculateDistance(req.x, req.y);
+                return { ...req, distance };
+            }).sort((a, b) => a.distance - b.distance);
+        }
+
+        // UI Rendering Functions
+        function renderQueue() {
+            const tbody = document.querySelector('#queueTable tbody');
+            tbody.innerHTML = '';
+            const sorted = getSortedRequests();
+
+            sorted.forEach((req, index) => {
+                const totalVulnerable = req.bedridden + req.elderly + req.children + req.visuallyImpaired;
+                const isNew = req.id === lastAddedId;
+                
+                const tr = document.createElement('tr');
+                if (isNew) {
+                    tr.classList.add('highlight-new');
+                }
+
+                tr.innerHTML = `
+                    <td>
+                        <span class="badge-priority">Rank #${index + 1}</span>
+                        ${isNew ? '<span class="badge-new">NEW</span>' : ''}
+                    </td>
+                    <td><strong>${req.name || 'N/A'}</strong></td>
+                    <td>(${req.x}, ${req.y})</td>
+                    <td>
+                        <small>
+                            Bedridden: ${req.bedridden}, Elderly: ${req.elderly}, 
+                            Children: ${req.children}, Visually Impaired: ${req.visuallyImpaired}
+                            <br>(Total Victims: <strong>${totalVulnerable + req.general}</strong>)
+                        </small>
+                    </td>
+                    <td><strong>${req.distance.toFixed(2)} units</strong></td>
+                    <td><span style="color: var(--primary);">Pending Assistance</span></td>
+                    <td><button class="btn-delete" onclick="deleteRequest('${req.id}')">✕</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (isTeacherUnlocked) {
+                renderTeacherMath(sorted);
+            }
+        }
+
+        function renderTeacherMath(sorted) {
+            const container = document.getElementById('mathBreakdown');
+            container.innerHTML = '';
+
+            sorted.forEach((req, index) => {
+                const div = document.createElement('div');
+                div.style.marginBottom = '10px';
+                div.style.padding = '8px';
+                div.style.background = '#fff';
+                div.style.borderRadius = '4px';
+                div.style.border = '1px solid #fee2e2';
+                
+                const dx = (req.x - 2).toFixed(1);
+                const dy = (req.y - 2).toFixed(1);
+                const sqX = Math.pow(req.x - 2, 2).toFixed(2);
+                const sqY = Math.pow(req.y - 2, 2).toFixed(2);
+
+                div.innerHTML = `
+                    <strong>Rank #${index + 1} (${req.name || req.id}) at Coordinates (${req.x}, ${req.y}):</strong><br>
+                    d = √[ (${req.x} - 2)² + (${req.y} - 2)² ]<br>
+                    d = √[ (${dx})² + (${dy})² ] = √[ ${sqX} + ${sqY} ] = <strong style="color:#be123c;">${req.distance.toFixed(2)} units</strong>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function deleteRequest(id) {
+            if (lastAddedId === id) lastAddedId = null;
+            requests = requests.filter(r => r.id !== id);
+            saveState();
+            render();
+        }
+
+        // Canvas Drawing Logic
+        function drawMap() {
+            const width = canvas.width;
+            const height = canvas.height;
+            const scale = width / 24; // Range -12 to 12
+            const originX = width / 2;
+            const originY = height / 2;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Grid Lines
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+
+            for (let x = -12; x <= 12; x++) {
+                ctx.beginPath();
+                ctx.moveTo(originX + x * scale, 0);
+                ctx.lineTo(originX + x * scale, height);
+                ctx.stroke();
+            }
+            for (let y = -12; y <= 12; y++) {
+                ctx.beginPath();
+                ctx.moveTo(0, originY - y * scale);
+                ctx.lineTo(width, originY - y * scale);
+                ctx.stroke();
+            }
+
+            // Axes
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(originX, 0); ctx.lineTo(originX, height);
+            ctx.moveTo(0, originY); ctx.lineTo(width, originY);
+            ctx.stroke();
+
+            // Assistance Center (2, 2)
+            const centerXPx = originX + CENTER.x * scale;
+            const centerYPx = originY - CENTER.y * scale;
+
+            ctx.fillStyle = '#0284c7';
+            ctx.beginPath();
+            ctx.arc(centerXPx, centerYPx, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 10px sans-serif';
+            ctx.fillText('HQ', centerXPx - 7, centerYPx + 3);
+
+            // Pre-loaded / Submitted SOS Requests with Assigned Rank & Short Name
+            const sorted = getSortedRequests();
+            const time = Date.now() * 0.003;
+
+            sorted.forEach((req, index) => {
+                const px = originX + req.x * scale;
+                const py = originY - req.y * scale;
+                const rank = index + 1;
+                const nameTag = req.name ? req.name.substring(0, 4) : 'SOS';
+
+                // Pulsing Red Effect
+                const pulse = Math.sin(time) * 4 + 8;
+                ctx.fillStyle = 'rgba(220, 38, 38, 0.3)';
+                ctx.beginPath();
+                ctx.arc(px, py, pulse + 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#dc2626';
+                ctx.beginPath();
+                ctx.arc(px, py, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Display Rank and Short Name on Map
+                ctx.fillStyle = '#0f172a';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.fillText(`[#${rank}] ${nameTag}`, px + 8, py - 4);
+            });
+        }
+
+        // Mouse Hover Balloon Tooltip Logic
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const scale = canvas.width / 24;
+            const originX = canvas.width / 2;
+            const originY = canvas.height / 2;
+
+            const sorted = getSortedRequests();
+            let hoveredPoint = null;
+
+            sorted.forEach((req, index) => {
+                const px = originX + req.x * scale;
+                const py = originY - req.y * scale;
+                const distPx = Math.hypot(mouseX - px, mouseY - py);
+
+                if (distPx <= 12) { // 12px radius threshold for hover
+                    hoveredPoint = { ...req, rank: index + 1, px, py };
+                }
+            });
+
+            if (hoveredPoint) {
+                tooltip.style.display = 'block';
+                tooltip.style.left = `${hoveredPoint.px}px`;
+                tooltip.style.top = `${hoveredPoint.py}px`;
+                tooltip.innerHTML = `<strong>[#${hoveredPoint.rank}] ${hoveredPoint.name}</strong><br>Coordinates: (${hoveredPoint.x}, ${hoveredPoint.y})`;
+            } else {
+                tooltip.style.display = 'none';
+            }
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+
+        // Map Click Interaction
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const scale = canvas.width / 24;
+            const originX = canvas.width / 2;
+            const originY = canvas.height / 2;
+
+            const gridX = Math.round((mouseX - originX) / scale);
+            const gridY = Math.round((originY - mouseY) / scale);
+
+            document.getElementById('coordX').value = gridX;
+            document.getElementById('coordY').value = gridY;
+        });
+
+        // Form Submit Validation & Processing
+        document.getElementById('sosForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const reqName = document.getElementById('reqName').value.trim().substring(0, 4);
+            const x = parseFloat(document.getElementById('coordX').value);
+            const y = parseFloat(document.getElementById('coordY').value);
+
+            // Step 2 Validation: coordinates must be real numbers within the map's actual range (-12 to 12)
+            if (isNaN(x) || isNaN(y) || x < -12 || x > 12 || y < -12 || y > 12) {
+                alert('Validation Error (Step 2): X and Y coordinates must be numbers between -12 and 12.');
+                return;
+            }
+
+            const vBedridden = parseInt(document.getElementById('vBedridden').value) || 0;
+            const vElderly = parseInt(document.getElementById('vElderly').value) || 0;
+            const vChildren = parseInt(document.getElementById('vChildren').value) || 0;
+            const vVisuallyImpaired = parseInt(document.getElementById('vVisuallyImpaired').value) || 0;
+            const vGeneral = parseInt(document.getElementById('vGeneral').value) || 0;
+
+            const totalVictims = vBedridden + vElderly + vChildren + vVisuallyImpaired + vGeneral;
+
+            // Step 3 Validation: Total Victims must be >= 1
+            if (totalVictims < 1) {
+                alert('Validation Error (Step 3): Total count of victims across all 5 categories must be at least 1.');
+                return;
+            }
+
+            const newId = 'SOS-' + Math.floor(100 + Math.random() * 900);
+            const newReq = {
+                id: newId,
+                name: reqName.toUpperCase(),
+                x: x,
+                y: y,
+                bedridden: vBedridden,
+                elderly: vElderly,
+                children: vChildren,
+                visuallyImpaired: vVisuallyImpaired,
+                general: vGeneral
+            };
+
+            lastAddedId = newId;
+            requests.push(newReq);
+            saveState();
+            render();
+
+            // Reset Form Fields
+            document.getElementById('sosForm').reset();
+            document.getElementById('vGeneral').value = 1;
+        });
+
+        // Teacher Mode Unlock
+        document.getElementById('btnTeacher').addEventListener('click', () => {
+            if (isTeacherUnlocked) {
+                document.getElementById('teacherPanel').style.display = 'none';
+                isTeacherUnlocked = false;
+                return;
+            }
+
+            const code = prompt('Enter Teacher Passcode:');
+            if (code === 'x') {
+                isTeacherUnlocked = true;
+                document.getElementById('teacherPanel').style.display = 'block';
+                renderQueue();
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            } else if (code !== null) {
+                alert('Access Denied: Incorrect Passcode');
+            }
+        });
+
+        // Rating System Logic
+        const stars = document.querySelectorAll('.star');
+        function updateStarUI(rating) {
+            stars.forEach(star => {
+                const r = parseInt(star.getAttribute('data-rating'));
+                if (r <= rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                starRating = parseInt(star.getAttribute('data-rating'));
+                saveState();
+                updateStarUI(starRating);
+            });
+        });
+
+        // Animation Loop
+        function animate() {
+            drawMap();
+            requestAnimationFrame(animate);
+        }
+
+        function render() {
+            renderQueue();
+            updateStarUI(starRating);
+        }
+
+        // Init App
+        render();
+        animate();
+    </script>
+</body>
+</html>
