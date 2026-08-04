@@ -853,17 +853,23 @@ function saveEditedEquation(){
 const GEMINI_API_KEY = "AQ.Ab8RN6KCmzOjadL-mPcwCV3Oh6f3oHdOs64wn56w62gYCvBe9g";
 // gemini-3.6-flash is a real, current, Stable model (verified against ai.google.dev/gemini-api/docs/models).
 const GEMINI_MODEL = "gemini-3.6-flash";
-// Google's now-GA "Interactions API" replaces the older generateContent REST endpoint this file
-// used previously. Verified live against ai.google.dev/gemini-api/docs/api-key on 2026-08-05:
-// POST /v1beta/interactions, auth via the `x-goog-api-key` header (not a `?key=` query param),
-// body is simply {model, input}. The key format "AQ...." (not "AIzaSy...") is expected — it's a
-// newer "auth key" bound to a service account, which AI Studio now issues by default.
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/interactions`;
+// Using the older `generateContent` REST endpoint here, NOT the newer "Interactions API"
+// (/v1beta/interactions) — even though Interactions is now GA, ai.google.dev's own Interactions
+// quickstart page states: "For stable production deployments, we recommend you continue to use
+// the generateContent API." That matters concretely for THIS file: generateContent is the
+// long-established endpoint that browser client apps call directly and has known-working CORS
+// support for that use case; the brand-new Interactions endpoint working live (in one browser
+// tab, from a local file) doesn't guarantee it's cleared for cross-origin fetches from an
+// arbitrary hosted domain yet. If this stops working again after hosting, that CORS gap on the
+// Interactions endpoint was the likely reason to avoid switching back to it.
+const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 /* Shared AI-call helper: calls the Gemini API directly, and falls back to a locally-generated
-   Socratic reply if the call fails (network issue, invalid/expired key, quota, etc.) so the
-   activity never dead-ends even if Gemini is unreachable. Both the initial critique and every
-   chat follow-up route through this one function. */
+   Socratic reply if the call fails (network issue, invalid/expired key, quota, CORS block, etc.)
+   so the activity never dead-ends even if Gemini is unreachable. Both the initial critique and
+   every chat follow-up route through this one function. The mock fallback also carries the real
+   error message so it can be shown on-screen — this is what let us diagnose earlier failures
+   instead of guessing blindly. */
 async function callAI(systemInstruction, userPrompt, mockReplyFn){
   const loadingEl = document.getElementById('ai-loading-indicator');
   loadingEl.classList.remove('hidden');
@@ -872,10 +878,8 @@ async function callAI(systemInstruction, userPrompt, mockReplyFn){
       method: 'POST',
       headers: {'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY},
       body: JSON.stringify({
-        model: GEMINI_MODEL,
-        // The Interactions API takes one combined input string rather than separate
-        // systemInstruction/contents fields, so we fold the system instruction in as a prefix.
-        input: `${systemInstruction}\n\n${userPrompt}`
+        systemInstruction: { parts: [{ text: systemInstruction }] },
+        contents: [{ role: 'user', parts: [{ text: userPrompt }] }]
       })
     });
     if(!response.ok){
@@ -883,14 +887,12 @@ async function callAI(systemInstruction, userPrompt, mockReplyFn){
       throw new Error(`Gemini API responded with ${response.status}: ${errBody}`);
     }
     const data = await response.json();
-    // Interactions API response shape: { steps: [ { type: 'model_output', content: [ {type:'text', text:'...'} ] }, ... ] }
-    const modelStep = (data.steps || []).find(s => s.type === 'model_output');
-    const reply = modelStep?.content?.filter(c => c.type === 'text').map(c => c.text).join('').trim();
+    const reply = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join('').trim();
     appendAiMessage(reply || "Gemini didn't return any text — please try again.", 'gemini');
   }catch(err){
-    console.warn('Gemini API call failed — using local simulation instead.', err);
+    console.error('Gemini API call failed — using local simulation instead. Full error:', err);
     await new Promise(r => setTimeout(r, 900));
-    appendAiMessage(mockReplyFn(), 'mock');
+    appendAiMessage(mockReplyFn(), 'mock', err.message || String(err));
   }finally{
     loadingEl.classList.add('hidden');
   }
@@ -937,7 +939,7 @@ function markdownToHtml(md){
   html = html.replace(/\n{2,}/g, '<br><br>').replace(/\n/g, '<br>');
   return html;
 }
-function appendAiMessage(text, source){
+function appendAiMessage(text, source, debugInfo){
   const container = document.getElementById('chat-messages');
   const bubble = document.createElement('div');
   bubble.className = "flex gap-3 max-w-[90%]";
@@ -946,9 +948,14 @@ function appendAiMessage(text, source){
     : source === 'mock'
       ? '<span class="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 mb-1.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Simulated (Gemini unreachable)</span>'
       : '';
+  // Show the raw fetch error inline (collapsed by default) whenever a real Gemini call failed,
+  // so a teacher/dev can screenshot the actual reason instead of guessing why it fell back.
+  const debugBlock = debugInfo
+    ? `<details class="text-[10px] text-slate-400"><summary class="cursor-pointer select-none">Technical detail (for troubleshooting)</summary><div class="mt-1 font-mono break-all bg-slate-50 border border-slate-200 rounded p-1.5">${String(debugInfo).replace(/</g,'&lt;')}</div></details>`
+    : '';
   const renderedText = source === 'gemini' ? markdownToHtml(text) : text;
   bubble.innerHTML = `<div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 font-bold text-xs shadow-md">AI</div>
-    <div class="bg-white p-3.5 rounded-2xl rounded-tl-none border border-slate-200 text-slate-700 shadow-sm space-y-2 leading-relaxed">${badge ? `<div>${badge}</div>` : ''}<div>${renderedText}</div></div>`;
+    <div class="bg-white p-3.5 rounded-2xl rounded-tl-none border border-slate-200 text-slate-700 shadow-sm space-y-2 leading-relaxed">${badge ? `<div>${badge}</div>` : ''}<div>${renderedText}</div>${debugBlock}</div>`;
   container.appendChild(bubble);
   container.scrollTop = container.scrollHeight;
   safeTypeset([bubble]);
